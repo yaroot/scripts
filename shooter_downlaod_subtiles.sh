@@ -26,7 +26,9 @@ for movie_file in "$@"; do
     subtitles=$(sscl --video-file "$movie_file" --pull)
 
     while read sub_file; do
-        mv "$sub_file" "$movie_path"
+        if [[ ! -z "$sub_file" ]]; then
+            mv "$sub_file" "$movie_path"
+        fi
     done <<< "$subtitles"
 done
 
