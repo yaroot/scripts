@@ -8,4 +8,5 @@ which gsha256sum > /dev/null && SHA256SUM=`which gsha256sum`
 HASH=$(echo "${INP}`cat $HOME/.salt`" | $SHA256SUM)
 
 echo ${HASH:1:10}
+echo $HASH
 
