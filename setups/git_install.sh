@@ -5,20 +5,22 @@
 REPO_URL="$1"
 LOCAL_CLONE="$2"
 
-if [ -d "$LOCAL_CLONE" ]
-then
-    pushd "$LOCAL_CLONE"
-    git pull
-    popd
-else
+
+if [ ! -d "$LOCAL_CLONE" ]; then
     mkdir -p "$LOCAL_CLONE"
-    pushd "$LOCAL_CLONE"
+fi
+pushd "$LOCAL_CLONE"
+
+#if [ `git rev-parse --git-dir > /dev/null 2>&1` ]; then
+if [ -d '.git' ]; then
+    git pull
+else
     git init
     git remote add origin "$REPO_URL"
     git fetch origin
     git reset --hard origin/master
     git branch --set-upstream master origin/master
-    popd
 fi
 
+popd
 
