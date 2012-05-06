@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-./git_install.sh git://github.com/visionmedia/n.git /home/yaroot/repos/n
+./git_install.sh git://github.com/visionmedia/n.git $HOME/repos/n
 
