@@ -19,7 +19,7 @@ for port in ${FORWARD_PORTS[@]}; do
     # -M 0      no listening
     # -f        run background
     # -NC       no shell, compress data transfer
-    autossh -M 0 -f -NCD ${port} ${SSH_SRV}
+    eval "autossh -M 0 -f -NCD ${port} ${SSH_SRV}"
 done
 
 
