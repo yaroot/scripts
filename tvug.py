@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import xml, urllib2, re, sys
-import ed2k
+import scan_ed2k
 import xml.sax.saxutils
 
 LINKBASE = r'http://tvunderground.org.ru/'
@@ -13,7 +13,7 @@ def get(link):
     ma = re.findall(r'"(index.php\?show=ed2k.+?)"', page, re.S)
     if(ma):
         for l in ma:
-	    ed2k.get(xml.sax.saxutils.unescape(LINKBASE+l))
+	    scan_ed2k.get(xml.sax.saxutils.unescape(LINKBASE+l))
 	    #print xml.sax.saxutils.unescape(LINKBASE+l)
 
 if __name__ == '__main__':
