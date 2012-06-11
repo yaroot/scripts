@@ -7,11 +7,20 @@ salt_file="/tmp/${USER}_salt"
 
 # generate pwfile
 if [ "$1" == '-g' ]; then
+  read -s -p 'seed: ' seed
+  echo ''
+
+  if [ -z "$seed" ]; then
+    echo 'Error: no seed provided' 1>&2
+    exit 1
+  fi
+
   touch "$salt_file"
   chmod 600 "$salt_file"
 
-  echo "$2" | $SHA256SUM | cut -d' ' -f1 | tee "$salt_file" > /dev/null
-  echo "pwhash salt generated >> $salt_file"
+  eval "echo \"$seed\" | $SHA256SUM | cut -d' ' -f1 | tee $salt_file > /dev/null"
+  echo "salt generated to $salt_file"
+  ls -alh "$salt_file"
   exit 0
 fi
 
@@ -26,6 +35,7 @@ if [ "$1" == '-c' ]; then
   if [ `uname -s` == 'Darwin' ]; then
     copy=' | pbcopy'
   else
+    # xorg
     copy=' | xclip -selection clipboard'
   fi
 fi
