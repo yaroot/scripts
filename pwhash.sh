@@ -33,10 +33,10 @@ copy='no'
 if [ "$1" == '-c' ]; then
   shift
   if [ `uname -s` == 'Darwin' ]; then
-    copy=' | pbcopy'
+    copy='| pbcopy'
   else
     # xorg
-    copy=' | xclip -selection clipboard'
+    copy='| xclip -selection clipboard'
   fi
 fi
 
@@ -49,6 +49,6 @@ pass=${pwhash:1:10}
 if [ "$copy" == 'no' ]; then
   echo "$pass"
 else
-  eval "echo $pass $copy"
+  eval "echo -n \"$pass\" $copy"
 fi
 
