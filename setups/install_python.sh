@@ -1,49 +1,53 @@
-URL="http://mirrors.sohu.com/python/2.7.1/Python-2.7.1.tar.bz2"
-VER="2.7.1"
 _pybasever="2.7"
-FILENAME="`basename $URL`"
 
 PYENV_PATH="$HOME/.pyenv"
 CACHE_DIR="$PYENV_PATH/cache"
 TMP_DIR="$PYENV_PATH/tmp"
 INSTALL_PATH="$PYENV_PATH/versions/$VER"
 
+mkdir -p $PYENV_PATH
 
 put() {
   echo ">>>>> $1"
 }
 
-build_check_dirs() {
+download_source() {
+  local url="$1"
+  local fname=`basename $url`
+
   mkdir -p $CACHE_DIR
+  cd $CACHE_DIR
+
+  if [ -f "$fname" ]; then
+    put "Already have file ${fname}"
+    return
+  fi
+
+  put "Downloading $fname"
+  wget $url
+}
+
+unpack_source() {
+  local fname=`basename $1`
+
   rm -rf $TMP_DIR
   mkdir -p $TMP_DIR
-  mkdir -p $INSTALL_PATH
-}
+  cd $TMP_DIR
+  cp "$CACHE_DIR/$fname" "$TMP_DIR"
 
-build_cleanup() {
-  rm -rf $TMP_DIR
-}
-
-build_download_source() {
-  if [ ! -f "$CACHE_DIR/$FILENAME" ]; then
-    put "Downloading source"
-    cd "$CACHE_DIR"
-    wget $URL
-  else
-    put "Source file already exists"
-  fi
-}
-
-build_compile_pre() {
-  cp "$CACHE_DIR/$FILENAME" "$TMP_DIR"
-  put "Copy file to tmp directory"
   cd "$TMP_DIR"
-  put "Unpacking tarball"
-  tar jxf "$FILENAME"
+  tar jxf "$fname"
 }
 
-build_compile_config() {
-  cd "$TMP_DIR/Python-$VER"
+build_source() {
+  local pkgname="$1"
+  local pkgid="$2"
+
+  local builddir="$TMP_DIR/$pkgname"
+  local prefix="$PYENV_PATH/versions/$pkgid"
+  mkdir -p "$prefix"
+
+  cd "$builddir"
 
   # Temporary workaround for FS#22322
   # See http://bugs.python.org/issue10835 for upstream report
@@ -67,51 +71,32 @@ build_compile_config() {
     --enable-unicode=ucs4 --with-system-expat --with-system-ffi \
     --with-dbmliborder=gdbm:ndbm
 
-  popd > /dev/null
-}
-
-build_compile_make() {
-  "$TMP_DIR/Python-$VER"
-
   local jobs=`cat /proc/cpuinfo | grep processor | wc -l`
   local makeopts="-j$jobs"
 
   put "Making ($jobs jobs)"
   make "$makeopts"
 
-  popd > /dev/null
-}
-
-build_compile_install() {
-  cd "$TMP_DIR/Python-$VER"
-
   put "Installing"
   make install
 
-  popd > /dev/null
+  put "Cleaning up"
+  rm ${TMP_DIR}
 }
 
-build_process() {
-  build_check_dirs
-  build_download_source
+install_package() {
+  local package_url="$1"
+  local package_name="$2"
+  local package_id="$3"
 
-  build_compile_pre
-  build_compile_config
-  build_compile_make
-  build_compile_install
-
-  build_cleanup
+  download_source $package_url
+  unpack_source $package_url
+  build_source $package_name $package_id
 }
 
-main() {
-  local py_dir="${PYENV_PATH}/$VER"
-  if [ -d "$py_dir" ]; then
-    put "You have python $VER installed in $py_dir"
-    exit
-  fi
 
-  build_process
-}
 
-main
+install_package "http://mirrors.sohu.com/python/2.7.1/Python-2.7.1.tar.bz2" "Python-2.7.1" "2.7.1"
+
+
 
