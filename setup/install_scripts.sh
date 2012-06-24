@@ -9,6 +9,11 @@ mkdir -p $HOME/.nodes/bin
 ./git_install.sh git://github.com/sstephenson/ruby-build.git $HOME/.rbenv/plugins/ruby-build
 ./git_install.sh git://github.com/jamis/rbenv-gemset.git $HOME/.rbenv/plugins/rbenv-gemset
 
+# virtualenv
+./git_install.sh git://github.com/pypa/virtualenv.git $HOME/repos/virtualenv
+
+# youtube-dl
+./git_install.sh git://github.com/rg3/youtube-dl.git $HOME/repos/youtube-dl
 
 # zsh-completion
 ./git_install.sh git://github.com/zsh-users/zsh-completions.git $HOME/repos/zsh-completions
