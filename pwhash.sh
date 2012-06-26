@@ -29,6 +29,19 @@ if [ ! -f "$salt_file" ]; then
   exit 1
 fi
 
+if [ "$1" == '-m' ]; then
+  \which dmenu &> /dev/null
+  if [ ! "$?" == "0" ]; then
+    echo "Error: -m need dmenu" 1>&2
+    exit 1
+  fi
+
+  dmenurc=`cat $HOME/.dmenurc 2> /dev/null`
+  site=$(xclip -o | dmenu -i $dmenurc -p `basename $0`)
+  eval "$0 -c $site"
+  exit
+fi
+
 copy='no'
 if [ "$1" == '-c' ]; then
   shift
@@ -42,6 +55,10 @@ fi
 
 
 site="$1"
+if [ "x$site" = "x" ]; then
+  echo "Erro: please give something to hash" 1>&2
+  exit 1
+fi
 
 pwhash=$(echo "${site}`cat $salt_file`" | $SHA256SUM)
 pass=${pwhash:1:10}
