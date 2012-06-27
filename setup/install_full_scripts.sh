@@ -11,7 +11,7 @@ symlink() {
 
 # n
 ./git_install.sh git://github.com/visionmedia/n.git $HOME/repos/n
-mkdir -p $HOME/.nodes/bin
+mkdir -p $HOME/.nodes/{bin,lib,include}
 
 # rbenv
 ./git_install.sh git://github.com/sstephenson/rbenv.git $HOME/.rbenv
