@@ -15,15 +15,8 @@ load() {
     sudo kextload /Library/Extensions/VBoxUSB.kext -r /Library/Extensions/
 }
 
-case "$1" in
-    unload|remove)
-        unload
-        ;;
-    load)
-        load
-        ;;
-    *|reload)
-        unload
-        load
-        ;;
-esac
+
+
+unload
+load
+
