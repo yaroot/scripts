@@ -21,7 +21,7 @@ _install "yaroot/dotfiles" "$HOME/.dotfiles"
 _install "yaroot/scripts" "$HOME/.bin"
 _install "yaroot/vimrc" "$HOME/.vim"
 
-which emacs 2>&1 > /dev/null && _install "yaroot/emacsd" "$HOME/.emacs.d"
-which irssi 2>&1 > /dev/null && _install "yaroot/dotirssi" "$HOME/.irssi/scripts/autorun"
+which emacs &> /dev/null && _install "yaroot/emacsd" "$HOME/.emacs.d"
+which irssi &> /dev/null && _install "yaroot/dotirssi" "$HOME/.irssi/scripts/autorun"
 
 
