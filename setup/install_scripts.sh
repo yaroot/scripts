@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
 symlink() {
-  local src="1"
-  local tar="2"
+  local src="$1"
+  local tar="$2"
 
   mkdir -p `dirname "$tar"`
+  rm -f "$tar"
   ln -sv "$src" "$tar"
 }
 
