@@ -1,10 +1,7 @@
 #!/usr/bin/env bash
 
-
-
 REPO_URL="$1"
 LOCAL_CLONE="$2"
-
 
 if [ ! -d "$LOCAL_CLONE" ]; then
   mkdir -p "$LOCAL_CLONE"
