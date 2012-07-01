@@ -9,7 +9,7 @@ LOCAL_CLONE="$2"
 if [ ! -d "$LOCAL_CLONE" ]; then
   mkdir -p "$LOCAL_CLONE"
 fi
-pushd "$LOCAL_CLONE" > /dev/null
+cd "$LOCAL_CLONE"
 
 #if [ `git rev-parse --git-dir > /dev/null 2>&1` ]; then
 if [ -d '.git' ]; then
@@ -20,5 +20,4 @@ else
   git clone "$REPO_URL" .
 fi
 
-popd > /dev/null
 
