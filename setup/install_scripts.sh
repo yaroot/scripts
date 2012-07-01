@@ -9,6 +9,9 @@ mkdir -p $HOME/.nodes/bin
 ./git_install.sh git://github.com/sstephenson/ruby-build.git $HOME/.rbenv/plugins/ruby-build
 ./git_install.sh git://github.com/jamis/rbenv-gemset.git $HOME/.rbenv/plugins/rbenv-gemset
 
+# leiningen
+./git_install.sh git://github.com/technomancy/leiningen.git $HOME/repos/leiningen
+
 # virtualenv
 ./git_install.sh git://github.com/pypa/virtualenv.git $HOME/repos/virtualenv
 
