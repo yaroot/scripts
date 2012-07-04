@@ -12,7 +12,7 @@ run() {
 }
 
 main(){
-  local branch=`git symbolic-ref --short HEAD`
+  local branch=`git symbolic-ref HEAD`
   branch=`basename $branch`
   if [ ! -z "$1" ]; then
     branch="$1"
