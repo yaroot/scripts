@@ -30,8 +30,8 @@ main(){
   else
     # git-svn repo
     run "git fetch $REMOTE_NAME"
-    run "git rebase $remote_branch"
-    run "git merge $remote_branch"
+    run "git rebase $REMOTE_NAME/$branch"
+    run "git merge $REMOTE_NAME/$branch"
 
     # run "git rebase $branch"
     run "git svn rebase"
