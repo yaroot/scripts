@@ -48,12 +48,5 @@ download_file_into http://gemi.fedorapeople.org/haskell/_cabal "$HOME/._zshcomp"
 # pacapt
 PACAPT_DIR="$HOME/repos/pacapt"
 ./git_install.sh git://github.com/icy/pacapt.git $PACAPT_DIR
-
-if [ -f "/etc/os-release" ]; then
-  source /etc/os-release
-  if [ 'arch' != $ID ]; then
-    cd /usr/bin; sudo ln -sv "${PACAPT_DIR}/pacapt/pacman" .
-  fi
-fi
-
+# sudo ln -sv "${PACAPT_DIR}/pacapt/pacman" /usr/bin/pacman
 
