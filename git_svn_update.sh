@@ -42,7 +42,7 @@ main(){
     run "git svn rebase"
     run "git svn dcommit"
 
-    run "git push $REMOTE_NAME --all -f"
+    run "git push $REMOTE_NAME -f"
   fi
 
   if $has_stash; then
