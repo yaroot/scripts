@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # a helper script deal with git-svn dcommit/push/merge stuff
+# git svn clone --prefix=svn/ svn://repo/url [-s]
 
 set -e
 
