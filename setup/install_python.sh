@@ -1,102 +1,113 @@
-_pybasever="2.7"
+#!/usr/bin/env bash
 
-PYENV_PATH="$HOME/.pyenv"
-CACHE_DIR="$PYENV_PATH/cache"
-TMP_DIR="$PYENV_PATH/tmp"
-INSTALL_PATH="$PYENV_PATH/versions/$VER"
-
-mkdir -p $PYENV_PATH
+BASEPATH=`pwd`
+VERSIONSPATH="$BASEPATH/versions"
 
 put() {
   echo ">>>>> $1"
 }
 
 download_source() {
-  local url="$1"
-  local fname=`basename $url`
+  local pkgurl="$1"
+  local pkgfile="$2"
 
-  mkdir -p $CACHE_DIR
-  cd $CACHE_DIR
-
-  if [ -f "$fname" ]; then
-    put "Already have file ${fname}"
-    return
+  if [ -f "$pkgfile" ]; then
+    put "Already have ${pkgfile}"
+  else
+    put "Downloading ${pkgfile}"
+    wget "$pkgurl"
   fi
-
-  put "Downloading $fname"
-  wget $url
 }
 
 unpack_source() {
-  local fname=`basename $1`
+  local pkgfile="$1"
+  local pkgname="$2"
 
-  rm -rf $TMP_DIR
-  mkdir -p $TMP_DIR
-  cd $TMP_DIR
-  cp "$CACHE_DIR/$fname" "$TMP_DIR"
+  put "Unpackaging $pkgfile"
 
-  cd "$TMP_DIR"
-  tar jxf "$fname"
+  rm -rf ${pkgname}
+  case $pkgfile in
+    *.tar.bz2)  tar xjf "$pkgfile" ;;
+    *.tar.gz)   tar xzf "$pkgfile" ;;
+    *.tar.bz)   tar xzf "$pkgfile" ;;
+  esac
 }
 
-build_source() {
+build_package_tarball() {
   local pkgname="$1"
-  local pkgid="$2"
+  local pkgver="$2"
+  local install_path="$VERSIONSPATH/$pkgver"
 
-  local builddir="$TMP_DIR/$pkgname"
-  local prefix="$PYENV_PATH/versions/$pkgid"
-  mkdir -p "$prefix"
-
-  cd "$builddir"
+  cd "$BASEPATH/$pkgname"
+  mkdir -p "${install_path}"
 
   # Temporary workaround for FS#22322
   # See http://bugs.python.org/issue10835 for upstream report
-  sed -i "/progname =/s/python/python${_pybasever}/" Python/pythonrun.c
+  # _pybasever="2.7"
+  # sed -i "/progname =/s/python/python${_pybasever}/" Python/pythonrun.c
 
   # Enable built-in SQLite module to load extensions (fix FS#22122)
-  sed -i "/SQLITE_OMIT_LOAD_EXTENSION/d" setup.py
+  # sed -i "/SQLITE_OMIT_LOAD_EXTENSION/d" setup.py
 
   # FS#23997
   # sed -i -e "s|^#.* /usr/local/bin/python|#!/usr/bin/python2|" Lib/cgi.py
 
   # Ensure that we are using the system copy of various libraries (expat, zlib and libffi),
   # rather than copies shipped in the tarball
-  rm -r Modules/expat
-  rm -r Modules/zlib
-  rm -r Modules/_ctypes/{darwin,libffi}*
+  # rm -r Modules/expat
+  # rm -r Modules/zlib
+  # rm -r Modules/_ctypes/{darwin,libffi}*
 
-  export OPT="${CFLAGS}"
+  local cflags=''
+
   put "Configuring"
-  ./configure --prefix="$INSTALL_PATH" --enable-shared --with-threads --enable-ipv6 \
+  ./configure --prefix="$install_path" --enable-shared --with-threads --enable-ipv6 \
     --enable-unicode=ucs4 --with-system-expat --with-system-ffi \
     --with-dbmliborder=gdbm:ndbm
 
   local jobs=`cat /proc/cpuinfo | grep processor | wc -l`
   local makeopts="-j$jobs"
 
-  put "Making ($jobs jobs)"
+  export CFLAGS='-march=x86-64 -mtune=generic -O2 -pipe -fstack-protector --param=ssp-buffer-size=4 -D_FORTIFY_SOURCE=2'
+
+  put "make (-j${jobs})"
   make "$makeopts"
 
-  put "Installing"
+  put "make install"
   make install
+}
 
-  put "Cleaning up"
-  rm ${TMP_DIR}
+build_package_python(){
+  local pkgname="$1"
+  local PYTHON="$VERSIONSPATH/$2/bin/python"
+
+  cd "$BASEPATH/$pkgname"
+  put "Installing $pkgname"
+
+  $PYTHON setup.py install
 }
 
 install_package() {
-  local package_url="$1"
-  local package_name="$2"
-  local package_id="$3"
+  local pkgtype="$1"
+  local pkgurl="$2"
+  local pkgfile="$3"
+  local pkgname="$4"
+  local pkgver="$5"
+  local pkginstallpath="$6"
 
-  download_source $package_url
-  unpack_source $package_url
-  build_source $package_name $package_id
+  shift 4
+  cd $BASEPATH
+
+  download_source $pkgurl $pkgfile
+  unpack_source $pkgfile $pkgname
+  build_package_${pkgtype} $pkgname $@
 }
 
+_pyver='2.7.2'
+_pipver='1.1'
+_distver='0.6.27'
 
-
-install_package "http://mirrors.sohu.com/python/2.7.1/Python-2.7.1.tar.bz2" "Python-2.7.1" "2.7.1"
-
-
+install_package "tarball" "http://mirrors.sohu.com/python/${_pyver}/Python-${_pyver}.tar.bz2" "Python-${_pyver}.tar.bz2" "Python-${_pyver}" "${_pyver}"
+install_package "python" "http://pypi.python.org/packages/source/d/distribute/distribute-${_distver}.tar.gz" "distribute-${_distver}.tar.gz"  "distribute-${_distver}" "${_pyver}"
+install_package "python" "http://pypi.python.org/packages/source/p/pip/pip-${_pipver}.tar.gz" "pip-${_pipver}.tar.gz" "pip-${_pipver}" "${_pyver}"
 
