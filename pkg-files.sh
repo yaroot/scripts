@@ -11,7 +11,8 @@ download_flist() {
   echo ">> Downloading $furl"
 
   cd $tmp_dir
-  wget -q "$furl"
+  #wget -q "$furl"
+  curl --progress-bar "$furl" -O
 
   local fname
 
