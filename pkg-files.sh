@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-# http://mirrors.163.com/archlinux/core/os/x86_64/core.files.tar.gz
-
 tmp_dir='/tmp/pkgfiles'
 pfile_dir='/var/pkgfiles'
 
