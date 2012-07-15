@@ -11,6 +11,11 @@ download_source() {
   local pkgurl="$1"
   local pkgfile="$2"
 
+  local files="$BASEPATH/files"
+  mkdir -p "$files"
+
+  cd "$files"
+
   if [ -f "$pkgfile" ]; then
     put "Already have ${pkgfile}"
   else
@@ -24,6 +29,7 @@ unpack_source() {
   local pkgname="$2"
 
   put "Unpackaging $pkgfile"
+  cd $BASEPATH/files
 
   rm -rf ${pkgname}
   case $pkgfile in
@@ -33,12 +39,12 @@ unpack_source() {
   esac
 }
 
-build_package_tarball() {
+build_package() {
   local pkgname="$1"
   local pkgver="$2"
   local install_path="$VERSIONSPATH/$pkgver"
 
-  cd "$BASEPATH/$pkgname"
+  cd "$BASEPATH/files/$pkgname"
   mkdir -p "${install_path}"
 
   # Temporary workaround for FS#22322
@@ -87,27 +93,34 @@ build_package_python(){
   $PYTHON setup.py install
 }
 
-install_package() {
-  local pkgtype="$1"
-  local pkgurl="$2"
-  local pkgfile="$3"
-  local pkgname="$4"
-  local pkgver="$5"
-  local pkginstallpath="$6"
-
-  shift 4
-  cd $BASEPATH
+install_python() {
+  local pkgurl="$1"
+  local pkgfile="$2"
+  local pkgname="$3"
+  local pkgver="$4"
 
   download_source $pkgurl $pkgfile
   unpack_source $pkgfile $pkgname
-  build_package_${pkgtype} $pkgname $@
+  build_package $pkgname $pkgver
+}
+
+install_virtualenv() {
+  local pkgurl="$1"
+  local pkgfile="$2"
+  local pkgname="$3"
+  local pyver="$4"
+
 }
 
 _pyver='2.7.2'
-_pipver='1.1'
-_distver='0.6.27'
+_vever='1.7.2'
+#_pipver='1.1'
+#_distver='0.6.27'
 
-install_package "tarball" "http://mirrors.sohu.com/python/${_pyver}/Python-${_pyver}.tar.bz2" "Python-${_pyver}.tar.bz2" "Python-${_pyver}" "${_pyver}"
-install_package "python" "http://pypi.python.org/packages/source/d/distribute/distribute-${_distver}.tar.gz" "distribute-${_distver}.tar.gz"  "distribute-${_distver}" "${_pyver}"
-install_package "python" "http://pypi.python.org/packages/source/p/pip/pip-${_pipver}.tar.gz" "pip-${_pipver}.tar.gz" "pip-${_pipver}" "${_pyver}"
+install_python "http://mirrors.sohu.com/python/${_pyver}/Python-${_pyver}.tar.bz2" "Python-${_pyver}.tar.bz2" "Python-${_pyver}" "${_pyver}"
+#install_package "python" "http://pypi.python.org/packages/source/d/distribute/distribute-${_distver}.tar.gz" "distribute-${_distver}.tar.gz"  "distribute-${_distver}" "${_pyver}"
+#install_package "python" "http://pypi.python.org/packages/source/p/pip/pip-${_pipver}.tar.gz" "pip-${_pipver}.tar.gz" "pip-${_pipver}" "${_pyver}"
+
+#install_virtualenv "http://pypi.python.org/packages/source/v/virtualenv/virtualenv-${_vever}.tar.gz" "virtualenv-${_vever}.tar.gz" "virtualenv-${_vever}" "${_pyver}"
+download_source "http://pypi.python.org/packages/source/v/virtualenv/virtualenv-${_vever}.tar.gz" "virtualenv-${_vever}.tar.gz"
 
