@@ -4,7 +4,6 @@
 
 set -e
 
-REMOTE_NAME='origin'
 SVN_PREFIX='svn'
 
 run() {
@@ -27,22 +26,31 @@ main(){
 
   if [ "x`git config --get svn-remote.svn.url`" = "x" ]; then
     # git repo
-    run "git fetch $REMOTE_NAME"
-    run "git rebase $REMOTE_NAME/$branch"
+    for remote in `git remote`; do
+      run "git fetch $remote"
+      run "git rebase $remote/$branch"
+    done
 
-    run "git merge $REMOTE_NAME/$branch"
-    run "git push $REMOTE_NAME"
+    for remote in `git remote`; do
+      run "git merge $remote/$branch"
+      run "git push $remote"
+    done
   else
     # git-svn repo
-    run "git fetch $REMOTE_NAME"
-    run "git rebase $REMOTE_NAME/$branch"
-    run "git merge $REMOTE_NAME/$branch"
+
+    for remote in `git remote`; do
+      run "git fetch $remote"
+      run "git rebase $remote/$branch"
+      run "git merge $remote/$branch"
+    done
 
     # run "git rebase $branch"
     run "git svn rebase"
     run "git svn dcommit"
 
-    run "git push $REMOTE_NAME -f"
+    for remote in `git remote`; do
+      run "git push $remote -f"
+    done
   fi
 
   if $has_stash; then
