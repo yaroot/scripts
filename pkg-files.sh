@@ -4,9 +4,10 @@ tmp_dir='/tmp/pkgfiles'
 pfile_dir='/var/pkgfiles'
 
 download_flist() {
-  local pname="$1"
+  local repo="$1"
   local mirror="$2"
-  local furl="${mirror}/${pname}.files.tar.gz"
+  local tarball="${repo}.files.tar.gz"
+  local download_url="${mirror}/${tarball}"
 
   echo ">> Downloading $furl"
 
@@ -14,20 +15,15 @@ download_flist() {
   #wget -q "$furl"
   curl --progress-bar "$furl" -O
 
-  local fname
+  mkdir "$repo"
+  tar zxf "$tarball" -C "$repo"
 
-  pname="${repo}.files"
-  fname=`basename $furl`
+  find "./${repo}" -name 'desc' -delete
+  find "./${repo}" -name 'depends' -delete
 
-  mkdir "$pname"
-  tar zxf "$fname" -C "$pname"
+  rsync -r --delete "${repo}" "${pfile_dir}/"
 
-  find "./${pname}" -name 'desc' -delete
-  find "./${pname}" -name 'depends' -delete
-
-  rsync -r --delete "${pname}" $pfile_dir
-
-  rm -rf "${pname}" "${fname}"
+  rm -rf "${repo}" "${tarball}"
 }
 
 update_filelist() {
