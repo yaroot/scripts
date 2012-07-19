@@ -25,33 +25,29 @@ main(){
   fi
 
   if [ "x`git config --get svn-remote.svn.url`" = "x" ]; then
-    # git repo
-    for remote in `git remote`; do
-      run "git fetch $remote"
-      run "git rebase $remote/$branch"
-    done
+    is_git_svn_repo=true
+  fi
 
-    for remote in `git remote`; do
-      run "git merge $remote/$branch"
-      run "git push $remote"
-    done
-  else
-    # git-svn repo
+  for remote in `git remote`; do
+    run "git fetch $remote"
+    run "git rebase $remote/$branch"
+    run "git merge $remote/$branch"
+  done
 
-    for remote in `git remote`; do
-      run "git fetch $remote"
-      run "git rebase $remote/$branch"
-      run "git merge $remote/$branch"
-    done
-
+  if $is_git_svn_repo; then
     # run "git rebase $branch"
     run "git svn rebase"
     run "git svn dcommit"
-
-    for remote in `git remote`; do
-      run "git push $remote -f"
-    done
   fi
+
+  local force=' '
+  if $is_git_svn_repo; then
+    force='-f'
+  fi
+
+  for remote in `git remote`; do
+    run "git push $remote $force"
+  done
 
   if $has_stash; then
     run "git stash apply"
