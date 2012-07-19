@@ -11,7 +11,7 @@ get_latest_for(){
     echo '>>> Error getting new virtion' 1>&2
   fi
 
-  curl --progress-bar "$BASEURL/$os/$latest/chrome-${target}.zip" -o "chrome-${target}-${latest}.zip"
+  curl --location --progress-bar "$BASEURL/$os/$latest/chrome-${target}.zip" -o "chrome-${target}-${latest}.zip"
 }
 
 get_latest_for 'Mac' 'mac'
