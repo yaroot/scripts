@@ -24,6 +24,7 @@ main(){
     run "git stash"
   fi
 
+  local is_git_svn_repo=false
   if [ "x`git config --get svn-remote.svn.url`" = "x" ]; then
     is_git_svn_repo=true
   fi
