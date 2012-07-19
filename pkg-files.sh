@@ -9,11 +9,11 @@ download_flist() {
   local tarball="${repo}.files.tar.gz"
   local download_url="${mirror}/${tarball}"
 
-  echo ">> Downloading $furl"
+  echo ">>>>> Downloading $download_url"
 
   cd $tmp_dir
   #wget -q "$furl"
-  curl --progress-bar "$furl" -O
+  curl --progress-bar "$download_url" -O
 
   mkdir "$repo"
   tar zxf "$tarball" -C "$repo"
@@ -40,7 +40,7 @@ update_filelist() {
   done
 
   rm -rf $tmp_dir
-  echo ">> Done updating"
+  echo ">>>>> Done updating"
 }
 
 main() {
