@@ -13,20 +13,21 @@ run() {
 
 main(){
   local branch=`git symbolic-ref HEAD`
-  branch=`basename $branch`
-  if [ ! -z "$1" ]; then
+  if [ -n "$1" ]; then
     branch="$1"
+  else
+    branch=`basename $branch`
   fi
 
   local has_stash=false
-  if [ ! "x`git status --porcelain`" = "x" ]; then
+  if [ -n "`git status --porcelain`" ]; then
     has_stash=true
     run "git stash"
   fi
 
-  local is_git_svn_repo=false
-  if [ "x`git config --get svn-remote.svn.url`" = "x" ]; then
-    is_git_svn_repo=true
+  local is_git_svn_repo=true
+  if [ -z "`git config --get svn-remote.svn.url`" ]; then
+    is_git_svn_repo=false
   fi
 
   for remote in `git remote`; do
@@ -41,13 +42,12 @@ main(){
     run "git svn dcommit"
   fi
 
-  local force=' '
-  if $is_git_svn_repo; then
-    force='-f'
-  fi
-
   for remote in `git remote`; do
-    run "git push $remote $force"
+    if $is_git_svn_repo; then
+      run "git push $remote -f"
+    else
+      run "git push $remote"
+    fi
   done
 
   if $has_stash; then
