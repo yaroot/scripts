@@ -1,16 +1,15 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
-from __future__ import absolute_import, print_function, unicode_literals
+from __future__ import absolute_import, print_function, unicode_literals, division
 
 import sys
 import datetime as DT
-
 
 def format_dt(ts):
     time = DT.datetime.fromtimestamp(ts)
     return time.strftime('%Y-%m-%d %H:%M:%S')
 
-def format_datatransfer(n):
+def format_size(n):
     n = n / 1024
     if n < 1024:
         return '%d KB' % n
@@ -27,12 +26,27 @@ def format_datatransfer(n):
     return '%d PB' % n
 
 
+SEC_MIN = 60
+SEC_HR = 60*60
+
+def format_duration(sec):
+    if sec < 60:
+        return '%dsec' % (sec)
+    elif sec < 60*60:
+        return '%dmin' % (sec/60)
+    elif sec < 10 * SEC_HR:
+        return '%dhr' % (sec / 10*SEC_HR)
+    else:
+        return '%dhr' % (sec / SEC_HR)
+
+
 def format_disconnect(line):
-    contype, name, ip, port, sent, recv, unixts, timestr = tuple(line.split(','))
-    size = format_datatransfer(int(sent)+int(recv))
-    dt = format_dt(int(unixts))
-    return "%(name)s\t\t%(size)s\t%(date)s" % \
-            {'name': name, 'date': dt, 'size': size}
+    contype, name, ip, port, sent, recv, duration, timeunix, timestr = tuple(line.split(','))
+    size = format_size(int(sent)+int(recv))
+    dt = format_dt(int(timeunix))
+    dur = format_duration(int(duration))
+    return "%(name)s\t\t%(size)s\tin %(duration)s\t[%(date)s]" % \
+            {'name': name, 'date': dt, 'size': size, 'duration': dur}
 
 
 def format_line(line):

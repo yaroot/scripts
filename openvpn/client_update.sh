@@ -9,6 +9,6 @@
 
 logfile='client_update.log'
 touch $logfile
-echo "${script_type},${common_name},${trusted_ip},${trusted_port},${bytes_sent},${bytes_received},${time_unix},${time_ascii}" >> $logfile
+echo "${script_type},${common_name},${trusted_ip},${trusted_port},${bytes_sent},${bytes_received},${time_duration},${time_unix},${time_ascii}" >> $logfile
 
 
