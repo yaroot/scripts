@@ -35,7 +35,7 @@ def format_duration(sec):
     elif sec < 60*60:
         return '%dmin' % (sec/60)
     elif sec < 10 * SEC_HR:
-        return '%dhr' % (sec / 10*SEC_HR)
+        return '%.1fhr' % (sec / SEC_HR)
     else:
         return '%dhr' % (sec / SEC_HR)
 
