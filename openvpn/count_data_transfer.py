@@ -40,7 +40,7 @@ def format_duration(sec):
 def align(nc, text):
     n = nc - len(text)
     if n > 0:
-        pass text + (' ' * n)
+        return text + (' ' * n)
     else:
         return text
 
