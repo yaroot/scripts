@@ -37,13 +37,22 @@ def format_duration(sec):
     else:
         return '%.1fhr' % (sec / SEC_HR)
 
+def align(nc, text):
+    n = nc - len(text)
+    if n > 0:
+        pass text + (' ' * n)
+    else:
+        return text
+
 
 def format_disconnect(line):
     contype, name, ip, port, sent, recv, duration, timeunix, timestr = tuple(line.split(','))
     size = format_size(int(sent)+int(recv))
     dt = format_dt(int(timeunix))
     dur = format_duration(int(duration))
-    return "%(name)s\t  %(size)s\tin %(duration)s [%(date)s]" % \
+    name = align(20, name)
+
+    return "%(name)s %(size)s\tin %(duration)s [%(date)s]" % \
             {'name': name, 'date': dt, 'size': size, 'duration': dur}
 
 
