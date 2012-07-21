@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 from __future__ import absolute_import, print_function, unicode_literals, division
 
@@ -34,10 +34,8 @@ def format_duration(sec):
         return '%dsec' % (sec)
     elif sec < 60*60:
         return '%dmin' % (sec/60)
-    elif sec < 10 * SEC_HR:
-        return '%.1fhr' % (sec / SEC_HR)
     else:
-        return '%dhr' % (sec / SEC_HR)
+        return '%.1fhr' % (sec / SEC_HR)
 
 
 def format_disconnect(line):
@@ -45,7 +43,7 @@ def format_disconnect(line):
     size = format_size(int(sent)+int(recv))
     dt = format_dt(int(timeunix))
     dur = format_duration(int(duration))
-    return "%(name)s\t\t%(size)s\tin %(duration)s\t[%(date)s]" % \
+    return "%(name)s\t  %(size)s\tin %(duration)s [%(date)s]" % \
             {'name': name, 'date': dt, 'size': size, 'duration': dur}
 
 
