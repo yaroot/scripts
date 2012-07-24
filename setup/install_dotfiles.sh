@@ -25,3 +25,6 @@ which emacs &> /dev/null && _install "yaroot/emacsd" "$HOME/.emacs.d"
 which irssi &> /dev/null && _install "yaroot/dotirssi" "$HOME/.irssi/scripts/autorun"
 
 
+# cower (AUR helper)
+# http://aur.archlinux.org/packages/co/cower/cower.tar.gz
+# http://github.com/falconindy/cower
