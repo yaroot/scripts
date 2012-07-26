@@ -2,8 +2,8 @@
 
 salt_file="/tmp/${USER}_salt"
 
-\which sha256sum &> /dev/null && SHA256SUM=`which sha256sum`
-\which gsha256sum &> /dev/null && SHA256SUM=`which gsha256sum`
+which sha256sum &> /dev/null && SHA256SUM=`which sha256sum`
+which shasum &> /dev/null && SHA256SUM="`which shasum` -a 256"
 
 # generate pwfile
 if [ "$1" == '-g' ]; then
