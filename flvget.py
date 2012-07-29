@@ -39,8 +39,20 @@ def DownloadFlv(links):
     for pair in links:
         name = '%s.flv' % pair['name']
         url  = pair['url']
-        subprocess.call(['wget', '--user-agent', FirefoxUA,
-            '-O', name, url])
+
+        try_curl = False
+        try:
+            subprocess.call(['wget', '--user-agent', FirefoxUA,
+                '-O', name, url])
+        except OSError:
+            try_curl = True
+        if try_curl:
+            try:
+                subprocess.call(['curl', '--user-agent', FirefoxUA,
+                    '-L', '-o', name, url])
+            except OSError:
+                pass
+
 
 def RequestDownloadLink(link):
     payload = { 'kw': link,
