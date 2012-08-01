@@ -10,8 +10,7 @@
 #       FORWARD_PORTS=(7070 7071 7072)
 #
 
-# kill all running autosshs first
-killall autossh 2>/dev/null
+killall -9 autossh 2>/dev/null
 
 source $HOME/.fuckgfw.rc
 
