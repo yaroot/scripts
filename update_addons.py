@@ -1,4 +1,24 @@
 #!/usr/bin/env python
+"""
+
+this script is written in python. `requests` is required (`pip install
+requests`).
+
+sample config file [WoW_install_directory]/Interface/addons.cfg]:
+
+    git://github.com/haste/oUF.git
+    github://p3lim/oUF_P3lim.git
+    git://github.com/haste/Butsu.git
+    git://github.com/tekkub/teksloot.git?teksLoot
+    http://www.wowace.com/addons/mapster/
+    http://www.wowinterface.com/downloads/info18855-TomTomLite.html
+    http://www.curse.com/addons/wow/deadly-boss-mods
+    #http://www.wowinterface.com/downloads/info7017-LightHeaded.html
+
+put this script in the same directory, `cd path/to/Interface` 
+then run `./update_addon.py`.
+
+"""
 
 from __future__ import absolute_import, print_function, unicode_literals, division
 
@@ -9,8 +29,11 @@ from HTMLParser import HTMLParser
 import urlparse
 from zipfile import ZipFile
 import shutil
+import subprocess
 
+UA = 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:14.0) Gecko/20100101 Firefox/14.0'
 STATUS_FAIL = -1
+headers = { 'user-agent': UA }
 
 def append_path(a, b):
     return a.rstrip('/')+'/'+b
@@ -52,16 +75,16 @@ def install_addon(info):
 
 
 def download_file(info):
-    link = info['link']
+    link = info['url']
     print(">>> Downloading " + link)
-    r = requests.get(info['link'])
+    r = requests.get(info['url'], headers=headers)
     if r.status_code == requests.codes.ok:
         save_file(append_path('files', info['file_name']), r.content)
 
 
 def download_with_fileinfo(info):
     file_name = info['file_name']
-    link = info['link']
+    link = info['url']
     download_file(info)
 
 
@@ -93,10 +116,10 @@ def parse_dlpage_wowi(page, info):
 
 def parse_dlink_wowi(info):
     dlink = info['dlink']
-    r = requests.head(dlink, allow_redirects=True)
+    r = requests.head(dlink, allow_redirects=True, headers=headers)
     fh = r.headers['content-disposition']
     info['file_name'] = fh.split('filename=')[-1].strip('"').strip("'")
-    info['link'] = r.url
+    info['url'] = r.url
     
 
 wowace_filename_re = re.compile(r'<dd><a href="(.+)">(.+)</a></dd>')
@@ -109,7 +132,7 @@ def parse_file_info_wowace(page):
             if found == 'filename':
                 match = wowace_filename_re.search(line)
                 if match:
-                    info['link'], info['file_name'] = match.groups()
+                    info['url'], info['file_name'] = match.groups()
             elif found == 'md5':
                 match = wowace_md5_re.search(line)
                 if match:
@@ -121,7 +144,7 @@ def parse_file_info_wowace(page):
                 found = 'filename'
             elif line.find('<dt>MD5</dt>') > 0:
                 found = 'md5'
-        if info.has_key('file_name') and info.has_key('link'
+        if info.has_key('file_name') and info.has_key('url'
                 ) and info.has_key('hash'):
             return info
 
@@ -129,14 +152,14 @@ def parse_file_info_wowace(page):
 def extract_download_info_wowace(link):
     files_page = append_path(link, 'files')
 
-    r = requests.get(files_page)
+    r = requests.get(files_page, headers=headers)
     if(r.status_code != requests.codes.ok):
         return STATUS_FAIL
     download_page_link = parse_dlpage_wowace(r.text)
     if download_page_link is None:
         return STATUS_FAIL
 
-    r = requests.get(urlparse.urljoin(link, download_page_link))
+    r = requests.get(urlparse.urljoin(link, download_page_link), headers=headers)
     if(r.status_code != requests.codes.ok):
         return STATUS_FAIL
     file_info = parse_file_info_wowace(r.text)
@@ -146,7 +169,7 @@ def extract_download_info_wowace(link):
 curse_download_link_re = re.compile(r'data\-href="(.+)" class="download\-link"')
 def extract_download_info_curse(link):
     dl_page = append_path(link, 'download')
-    r = requests.get(dl_page)
+    r = requests.get(dl_page, headers=headers)
     if r.status_code != requests.codes.ok:
         return STATUS_FAIL
     info = dict()
@@ -155,14 +178,14 @@ def extract_download_info_curse(link):
         if ma:
             link = ma.groups()[0]
             info['file_name'] = link.split('/')[-1]
-            info['link'] = link
-        if info.has_key('link') and info.has_key('file_name'):
+            info['url'] = link
+        if info.has_key('url') and info.has_key('file_name'):
             return info
     return STATUS_FAIL
 
 
 def extract_download_info_wowi(link):
-    r = requests.get(link)
+    r = requests.get(link, headers=headers)
     if r.status_code != requests.codes.ok:
         return STATUS_FAIL
     info = dict()
@@ -170,6 +193,7 @@ def extract_download_info_wowi(link):
     info['dlink'] = urlparse.urljoin(link, info['dlink'])
     parse_dlink_wowi(info)
     return info
+
 
 def download_and_install(info):
     if is_file_downloaded(info['file_name']):
@@ -196,23 +220,64 @@ def download_wowi(link):
         download_and_install(info)
 
 
+def git_do_checkout(info):
+    url = info['url']
+    directory = info['name']
+    wd = os.getcwd()
+    if os.path.exists('AddOns/'+directory):
+        print('>>> git update ', url, os.getcwd())
+        os.chdir('AddOns/' + directory)
+        subprocess.call(['git', 'pull'])
+    else:
+        print('>>> git clone', url, directory, os.getcwd())
+        os.chdir('AddOns')
+        subprocess.call(['git', 'clone', url, directory])
+    os.chdir(wd)
+
+
+def checkout_git(link):
+    sch, netloc, path, par, query, fra = urlparse.urlparse(link)
+    info = dict()
+    if sch == 'github':
+        info['url'] = 'git://github.com/'+netloc
+    elif sch == 'git':
+        info['url'] = 'git://'+netloc
+
+    i = path.find('?')
+    if i > 0:
+        info['url'] += path[0:i]
+    else:
+        info['url'] += path
+
+    ls = link.split('?')
+    if len(ls) > 1:
+        info['name'] = ls[-1]
+    else:
+        info['name'] = link.split('/')[-1].rstrip('.git')
+
+    git_do_checkout(info)
+
+
 def download(link):
     print(">>> Parsing " + link)
     sch, netloc, path, par, query, fra = urlparse.urlparse(link)
-    if 'curseforge' in netloc or 'wowace' in netloc:
-        download_wowace(link)
-    elif 'curse.com' in netloc:
-        download_curse(link)
-    elif 'wowinterface' in netloc:
-        download_wowi(link)
 
+    if 'git' in sch:
+        checkout_git(link)
+    elif sch == 'http':
+        if 'curseforge' in netloc or 'wowace' in netloc:
+            download_wowace(link)
+        elif 'curse.com' in netloc:
+            download_curse(link)
+        elif 'wowinterface' in netloc:
+            download_wowi(link)
 
 
 def main(argv):
     init_dir()
     addon_list = list()
     with open('addons.cfg') as f:
-        for l in f.lines():
+        for l in f.readlines():
             addon_list.append(l.strip())
     for l in addon_list:
         download(l)
