@@ -4,35 +4,65 @@ from __future__ import absolute_import, print_function, unicode_literals, divisi
 
 import requests
 import re
+import os
+from HTMLParser import HTMLParser
+import urlparse
+from zipfile import ZipFile
+import shutil
 
 STATUS_FAIL = -1
-STATUS_OK = 0
-log = dict()
 
 def append_path(a, b):
     return a.rstrip('/')+'/'+b
 
-def init_log():
-    try:
-        with open('addon_update.log', 'r') as f:
-            for line in f.lines:
-                log[line.strip()] = True
-    except IOError as e:
-        pass
+def unexcape_html(a):
+    return HTMLParser().unescape(a)
+
+
+def init_dir():
+    if not os.path.exists('files'):
+        os.mkdir('files')
+    if not os.path.exists('AddOns'):
+        os.mkdir('AddOns')
+
 
 def is_file_downloaded(file_name):
-    return log.has_key(file_name)
+    return os.path.exists(append_path('files', file_name))
+
+
+def save_file(file_path, content):
+    with open(file_path, 'wb') as f:
+        f.write(content)
+
+
+def install_addon(info):
+    print(">>> Extracting " + info['file_name'])
+    z = ZipFile('files/'+info['file_name'])
+    dirs = dict()
+    for zi in z.infolist():
+        d = zi.filename.split('/')[0]
+        if not dirs.has_key(d):
+            dirs[d] = True
+    for d in dirs.keys():
+        if os.path.exists('AddOns/'+d):
+            shutil.rmtree('AddOns/'+d)
+
+    z.extractall('AddOns/')
+    z.close()
+
+
+def download_file(info):
+    link = info['link']
+    print(">>> Downloading " + link)
+    r = requests.get(info['link'])
+    if r.status_code == requests.codes.ok:
+        save_file(append_path('files', info['file_name']), r.content)
 
 
 def download_with_fileinfo(info):
     file_name = info['file_name']
     link = info['link']
-    hash_ = info['hash']
-    hash_type = info['hash_type']
-    if is_file_downloaded(file_name):
-        return STATUS_OK
-
-
+    download_file(info)
 
 
 wowace_download_link_re = re.compile(r'href="(.+)"')
@@ -45,6 +75,29 @@ def parse_dlpage_wowace(page):
                 if len(group) == 1:
                     return group[0]
 
+
+wowi_dlpage_re = re.compile(r'<div id="icon"><a href="(.+)" onclick="')
+wowi_md5_re = re.compile(r'value="(.+)" /></td>')
+def parse_dlpage_wowi(page, info):
+    for line in page.splitlines():
+        ma = wowi_dlpage_re.search(line)
+        if ma:
+            info['dlink'] = unexcape_html(ma.groups()[0])
+        elif line.find('titletext">MD5:</td>') > 0:
+            ma = wowi_md5_re.search(line)
+            info['hash'] = ma.groups()[0]
+            info['hash_type'] = 'md5'
+        if info.has_key('dlink') and info.has_key('hash'):
+            return info
+
+
+def parse_dlink_wowi(info):
+    dlink = info['dlink']
+    r = requests.head(dlink, allow_redirects=True)
+    fh = r.headers['content-disposition']
+    info['file_name'] = fh.split('filename=')[-1].strip('"').strip("'")
+    info['link'] = r.url
+    
 
 wowace_filename_re = re.compile(r'<dd><a href="(.+)">(.+)</a></dd>')
 wowace_md5_re = re.compile(r'<dd>(.+)</dd>')
@@ -73,11 +126,9 @@ def parse_file_info_wowace(page):
             return info
 
 
-def download_wowace(link):
+def extract_download_info_wowace(link):
     files_page = append_path(link, 'files')
-    site = 'http://www.wowace.com'
-    if link.find('curseforge.com') > 0:
-        site = 'http://wow.curseforge.com'
+
     r = requests.get(files_page)
     if(r.status_code != requests.codes.ok):
         return STATUS_FAIL
@@ -85,57 +136,86 @@ def download_wowace(link):
     if download_page_link is None:
         return STATUS_FAIL
 
-    r = requests.get(site+download_page_link)
+    r = requests.get(urlparse.urljoin(link, download_page_link))
     if(r.status_code != requests.codes.ok):
         return STATUS_FAIL
     file_info = parse_file_info_wowace(r.text)
-    if file_info:
-        download_with_fileinfo(file_info)
+    return file_info
+
+
+curse_download_link_re = re.compile(r'data\-href="(.+)" class="download\-link"')
+def extract_download_info_curse(link):
+    dl_page = append_path(link, 'download')
+    r = requests.get(dl_page)
+    if r.status_code != requests.codes.ok:
+        return STATUS_FAIL
+    info = dict()
+    for line in r.text.splitlines():
+        ma = curse_download_link_re.search(line)
+        if ma:
+            link = ma.groups()[0]
+            info['file_name'] = link.split('/')[-1]
+            info['link'] = link
+        if info.has_key('link') and info.has_key('file_name'):
+            return info
+    return STATUS_FAIL
+
+
+def extract_download_info_wowi(link):
+    r = requests.get(link)
+    if r.status_code != requests.codes.ok:
+        return STATUS_FAIL
+    info = dict()
+    parse_dlpage_wowi(r.text, info)
+    info['dlink'] = urlparse.urljoin(link, info['dlink'])
+    parse_dlink_wowi(info)
+    return info
+
+def download_and_install(info):
+    if is_file_downloaded(info['file_name']):
+        return
+    download_with_fileinfo(info)
+    install_addon(info)
+
+
+def download_wowace(link):
+    info = extract_download_info_wowace(link)
+    if info != STATUS_FAIL:
+        download_and_install(info)
 
 
 def download_curse(link):
-    pass
+    info = extract_download_info_curse(link)
+    if info != STATUS_FAIL:
+        download_and_install(info)
+
 
 def download_wowi(link):
-    pass
+    info = extract_download_info_wowi(link)
+    if info != STATUS_FAIL:
+        download_and_install(info)
+
 
 def download(link):
-    if(link.find('curseforge.com') > 0 or link.find('wowace.com') > 0):
+    print(">>> Parsing " + link)
+    sch, netloc, path, par, query, fra = urlparse.urlparse(link)
+    if 'curseforge' in netloc or 'wowace' in netloc:
         download_wowace(link)
-    elif(link.find('curse.com') > 0):
+    elif 'curse.com' in netloc:
         download_curse(link)
-    elif(link.find('wowinterface.com') > 0):
+    elif 'wowinterface' in netloc:
         download_wowi(link)
 
 
-def parse_cfg_line(line):
-    pass
-
-def read_cfg_by_line(fd):
-    alist = list()
-    for line in fd.lines():
-        a = parse_cfg_line(line)
-        if a:
-            alist.append(a)
-    return alist
-
-
-def parse_config(cfg_file):
-    try:
-        with open(cfg_file) as f:
-            cfg = read_cfg_by_line(f)
-            return cfg
-    except IOError:
-        raise Exception("Open [{}] error".format(cfg_file))
-
 
 def main(argv):
-    init_log()
-    # addon_list = parse_config('addon.cfg')
-    download('http://wow.curseforge.com/addons/heal-bot-continued/')
-    download('http://www.wowinterface.com/downloads/info20546-CurrencyMonitor.html')
-    download('http://www.curse.com/addons/wow/clique')
-    download('http://www.wowace.com/addons/ace3/')
+    init_dir()
+    addon_list = list()
+    with open('addons.cfg') as f:
+        for l in f.lines():
+            addon_list.append(l.strip())
+    for l in addon_list:
+        download(l)
 
 if __name__ == '__main__':
     import sys
