@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 """
+this script reads a config and install/update wow addons for you
 
-this script is written in python. `requests` is required (`pip install
-requests`).
+require: `pip install requests`
+
 
 sample config file [WoW_install_directory]/Interface/addons.cfg]:
 
