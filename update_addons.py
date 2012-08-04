@@ -35,9 +35,11 @@ import subprocess
 UA = 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:14.0) Gecko/20100101 Firefox/14.0'
 STATUS_FAIL = -1
 headers = { 'user-agent': UA }
+
 GIT='git'
+# http://msysgit.github.com/
 if 'win' in str(sys.platform):
-    GIT='git.cmd' # http://code.google.com/p/msysgit/
+    GIT='git.cmd'
 
 def append_path(a, b):
     return a.rstrip('/')+'/'+b
