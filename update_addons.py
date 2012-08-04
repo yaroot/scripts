@@ -226,11 +226,11 @@ def git_do_checkout(info):
     directory = info['name']
     wd = os.getcwd()
     if os.path.exists('AddOns/'+directory):
-        print('>>> git update ', url, os.getcwd())
+        print('>>> git update ', url)
         os.chdir('AddOns/' + directory)
         subprocess.call(['git', 'pull'])
     else:
-        print('>>> git clone', url, directory, os.getcwd())
+        print('>>> git clone', url, directory)
         os.chdir('AddOns')
         subprocess.call(['git', 'clone', url, directory])
     os.chdir(wd)
