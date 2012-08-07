@@ -26,8 +26,7 @@ def format_size(n):
 
 
 def count_dev(dev):
-    kls = '/sys/class/net/{}/statistics/'.format(dev)
-    print(kls)
+    kls = '/sys/class/net/{0}/statistics/'.format(dev)
     rx = int(cat_file(kls + 'rx_bytes'))
     tx = int(cat_file(kls + 'tx_bytes'))
     print(dev, ' => [in] ', format_size(rx), '[out] ', format_size(tx))
