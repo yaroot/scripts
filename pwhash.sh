@@ -18,7 +18,7 @@ if [ "$1" == '-g' ]; then
   touch "$salt_file"
   chmod 600 "$salt_file"
 
-  eval "echo \"$seed\" | $SHA256SUM | cut -d' ' -f1 | tee $salt_file > /dev/null"
+  eval "echo '$seed' | $SHA256SUM | cut -d' ' -f1 | tee $salt_file > /dev/null"
   echo "salt generated to $salt_file"
   ls -alh "$salt_file"
   exit 0
@@ -30,7 +30,7 @@ if [ ! -f "$salt_file" ]; then
 fi
 
 if [ "$1" == '-m' ]; then
-  \which dmenu &> /dev/null
+  which dmenu &> /dev/null
   if [ ! "$?" == "0" ]; then
     echo "Error: -m need dmenu" 1>&2
     exit 1
@@ -66,6 +66,6 @@ pass=${pwhash:1:10}
 if [ "$copy" == 'no' ]; then
   echo "$pass"
 else
-  eval "echo -n \"$pass\" $copy"
+  eval "echo -n '$pass' $copy"
 fi
 
