@@ -43,5 +43,4 @@ download_file_into http://gemi.fedorapeople.org/haskell/_hugs  $ZSHCOMP
 download_file_into http://gemi.fedorapeople.org/haskell/_cabal $ZSHCOMP
 
 ./git_install.sh git://github.com/icy/pacapt.git "$HOME/repos/pacapt"
-# sudo ln -sv "${PACAPT_DIR}/pacapt/pacman" /usr/bin/pacman
 
