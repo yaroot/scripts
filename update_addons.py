@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 """
 this script reads a config and install/update wow addons for you
 
