@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+ZSHCOMP="$HOME/.local/zshcomp"
+
 symlink() {
   local src="$1"
   local tar="$2"
@@ -22,6 +24,10 @@ symlink $HOME/repos/leiningen/zsh_completion.zsh $HOME/.local/zshcomp/_lein
 
 ./git_install.sh git://github.com/rg3/youtube-dl.git $HOME/repos/youtube-dl
 
+./git_install.sh git://github.com/defunkt/hub.git $HOME/repos/hub
+pushd $HOME/repos/hub; rake standalone; cp hub $HOME/.local/bin/;
+cp etc/hub.zsh_completion ${ZSHCOMP}/_hub; popd;
+
 ./git_install.sh git://github.com/zsh-users/zsh-completions.git $HOME/.local/zsh-completions
 
 download_file_into() {
@@ -32,12 +38,10 @@ download_file_into() {
   curl -sL "$uri" | tee "${path}/${filename}" > /dev/null
 }
 
-ZSHCOMP="$HOME/.local/zshcomp"
 download_file_into http://gemi.fedorapeople.org/haskell/_ghc   $ZSHCOMP
 download_file_into http://gemi.fedorapeople.org/haskell/_hugs  $ZSHCOMP
 download_file_into http://gemi.fedorapeople.org/haskell/_cabal $ZSHCOMP
 
-PACAPT_DIR="$HOME/repos/pacapt"
-./git_install.sh git://github.com/icy/pacapt.git $PACAPT_DIR
+./git_install.sh git://github.com/icy/pacapt.git "$HOME/repos/pacapt"
 # sudo ln -sv "${PACAPT_DIR}/pacapt/pacman" /usr/bin/pacman
 
