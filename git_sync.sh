@@ -38,7 +38,9 @@ main(){
 
   if $is_git_svn_repo; then
     # run "git rebase $branch"
-    run "git svn rebase"
+    run "git fetch"
+    # run "git svn rebase"
+    run "git rebase $SVN_PREFIX/$branch"
     run "git svn dcommit"
   fi
 
