@@ -17,12 +17,11 @@ _install() {
   ./git_install.sh "$repo" "$dir"
 }
 
-#_install "yaroot/dotfiles" "$HOME/.dotfiles"
-#_install "yaroot/scripts" "$HOME/.bin"
-#_install "yaroot/vimrc" "$HOME/.vim"
-#
-#which irssi &> /dev/null && _install "yaroot/dotirssi" "$HOME/.irssi/scripts/autorun"
-#which emacs &> /dev/null && _install "yaroot/emacsd" "$HOME/.emacs.d"
+_install "yaroot/dotfiles" "$HOME/.dotfiles"
+_install "yaroot/scripts" "$HOME/.bin"
+_install "yaroot/vimrc" "$HOME/.vim"
+
+which irssi &> /dev/null && _install "yaroot/dotirssi" "$HOME/.irssi/scripts/autorun"
 
 
 if [ -n `which emacs` ]; then
