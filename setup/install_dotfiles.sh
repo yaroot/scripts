@@ -17,14 +17,37 @@ _install() {
   ./git_install.sh "$repo" "$dir"
 }
 
-_install "yaroot/dotfiles" "$HOME/.dotfiles"
-_install "yaroot/scripts" "$HOME/.bin"
-_install "yaroot/vimrc" "$HOME/.vim"
+#_install "yaroot/dotfiles" "$HOME/.dotfiles"
+#_install "yaroot/scripts" "$HOME/.bin"
+#_install "yaroot/vimrc" "$HOME/.vim"
+#
+#which irssi &> /dev/null && _install "yaroot/dotirssi" "$HOME/.irssi/scripts/autorun"
+#which emacs &> /dev/null && _install "yaroot/emacsd" "$HOME/.emacs.d"
 
-which emacs &> /dev/null && _install "yaroot/emacsd" "$HOME/.emacs.d"
-which irssi &> /dev/null && _install "yaroot/dotirssi" "$HOME/.irssi/scripts/autorun"
+
+if [ -n `which emacs` ]; then
+  has_emacs=false
+  # debian has jove as emacs
+  if [ -n `which jove` ]; then
+    has_emacs=true
+    if [ "$(readlink -fn `which emacs`)" = `which jove` ]; then
+      has_emacs=false
+    fi
+  fi
+
+  if $has_emacs; then
+    _install "yaroot/emacsd" "$HOME/.emacs.d"
+  fi
+fi
+
+if [ -f '/etc/os-release' ]; then
+  source '/etc/os-release'
+  if [ "$NAME" = 'Arch Linux' ]; then
+    if [ -z `which cower` ]; then
+      # http://github.com/falconindy/cower
+      wget http://aur.archlinux.org/packages/co/cower/cower.tar.gz
+    fi
+  fi
+fi
 
 
-# cower (AUR helper)
-# http://aur.archlinux.org/packages/co/cower/cower.tar.gz
-# http://github.com/falconindy/cower
