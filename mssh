@@ -24,7 +24,8 @@ main()
   # split window and `ssh` to `host`
   for host in "$@"; do
     tmux split-window -t $TMUXWINDOW
-    tmux send-key -t $TMUXWINDOW "ssh $host" Enter
+    local TMUXPANE=`tmux list-panes -t $TMUXWINDOW | awk -F: 'END { print $1 }'`
+    tmux send-key -t "${TMUXWINDOW}.${TMUXPANE}" "ssh $host" Enter
   done
 
   # kill the first pane
