@@ -40,8 +40,8 @@ headers = { 'user-agent': UA }
 
 GIT='git'
 # http://msysgit.github.com/
-if 'win' in str(sys.platform):
-    GIT='git.cmd'
+# if 'win' in str(sys.platform):
+#     GIT='git.cmd'
 
 def append_path(a, b):
     return a.rstrip('/')+'/'+b
