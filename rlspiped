@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 # http://www.freebsd.org/cgi/cvsweb.cgi/ports/sysutils/spiped/files/spiped.in
 
@@ -10,7 +10,7 @@
 # spiped_pipe_X_key:	Key file for pipe X.
 
 
-. $HOME/.spipedrc
+source $HOME/.spipedrc
 
 command=`which spiped`
 
