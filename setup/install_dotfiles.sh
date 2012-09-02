@@ -24,12 +24,14 @@ _install "yaroot/vimrc" "$HOME/.vim"
 which irssi &> /dev/null && _install "yaroot/dotirssi" "$HOME/.irssi/scripts/autorun"
 
 
-if [ -n `which emacs` ]; then
+EMACS=`which emacs 2> /dev/null`
+JOVE=`which jove 2> /dev/null`
+if [ -n "$EMACS" ]; then
   has_emacs=false
   # debian has jove as emacs
-  if [ -n `which jove` ]; then
+  if [ -n "$JOVE" ]; then
     has_emacs=true
-    if [ "$(readlink -fn `which emacs`)" = `which jove` ]; then
+    if [ "`readlink -fn $EMACS`" = "$JOVE" ]; then
       has_emacs=false
     fi
   fi
