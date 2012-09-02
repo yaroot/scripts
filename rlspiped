@@ -10,7 +10,7 @@
 # spiped_pipe_X_key:	Key file for pipe X.
 
 
-source $HOME/.spipedrc
+. $HOME/.spipedrc
 
 command=`which spiped`
 
