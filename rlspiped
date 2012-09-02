@@ -1,0 +1,46 @@
+#!/usr/bin/env sh
+
+# http://www.freebsd.org/cgi/cvsweb.cgi/ports/sysutils/spiped/files/spiped.in
+
+# spiped_enable:	Set to YES to enable spiped.
+# spiped_pipes:		List of names of pipes to create.
+# spiped_pipe_X_mode:	"encrypt"/"client" or "decrypt"/"server".
+# spiped_pipe_X_source: Source address of pipe X.
+# spiped_pipe_X_target:	Target address of pipe X.
+# spiped_pipe_X_key:	Key file for pipe X.
+
+
+source $HOME/.spipedrc
+
+command=`which spiped`
+
+spiped_start()
+{
+  local P PIDFILE MODE SOURCE TARGET KEY MODEFLAG
+
+  for P in ${spiped_pipes}; do
+    echo $P
+    #PIDFILE=/var/run/spiped_${P}.pid
+    eval MODE=\$spiped_pipe_${P}_mode
+    eval SOURCE=\$spiped_pipe_${P}_source
+    eval TARGET=\$spiped_pipe_${P}_target
+    eval KEY=\$spiped_pipe_${P}_key
+    case "$MODE" in
+      encrypt | client)
+        MODEFLAG="-e"
+        ;;
+      decrypt | server)
+        MODEFLAG="-d"
+        ;;
+      *)
+        echo Invalid value for spiped_pipe_${P}_mode: $MODE
+        continue
+    esac
+    echo ${command} -D $MODEFLAG -s $SOURCE -t $TARGET -k $KEY
+  done
+}
+
+
+killall spiped
+spiped_start
+
