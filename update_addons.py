@@ -262,7 +262,11 @@ def checkout_git(link):
     if len(ls) > 1:
         info['name'] = ls[-1]
     else:
-        info['name'] = link.split('/')[-1].rstrip('.git')
+        name = link.split('/')[-1]
+        ind = name.rfind('.git')
+        if ind > -1:
+            name = name[:ind]
+        info['name'] = name
 
     git_do_checkout(info)
 
