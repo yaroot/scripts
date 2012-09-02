@@ -36,7 +36,7 @@ spiped_start()
         echo Invalid value for spiped_pipe_${P}_mode: $MODE
         continue
     esac
-    echo ${command} -D $MODEFLAG -s $SOURCE -t $TARGET -k $KEY
+    ${command} -D $MODEFLAG -s $SOURCE -t $TARGET -k $KEY
   done
 }
 
