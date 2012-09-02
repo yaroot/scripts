@@ -19,7 +19,6 @@ spiped_start()
   local P PIDFILE MODE SOURCE TARGET KEY MODEFLAG
 
   for P in ${spiped_pipes}; do
-    echo $P
     #PIDFILE=/var/run/spiped_${P}.pid
     eval MODE=\$spiped_pipe_${P}_mode
     eval SOURCE=\$spiped_pipe_${P}_source
