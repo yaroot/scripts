@@ -107,13 +107,12 @@ def parse_dlpage_wowace(page):
                     return group[0]
 
 
-wowi_dlpage_re = re.compile(r'<div id="icon"><a href="(.+?)" onClick')
+wowi_dlpage_re = re.compile(r'a href="([^"]+)" onclick="setDonate')
 wowi_md5_re = re.compile(r'value="(.+)" /></td>')
 def parse_dlpage_wowi(page, info):
     for line in page.splitlines():
         ma = wowi_dlpage_re.search(line)
         if ma:
-            ma.groups()
             info['dlink'] = unexcape_html(ma.groups()[0])
         elif line.find('titletext">MD5:</td>') > 0:
             ma = wowi_md5_re.search(line)
@@ -272,7 +271,8 @@ def checkout_git(link):
 
 
 def download(link):
-    print(">>> Parsing " + link)
+    if link.find('#') < 0:
+        print(">>> Parsing " + link)
     sch, netloc, path, par, query, fra = urlparse.urlparse(link)
 
     if 'git' in sch:
