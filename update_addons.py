@@ -107,13 +107,14 @@ def parse_dlpage_wowace(page):
                     return group[0]
 
 
-wowi_dlpage_re = re.compile(r'a href="([^"]+)" onclick="setDonate')
+wowi_dlpage_re = re.compile(r'a href="(.+)" onClick')
 wowi_md5_re = re.compile(r'value="(.+)" /></td>')
 def parse_dlpage_wowi(page, info):
     for line in page.splitlines():
-        ma = wowi_dlpage_re.search(line)
-        if ma:
-            info['dlink'] = unexcape_html(ma.groups()[0])
+        if line.find('_trackPageview') > 0 and line.find('alt="Download"') > 0:
+            ma = wowi_dlpage_re.search(line)
+            if ma:
+                info['dlink'] = unexcape_html(ma.groups()[0])
         elif line.find('titletext">MD5:</td>') > 0:
             ma = wowi_md5_re.search(line)
             info['hash'] = ma.groups()[0]
