@@ -24,9 +24,9 @@ symlink $HOME/repos/leiningen/zsh_completion.zsh $HOME/.local/zshcomp/_lein
 
 ./git_install.sh git://github.com/rg3/youtube-dl.git $HOME/repos/youtube-dl
 
-./git_install.sh git://github.com/defunkt/hub.git $HOME/repos/hub
-pushd $HOME/repos/hub; rake standalone; cp hub $HOME/.local/bin/;
-cp etc/hub.zsh_completion ${ZSHCOMP}/_hub; popd;
+# ./git_install.sh git://github.com/defunkt/hub.git $HOME/repos/hub
+# pushd $HOME/repos/hub; rake standalone; cp hub $HOME/.local/bin/;
+# cp etc/hub.zsh_completion ${ZSHCOMP}/_hub; popd;
 
 ./git_install.sh git://github.com/zsh-users/zsh-completions.git $HOME/.local/zsh-completions
 
