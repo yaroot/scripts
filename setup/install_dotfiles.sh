@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+
+mkdir -p $HOME/.local/bin
+mkdir -p $HOME/.mnt/private
+
 protocol='git'
 if [ "x${1}" = 'x--ssh' ]; then
   protocol='ssh'
