@@ -28,6 +28,6 @@ if [ 'Darwin' = `uname -s` ]; then
   _install "ovpn" "$HOME/.ovpn"
 else
   mkdir -p "$HOME/.ovpn"
-  _install "ovpn" "$HOME/.ovpn/.ovpn"
+  _install "ovpn" "$HOME/.ovpn/ovpn"
 fi
 
