@@ -24,10 +24,6 @@ _install() {
 
 _install "notes" "$HOME/.gtd"
 
-if [ 'Darwin' = `uname -s` ]; then
-  _install "ovpn" "$HOME/.ovpn"
-else
-  mkdir -p "$HOME/.ovpn"
-  _install "ovpn" "$HOME/.ovpn/ovpn"
-fi
+mkdir -p "$HOME/.ovpn"
+_install "ovpn" "$HOME/.ovpn/ovpn"
 
