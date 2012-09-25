@@ -11,12 +11,14 @@ _install() {
       git remote rm $remote
     done
     git remote add bb "$clone"
-    git fetch bb
+    git fetch bb > /dev/null
     git branch --set-upstream master bb/master
-    popd > /dev/null
+    git merge bb/master --ff-only
+    popd > /dev/null 
+  else
+    ./git_install.sh "$clone" "$dir"
   fi
 
-  ./git_install.sh "$clone" "$dir"
 }
 
 
