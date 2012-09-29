@@ -24,23 +24,25 @@ symlink $HOME/repos/leiningen/zsh_completion.zsh $HOME/.local/zshcomp/_lein
 
 ./git_install.sh git://github.com/rg3/youtube-dl.git $HOME/repos/youtube-dl
 
-# ./git_install.sh git://github.com/defunkt/hub.git $HOME/repos/hub
-# pushd $HOME/repos/hub; rake standalone; cp hub $HOME/.local/bin/;
-# cp etc/hub.zsh_completion ${ZSHCOMP}/_hub; popd;
-
 ./git_install.sh git://github.com/zsh-users/zsh-completions.git $HOME/.local/zsh-completions
 
 download_file_into() {
   local uri="$1"
-  local path="$2"
-  local filename=$(basename "$uri")
+  local filename="$2"
+  local path="$3"
   mkdir -p $path
   curl -sL "$uri" | tee "${path}/${filename}" > /dev/null
 }
 
-download_file_into http://gemi.fedorapeople.org/haskell/_ghc   $ZSHCOMP
-download_file_into http://gemi.fedorapeople.org/haskell/_hugs  $ZSHCOMP
-download_file_into http://gemi.fedorapeople.org/haskell/_cabal $ZSHCOMP
+download_file_into http://gemi.fedorapeople.org/haskell/_ghc   _ghc $ZSHCOMP
+download_file_into http://gemi.fedorapeople.org/haskell/_hugs  _hugs $ZSHCOMP
+download_file_into http://gemi.fedorapeople.org/haskell/_cabal _cabal $ZSHCOMP
+
+# ./git_install.sh git://github.com/defunkt/hub.git $HOME/repos/hub
+download_file_into http://defunkt.io/hub/standalone hub "$HOME/.local/bin"
+download_file_into https://github.com/defunkt/hub/raw/master/etc/hub.zsh_completion _hub $ZSHCOMP
+chmod +x $HOME/.local/bin/hub
+
 
 ./git_install.sh git://github.com/icy/pacapt.git "$HOME/repos/pacapt"
 
