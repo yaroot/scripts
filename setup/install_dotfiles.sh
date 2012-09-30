@@ -2,7 +2,8 @@
 
 
 mkdir -p $HOME/.local/bin
-mkdir -p $HOME/.mnt/private
+mkdir -p $HOME/.mnt
+# mkdir -p $HOME/.mnt/private
 
 protocol='git'
 if [ "x${1}" = 'x--ssh' ]; then
