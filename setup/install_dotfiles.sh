@@ -6,7 +6,7 @@ mkdir -p $HOME/.mnt
 # mkdir -p $HOME/.mnt/private
 
 protocol='git'
-if [ "x${1}" = 'x--ssh' ]; then
+if [ '--ssh' = "${1}" ]; then
   protocol='ssh'
 fi
 
