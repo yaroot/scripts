@@ -8,9 +8,9 @@ get_latest_for(){
   local os="$1"
   local target="$2"
 
-  local latest=`curl $BASEURL/$os/LAST_CHANGE`
+  local latest=`curl -s $BASEURL/$os/LAST_CHANGE`
   if [ -z $latest ]; then
-    echo '>>> Error getting new virtion' 1>&2
+    echo '>>> Error reading version number' 1>&2
   fi
 
   curl --location --progress-bar "$BASEURL/$os/$latest/chrome-${target}.zip" -o "$OUTDIR/chrome-${target}-${latest}.zip"
