@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
 BASEURL='http://commondatastorage.googleapis.com/chromium-browser-snapshots'
-OUTDIR="$HOME/Downloads"
-mkdir -p "$OUTDIR/"
 
 get_latest_for(){
   local os="$1"
@@ -13,7 +11,7 @@ get_latest_for(){
     echo '>>> Error reading version number' 1>&2
   fi
 
-  curl --location --progress-bar "$BASEURL/$os/$latest/chrome-${target}.zip" -o "$OUTDIR/chrome-${target}-${latest}.zip"
+  curl --location --progress-bar "$BASEURL/$os/$latest/chrome-${target}.zip" -o "chrome-${target}-${latest}.zip"
 }
 
 get_latest_for 'Mac' 'mac'
