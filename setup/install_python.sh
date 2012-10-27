@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 BASEPATH=`pwd`
 VERSIONSPATH="$BASEPATH/versions"
