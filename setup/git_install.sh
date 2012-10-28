@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 REPO_URL="$1"
 LOCAL_CLONE="$2"
