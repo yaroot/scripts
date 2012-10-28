@@ -40,6 +40,6 @@ spiped_start()
 }
 
 
-killall spiped
+killall spiped 2> /dev/null
 spiped_start
 
