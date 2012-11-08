@@ -53,7 +53,7 @@ main(){
   done
 
   if $has_stash; then
-    run "git stash apply"
+    run "git stash pop" # apply stash?
   fi
 }
 
