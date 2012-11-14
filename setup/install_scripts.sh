@@ -11,7 +11,8 @@ symlink() {
   ln -sv "$src" "$tar"
 }
 
-./git_install.sh git://github.com/visionmedia/n.git $HOME/.local/n
+# ./git_install.sh git://github.com/visionmedia/n.git $HOME/.local/n
+./git_install.sh git://github.com/ekalinin/nodeenv.git $HOME/repos/nodeenv
 
 ./git_install.sh git://github.com/sstephenson/rbenv.git $HOME/.rbenv
 ./git_install.sh git://github.com/sstephenson/ruby-build.git $HOME/.rbenv/plugins/ruby-build
