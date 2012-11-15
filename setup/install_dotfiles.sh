@@ -5,15 +5,16 @@ mkdir -p $HOME/.local/bin
 mkdir -p $HOME/.mnt
 # mkdir -p $HOME/.mnt/private
 
-protocol='git'
+
+use_ssh=false
 if [ '--ssh' = "${1}" ]; then
-  protocol='ssh'
+  use_ssh=true
 fi
 
 _install() {
   local repo="$1"
   local dir="$2"
-  if [ "$protocol" == 'ssh' ]; then
+  if $use_ssh; then
     repo="git@github.com:${repo}.git"
   else
     repo="git://github.com/${repo}.git"
