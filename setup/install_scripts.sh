@@ -17,6 +17,7 @@ symlink() {
 ./git_install.sh git://github.com/sstephenson/rbenv.git $HOME/.rbenv
 ./git_install.sh git://github.com/sstephenson/ruby-build.git $HOME/.rbenv/plugins/ruby-build
 ./git_install.sh git://github.com/jamis/rbenv-gemset.git $HOME/.rbenv/plugins/rbenv-gemset
+symlink $HOME/.rbenv/completions/rbenv.zsh $HOME/.local/zshcomp/_rbenv
 
 ./git_install.sh git://github.com/technomancy/leiningen.git $HOME/repos/leiningen
 symlink $HOME/repos/leiningen/zsh_completion.zsh $HOME/.local/zshcomp/_lein
