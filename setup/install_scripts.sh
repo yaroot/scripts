@@ -24,7 +24,7 @@ symlink $HOME/repos/leiningen/zsh_completion.zsh $HOME/.local/zshcomp/_lein
 
 # ./git_install.sh git://github.com/pypa/virtualenv.git $HOME/repos/virtualenv
 
-./git_install.sh git://github.com/rg3/youtube-dl.git $HOME/repos/youtube-dl
+# ./git_install.sh git://github.com/rg3/youtube-dl.git $HOME/repos/youtube-dl
 
 ./git_install.sh git://github.com/zsh-users/zsh-completions.git $HOME/.local/zsh-completions
 
