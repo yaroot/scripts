@@ -20,6 +20,7 @@ reconnect()
 
 do_watch()
 {
+  test -z `pidof vpnc` || exit 1
   test 0 = `test_icmp` || reconnect
 }
 
