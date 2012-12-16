@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+
+ICMP_DEST='199.59.150.7' # twitter.com
+#ICMP_DEST='199.59.150.99'
+
+
+test_icmp()
+{
+  # timeout 4 sec, try 3 times
+  ping -W 4 -c 3 $ICMP_DEST &> /dev/null
+  echo $?
+}
+
+reconnect()
+{
+  vpnc-disconnect
+  vpnc
+}
+
+do_watch()
+{
+  test 0 = `test_icmp` || reconnect
+}
+
+main()
+{
+  # if [ -z $_BACKGROUND ]; then
+  #   echo "$0 => fork to background"
+  #   (_BACKGROUND=1 exec $0 &> /dev/null &)&
+  # fi
+
+  while true; do
+    do_watch
+    sleep 5s
+  done
+}
+
+main $@
+
