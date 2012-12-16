@@ -2,13 +2,15 @@
 
 
 ICMP_DEST='199.59.150.7' # twitter.com
-#ICMP_DEST='199.59.150.99'
+#ICMP_DEST='199.59.150.99' # unreachable for testing
 
+ICMP_COUNT=3
+ICMP_TIMEOUT=3
 
 test_icmp()
 {
   # timeout 4 sec, try 3 times
-  ping -W 4 -c 3 $ICMP_DEST &> /dev/null
+  ping -W $ICMP_TIMEOUT -c $ICMP_COUNT $ICMP_DEST &> /dev/null
   echo $?
 }
 
@@ -20,16 +22,16 @@ reconnect()
 
 do_watch()
 {
-  test -z `pidof vpnc` || exit 1
+  test -n `pidof vpnc` || exit 1
   test 0 = `test_icmp` || reconnect
 }
 
 main()
 {
-  # if [ -z $_BACKGROUND ]; then
-  #   echo "$0 => fork to background"
-  #   (_BACKGROUND=1 exec $0 &> /dev/null &)&
-  # fi
+  if [ -z $_BACKGROUND ]; then
+    (_BACKGROUND=1 exec $0 &> /dev/null &)&
+    exit 0
+  fi
 
   while true; do
     do_watch
