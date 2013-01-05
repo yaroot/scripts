@@ -1,0 +1,5 @@
+#!/bin/sh
+
+#  export GIT_PROXY_COMMAND=`which git-proxy-wrapper`
+
+nc -x127.0.0.1:7071 -X5 $@
