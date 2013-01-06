@@ -13,6 +13,22 @@ main()
 {
   check_inside_tmux
 
+  local SSH_CMD='ssh'
+  local charset=''
+
+  while getopts "c:" OPTION
+  do
+    case $OPTION in
+      c)
+        charset=$OPTARG
+        ;;
+    esac
+  done
+
+  if [ -n "$charset" ]; then
+    SSH_CMD="luit -encoding $charset ssh"
+  fi
+
   # already in a tmux session, won't need to specify session
   #TMUXSESSION=`echo $TMUX | awk -F, '{ print $3 }'`
 
@@ -25,12 +41,12 @@ main()
   for host in "$@"; do
     tmux split-window -t $TMUXWINDOW
     local TMUXPANE=`tmux list-panes -t $TMUXWINDOW | awk -F: 'END { print $1 }'`
-    tmux send-key -t "${TMUXWINDOW}.${TMUXPANE}" "ssh $host" Enter
+    tmux send-key -t "${TMUXWINDOW}.${TMUXPANE}" "$SSH_CMD $host" Enter
   done
 
   # kill the first pane
   tmux kill-pane -t "${TMUXWINDOW}.0"
-  tmux select-layout -t $TMUXWINDOW tiled
+  tmux select-layout -t $TMUXWINDOW even-horizontal
   tmux set-window-option -t $TMUXWINDOW synchronize-panes on
 }
 
