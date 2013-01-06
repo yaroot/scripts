@@ -33,10 +33,9 @@ which irssi &> /dev/null && _install "yaroot/dotirssi" "$HOME/.irssi/scripts/aut
 EMACS=`which emacs 2> /dev/null`
 JOVE=`which jove 2> /dev/null`
 if [ -n "$EMACS" ]; then
-  has_emacs=false
+  has_emacs=true
   # debian has jove as emacs
   if [ -n "$JOVE" ]; then
-    has_emacs=true
     if [ "`readlink -fn $EMACS`" = "$JOVE" ]; then
       has_emacs=false
     fi
