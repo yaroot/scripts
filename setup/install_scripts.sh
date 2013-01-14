@@ -19,8 +19,8 @@ symlink() {
 # ./git_install.sh git://github.com/jamis/rbenv-gemset.git $HOME/.rbenv/plugins/rbenv-gemset
 symlink $HOME/.rbenv/completions/rbenv.zsh $HOME/.local/zshcomp/_rbenv
 
-./git_install.sh git://github.com/technomancy/leiningen.git $HOME/repos/leiningen
-symlink $HOME/repos/leiningen/zsh_completion.zsh $HOME/.local/zshcomp/_lein
+# ./git_install.sh git://github.com/technomancy/leiningen.git $HOME/repos/leiningen
+# symlink $HOME/repos/leiningen/zsh_completion.zsh $HOME/.local/zshcomp/_lein
 
 # ./git_install.sh git://github.com/pypa/virtualenv.git $HOME/repos/virtualenv
 
