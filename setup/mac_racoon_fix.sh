@@ -1,18 +1,25 @@
 #!/bin/bash
 
+restart_racoon() {
+  RACOON_PROF='com.apple.racoon'
+  launchctl stop $RACOON_PROF
+  launchctl start $RACOON_PROF
 
-print_help() {
-  echo " Usage: run \`$0 'vpn_ip.conf'\` while connected to vpn"
-  echo '        `ls /var/run/racoon` to get `vpn_ip`'
-  echo ' change racoon config (/etc/racoon/racoon.conf)'
-  echo '   from `include "/var/run/racoon/*.conf"` to'
-  echo '        `include "/etc/racoon/remotes/*.conf"`'
+  echo "*** done fix racoon, please reconnect vpn ***"
 }
+
+restore_racoon() {
+  sed -i.bak 's/^# include/include/' /etc/racoon/racoon.conf
+  sed -i.bak '/^include\ "\/etc\/racoon\/remotes.*/d' /etc/racoon/racoon.conf
+
+  restart_racoon
+}
+
 
 main() {
   local prof="$1"
   if [ -z "$prof" ]; then
-    print_help;
+    restore_racoon
     exit 0;
   fi
 
@@ -24,12 +31,12 @@ main() {
 
   sed 's/3600 sec/24 hour/' "$origconfdir/$prof" > "$remotes/$prof"
 
-  # restart racoon
+  # configure racoon and restart
 
-  RACOON_PROF='com.apple.racoon'
+  sed -i 's/^include\ "\/var/# include "\/var/' /etc/racoon/racoon.conf
+  echo 'include "/etc/racoon/remotes/*.conf" ;' >> /etc/racoon/racoon.conf
 
-  launchctl stop $RACOON_PROF
-  launchctl start $RACOON_PROF
+  restart_racoon
 }
 
 main $@
