@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# write markdown and convert to slides using google's html5slides
+# '---' should be put between each slide
+
+print_head() {
+  cat << EOL
+<html>
+  <head>
+    <title>Presentation</title>
+    <meta charset='utf-8'>
+    <script src='http://html5slides.googlecode.com/svn/trunk/slides.js'></script>
+  </head>
+  <style>
+    /* Your individual styles here, or just use inline styles if that’s
+       what you want. */
+  </style>
+  <body style='display: none'>
+    <section class='slides layout-regular'>
+
+<article>
+EOL
+}
+
+print_foot() {
+  cat << EOL
+</article>
+    </section>
+  </body>
+</html>
+EOL
+}
+
+
+main() {
+  local mdFile="$1"
+  local outputHtml=${mdFile%%.md}.html
+
+  if [ -f $mdFile ]; then
+    rm -f $outputHtml
+    touch $outputHtml
+
+    print_head >> $outputHtml
+    markdown2 $mdFile >> $outputHtml
+    print_foot >> $outputHtml
+
+    sed -i 's/<hr\ \/>/<\/article><article>/' $outputHtml
+
+    echo "[$outputHtml] done, now get assets from http://code.google.com/p/html5slides/"
+  else
+    echo "$mdFile doesn't exist"
+    exit 1
+  fi
+}
+
+main $@
