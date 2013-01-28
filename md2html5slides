@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# write markdown and convert to slides using google's html5slides
+# convert markdown to (google's) html5slides
 # '---' should be put between each slide
 
 print_head() {
