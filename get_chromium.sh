@@ -15,6 +15,6 @@ get_latest_for(){
 }
 
 get_latest_for 'Mac' 'mac'
-get_latest_for 'Win' 'win32'
+# get_latest_for 'Win' 'win32'
 
 
