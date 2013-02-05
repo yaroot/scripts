@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+
+
+function do_debian()
+{
+  echo ">>>>> restarting networking"
+  /etc/init.d/networking stop
+  /etc/init.d/networking start
+}
+
+function do_arch()
+{
+  local dev="$1"
+
+  if [ -z "$dev" ]; then
+    echo ">>>>> usage '${0} eth0'"
+    exit 1
+  fi
+
+  while true; do
+    if [ -z "`ip -4 ad show $dev`" ]; then
+      echo ">>>>> restart attempting [${dev}]  [`date`]"
+      systemctl restart netcfg
+    else
+      exit 0
+    fi
+  done
+}
+
+main()
+{
+  local dev="$1"
+
+  if [ -f /etc/debian_version ]; then
+    do_debian
+  elif [ -f /etc/arch-release ]; then
+    do_arch $dev
+  fi
+}
+
+main $@
+
