@@ -31,7 +31,7 @@ def parseDownloadURL(link):
 def main(url):
     proglist = parsePage(url)
     for link in proglist:
-        print(parseDownloadURL(link))
+        parseDownloadURL(link)
 
 if __name__ == '__main__':
     import sys
