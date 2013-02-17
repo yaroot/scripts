@@ -27,6 +27,7 @@ main()
 
   if [ -n "$charset" ]; then
     SSH_CMD="luit -encoding $charset ssh"
+    shift;shift;
   fi
 
   # already in a tmux session, won't need to specify session
