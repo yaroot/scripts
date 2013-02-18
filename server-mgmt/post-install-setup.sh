@@ -13,6 +13,7 @@ elif [ -f /etc/debian_version ]; then
 fi
 
 run() {
+  echo "$@"
   eval "$@"
 }
 
