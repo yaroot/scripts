@@ -28,6 +28,9 @@ symlink $HOME/.rbenv/completions/rbenv.zsh $HOME/.local/zshcomp/_rbenv
 
 ./git_install.sh git://github.com/zsh-users/zsh-completions.git $HOME/.local/zsh-completions
 
+./git_install.sh git://github.com/yaroot/spiped-PKGBUILD.git $HOME/repos/spiped-PKGBUILD
+./git_install.sh git://github.com/yaroot/network.sh.git $HOME/repos/network.sh
+
 download_file_into() {
   local uri="$1"
   local filename="$2"
