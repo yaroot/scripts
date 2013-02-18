@@ -31,6 +31,7 @@ install_packages() {
     run pacman -Syy
     run pacman -S --noconfirm archlinux-keyring
     run pacman -Su --needed --noconfirm $PACKAGES
+    run pacman -Scc --noconfirm
   fi
 }
 
