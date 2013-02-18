@@ -21,7 +21,7 @@ save_file_to() {
   local url="$1"
   local to="$2"
 
-  run "curl -L '$url' | tee '$to' > /dev/null"
+  run "curl -qL '$url' | tee '$to' > /dev/null"
 }
 
 install_packages() {
@@ -39,6 +39,8 @@ post_install_arch() {
   save_file_to 'https://github.com/yaroot/dotfiles/raw/master/etc/arch/rc-local.service' /usr/lib/systemd/system/rc-local.service
   save_file_to 'https://github.com/yaroot/dotfiles/raw/master/etc/arch/rc.local' /etc/rc.local
   run chmod +x /etc/rc.local
+
+  systemctl enable multi-user.target
 
   run systemd enable rc-local.service
 
@@ -69,7 +71,6 @@ post_install() {
   run mkdir -p $TERMR
   save_file_to 'https://github.com/yaroot/dotfiles/raw/master/etc/rxvt/rxvt-unicode-256color' $TERMR/rxvt-unicode-256color
   save_file_to 'https://github.com/yaroot/dotfiles/raw/master/etc/rxvt/rxvt-unicode' $TERMR/rxvt-unicode
-
 }
 
 add_user() {
