@@ -1,5 +1,5 @@
 #!/bin/sh
-# curl -L https://github.com/yaroot/scripts/server-mgmt/post-install-setup.sh | sh
+# curl -L https://github.com/yaroot/scripts/raw/master/server-mgmt/post-install-setup.sh | sh
 
 PACKAGES="base-devel sudo iptables start-stop-daemon \
   openssh dante sshguard ntp curl wget netcfg  python2 lesspipe \
