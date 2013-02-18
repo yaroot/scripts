@@ -1,47 +1,99 @@
-#!/bin/bash
+#!/bin/sh
+# curl -L https://github.com/yaroot/scripts/server-mgmt/post-install-setup.sh | sh
 
+PACKAGES="base-devel sudo vim tmux git zsh openssh dante sshguard ntp curl wget"
 
-which apt-get 2>&1 > /dev/null
-
-PKGS="git openssh-server sudo"
-
-if [ -x /usr/bin/apt-get ] ; then
-    #apt-get update -y && apt-get upgrade -y && apt-get dest-update -y
-    apt-get install -y $PKGS
-elif [ -x /usr/bin/yum ] ; then
-    yum install -y $PKGS
+DIST=''
+if [ -f /etc/arch-release ]; then
+  DIST='arch'
+elif [ -f /etc/debian_version ]; then
+  DIST='debian'
 fi
 
+run() {
+  echo "$@"
+}
+
+save_file_to() {
+  local url="$1"
+  local to="$2"
+
+  run "curl -L '$url' | tee '$to' > /dev/null"
+}
+
+install_packages() {
+  if [ 'debian' = "$DIST" ]; then
+    run apt-get install -y $PACKAGES
+  elif [ 'arch' = "$DIST" ]; then
+    run pacman install --needed --noconfirm $PACKAGES
+  fi
+}
+
+post_install_arch() {
+  save_file_to 'https://github.com/yaroot/dotfiles/raw/master/etc/arch/rc-local.service' /usr/lib/systemd/system/rc-local.service
+  save_file_to 'https://github.com/yaroot/dotfiles/raw/master/etc/arch/rc.local' /etc/rc.local
+  run chmod +x /etc/rc.local
+
+  run systemd enable rc-local.service
+
+  run systemd enable cronie.service
+  run systemd enable sshd.service
+  run systemd enable sshguard.service
+
+  run systemd disable ip6tables.service
+  run systemd disable iptables.service
+
+  run systemd mask ip6tables.service
+  run systemd mask iptables.service
+}
+
+post_install_debian() {
+  echo 1 > /dev/null
+}
+
+post_install() {
+  if [ 'arch' = "$DIST" ]; then
+    post_install_arch
+  elif [ 'debian' = "$DIST" ]; then
+    post_install_debian
+  fi
 
 
-addstuff() {
-    if getent passwd ${1} > /dev/null ; then
-        echo "User already exists: ${1}"
-    else
-        echo "Adding user: ${1}"
-        useradd -m ${1}
-    fi
-
-    mkdir -p /home/${1}/.ssh
-    chown ${1}:${1} /home/${1}/.ssh
-    chmod 700 /home/${1}/.ssh
-
-    touch /home/${1}/.ssh/authorized_keys
-    chown ${1}:${1} /home/${1}/.ssh/authorized_keys
-    chmod 600 /home/${1}/.ssh/authorized_keys
-
-    if [ -f "./${1}.pub" ] && [ -r "./${1}.pub" ] ; then
-        cat ./${1}.pub >> /home/${1}/.ssh/authorized_keys
-    fi
-
-    if ! grep ${1} /etc/sudoers 2>&1 > /dev/null ; then
-        echo "${1}    ALL = NOPASSWD: ALL" >> /etc/sudoers
-    fi
+  local TERMR='/usr/share/terminfo/r'
+  run mkdir -p $TERMR
+  save_file_to 'https://github.com/yaroot/dotfiles/raw/master/etc/rxvt/rxvt-unicode-256color' $TERMR/rxvt-unicode-256color
+  save_file_to 'https://github.com/yaroot/dotfiles/raw/master/etc/rxvt/rxvt-unicode' $TERMR/rxvt-unicode
 
 }
 
-for username in $@; do
-    addstuff $username
-done
+add_user() {
+  run useradd -m -g users -G wheel -s /bin/bash yaroot
 
+  local sshdir='/home/yaroot/.ssh'
+  local authfile="$sshdir/authorized_keys"
+
+  run mkdir -p $sshdir
+  run touch $authfile
+  run chmod 600 $authfile
+
+  run "echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDQ4v/HyXZaIXopbipOIrBnPi9VR3xmbslAjusxi9cYbUiiusHYMXNDLoc6oK6QuRVIqLUcsm4YtAgTQm5rNJIHsTfzyJlmUxbU0reKZ93UOK2/IlliwvXZjreZm/9LqeNunCpuomv9UZl7tMV5HSVyxD4+/aaycPCQzT14UdXrSYNScfCyGLOHrwNfrSZ9Y9rXqxN9bPhVDWj+ItcIIhZSwysHhUvYZo/5Cdz/eBF3ICAhgHv8OzbXkClyuScxhRdRB37RrnMN08Iu39XJEO8RdpgRavMAai/Wj+qhkw9oPbfVcfW8EtglaQ/0aUaEBgcktocpWFg4KxZ9rgd2aJuj yaroot@default' >> $authfile"
+
+  run chown -R yaroot $sshdir
+}
+
+helpmsg() {
+  echo '**************************'
+  echo 'All Done'
+  echo ' clone your dotfiles [git clone git://github.com/yaroot/scripts.git $HOME/.bin]'
+}
+
+main() {
+  install_packages
+  post_install
+  add_user
+
+  helpmsg
+}
+
+main
 
