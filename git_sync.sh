@@ -47,9 +47,9 @@ main(){
   for remote in `git remote`; do
     local flag=''
     if $is_git_svn_repo; then
-      flag='-f'
+      flag=' -f'
     fi
-    run "git push $remote $branch $flag"
+    run "git push $remote ${branch}$flag"
   done
 
   if $has_stash; then
