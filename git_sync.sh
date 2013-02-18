@@ -7,7 +7,7 @@ set -e
 SVN_PREFIX='svn'
 
 run() {
-  echo ">>> Running [$1]"
+  echo "-> running [$1]"
   eval "$1"
 }
 
