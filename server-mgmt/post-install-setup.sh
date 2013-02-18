@@ -1,7 +1,9 @@
 #!/bin/sh
 # curl -L https://github.com/yaroot/scripts/server-mgmt/post-install-setup.sh | sh
 
-PACKAGES="base-devel sudo vim tmux git zsh openssh dante sshguard ntp curl wget"
+PACKAGES="base-devel sudo iptables start-stop-daemon \
+  openssh dante sshguard ntp curl wget netcfg  python2 lesspipe \
+  vim tmux git zsh atool unzip unrar iotop htop bwm-ng ack "
 
 DIST=''
 if [ -f /etc/arch-release ]; then
