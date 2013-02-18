@@ -27,6 +27,7 @@ install_packages() {
   if [ 'debian' = "$DIST" ]; then
     run apt-get install -y $PACKAGES
   elif [ 'arch' = "$DIST" ]; then
+    run pacman -Syyu --noconfirm
     run pacman install --needed --noconfirm $PACKAGES
   fi
 }
