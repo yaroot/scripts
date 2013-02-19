@@ -1,5 +1,13 @@
 #!/bin/sh
-# http://twopenguins.org/tips/git-through-proxy.php
 # export GIT_PROXY_COMMAND=`which git-proxy-wrapper`
+# $1 = hostname, $2 = port
 
-nc -x127.0.0.1:7071 -X5 $@
+socks_server='127.0.0.1'
+socks_port='7071'
+
+# openbsd-netcat
+exec nc -x${socks_server}:${socks_port} -X5 $@
+
+# socat
+# exec socat STDIO SOCKS4:${socks_server}:$1:$2,socksport=${socks_port}
+
