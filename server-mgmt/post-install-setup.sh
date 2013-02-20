@@ -21,7 +21,7 @@ save_file_to() {
   local url="$1"
   local to="$2"
 
-  run "curl -qL '$url' | tee '$to' > /dev/null"
+  run "curl -sL '$url' | tee '$to' > /dev/null"
 }
 
 install_packages() {
