@@ -17,4 +17,6 @@ get_latest_for(){
 get_latest_for 'Mac' 'mac'
 # get_latest_for 'Win' 'win32'
 
-
+# chrome
+# https://dl.google.com/dl/linux/direct/google-chrome-unstable_current_x86_64.rpm
+# https://dl.google.com/dl/linux/direct/google-chrome-unstable_current_i386.rpm
