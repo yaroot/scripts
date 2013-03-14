@@ -1,0 +1,42 @@
+#!/bin/bash
+# manage truecrypt containers using tcplay
+
+user=yaroot
+cryptdev=private
+cryptpath=/home/$user/.mnt/tcprivate
+loopdev=$(losetup -f)
+mountpt=/home/$user/.mnt/$cryptdev
+
+# must be run as root
+if [[ $EUID != 0 ]]; then
+  printf "%s\n" "You must be root to run this."
+  exit 1
+fi
+
+# unecrypt and mount container
+if [[ "$1" == "open" ]]; then
+  losetup "$loopdev" "$cryptpath"
+  tcplay --map="$cryptdev" --device="$loopdev"
+
+  # read passphrase
+  read -r -s passphrase <<EOF
+  "$passphrase"
+EOF
+
+  # mount container
+  [[ -d "$mountpt" ]] || mkdir "$mountpt"
+
+  # mount options
+  userid=$(awk -F"[=(]" '{print $2,$4}' <(id "$user"))
+  #mount -o nosuid,uid="${userid% *}",gid="${userid#* }" /dev/mapper/"$cryptdev" "$mountpt"
+  mount -o nosuid /dev/mapper/"$cryptdev" "$mountpt"
+
+# close and clean up…
+elif [[ "$1" == "close" ]]; then
+  device=$(awk -v dev=$cryptdev -F":" '/dev/ {print $1}' <(losetup -a))
+  umount "$mountpt"
+  dmsetup remove "$cryptdev" || printf "%s\n" "demapping failed"
+  losetup -d "$device" || printf "%s\n" "deleting $loopdev failed"
+else
+  printf "%s\n" "Options are open or close."
+fi
