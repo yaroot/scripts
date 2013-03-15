@@ -15,6 +15,9 @@ class Account(object):
 def list_repo(account):
     print(account.type, account.name, account.passwd)
 
+def create_repo(account, repoName):
+    print(account, repoName)
+
 def filter_None(x):
     if x is None:
         return False
@@ -53,11 +56,9 @@ def main(args):
         for acc in accs:
             list_repo(acc)
     else if args.create:
-
-    print(accs)
-    # for account in args.account:
-    #     for repo in args.create:
-    #         print(account, repo)
+        for acc in accs:
+            for repo in arg.create:
+                create_repo(acc, repo)
 
 
 if __name__ == '__main__':
