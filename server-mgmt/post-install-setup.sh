@@ -36,8 +36,10 @@ install_packages() {
 }
 
 post_install_arch() {
-  save_file_to 'https://github.com/yaroot/dotfiles/raw/master/etc/arch/rc-local.service' /usr/lib/systemd/system/rc-local.service
-  save_file_to 'https://github.com/yaroot/dotfiles/raw/master/etc/arch/rc.local' /etc/rc.local
+  cp /tmp/dotfiles/etc/arch/rc-local.service /usr/lib/systemd/system/rc-local.service
+  cp /tmp/dotfiles/etc/arch/rc.local /etc/rc.local
+  # save_file_to 'https://github.com/yaroot/dotfiles/raw/master/etc/arch/rc-local.service' /usr/lib/systemd/system/rc-local.service
+  # save_file_to 'https://github.com/yaroot/dotfiles/raw/master/etc/arch/rc.local' /etc/rc.local
   run chmod +x /etc/rc.local
 
   run systemctl enable multi-user.target
@@ -60,16 +62,20 @@ post_install_debian() {
 }
 
 post_install() {
+  pushd /tmp > /dev/null
+  git clone https://github.com/yaroot/dotfiles.git
+  popd > /dev/null
+
   if [ 'arch' = "$DIST" ]; then
     post_install_arch
   elif [ 'debian' = "$DIST" ]; then
     post_install_debian
   fi
 
-  local TERMR='/usr/share/terminfo/r'
-  run mkdir -p $TERMR
-  save_file_to 'https://github.com/yaroot/dotfiles/raw/master/etc/rxvt/rxvt-unicode-256color' $TERMR/rxvt-unicode-256color
-  save_file_to 'https://github.com/yaroot/dotfiles/raw/master/etc/rxvt/rxvt-unicode' $TERMR/rxvt-unicode
+  # local TERMR='/usr/share/terminfo/r'
+  # run mkdir -p $TERMR
+  # save_file_to 'https://github.com/yaroot/dotfiles/raw/master/etc/rxvt/rxvt-unicode-256color' $TERMR/rxvt-unicode-256color
+  # save_file_to 'https://github.com/yaroot/dotfiles/raw/master/etc/rxvt/rxvt-unicode' $TERMR/rxvt-unicode
 }
 
 add_user() {
