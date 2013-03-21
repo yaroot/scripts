@@ -11,28 +11,37 @@ except ImportError:
     sys.exit(1)
 
 FirefoxUA = '''Mozilla/5.0 (Windows NT 6.1; WOW64; rv:14.0) Gecko/20100101 Firefox/14.0'''
+FNAME = '<input type="hidden" name="name" value="'
+FLIST = '<input type="hidden" name="inf" value="'
 
 def ParseDownloadLinks(page):
     found = False
     linkList = list()
-    pair = dict()
+    name = None
+    c = 1
 
     for line in page.splitlines():
-        if line.find('''<input type="hidden" name="name"''') > -1:
-            found = True
+        if line.find(FNAME) > -1:
+            name = line[len(FNAME): len(line)-2]
 
+        if line.find(FLIST) > -1:
+            found = True
         if found:
-            if line.find('<strong>') == 0:
+            if line.find('"/>') == 0:
                 break
-            if line.find('<N>') > -1:
-                pair['name'] = line.replace('<N>', '')
-            elif line.find('<U>') > -1:
-                pair['url'] = line.replace('<U>', '')
-            
-            if pair.has_key('name') and pair.has_key('url'):
-                linkList.append(pair)
+            if line.find(FLIST) > -1:
                 pair = dict()
-        
+                pair['url'] = line[len(FLIST):]
+                pair['name'] = name + str(c).decode('utf-8')
+                linkList.append(pair)
+                c = c+1
+            else:
+                pair = dict()
+                pair['url'] = line
+                pair['name'] = name + str(c).decode('utf-8')
+                linkList.append(pair)
+                c = c+1
+
     return linkList
 
 
@@ -57,8 +66,8 @@ def DownloadFlv(links):
 
 def RequestDownloadLink(link):
     payload = { 'kw': link,
-            'flag': 'one',
             'format': 'super' }
+            # 'flag': 'one',
 
     r = requests.get('http://www.flvcd.com/parse.php', params=payload)
     webcontent = r.content.decode('GBK')
