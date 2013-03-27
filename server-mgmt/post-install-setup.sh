@@ -3,7 +3,7 @@
 
 PACKAGES="base-devel sudo iptables start-stop-daemon \
   openssh dante sshguard ntp curl wget netcfg  python2 lesspipe \
-  vim tmux git zsh atool unzip unrar iotop htop bwm-ng ack "
+  vim tmux git zsh atool unzip unrar iotop htop bwm-ng ack rsync"
 
 DIST=''
 if [ -f /etc/arch-release ]; then
