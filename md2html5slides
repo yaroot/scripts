@@ -35,12 +35,30 @@ main() {
   local mdFile="$1"
   local outputHtml=${mdFile%%.md}.html
 
+  local MARKDOWN_BIN
+
+  # perl markdown
+  which markdown &> /dev/null
+  if [ '0' = "$?" ]; then
+    MARKDOWN_BIN=`which markdown`
+  fi
+  # python markdown2 pip
+  which markdown_py2 &> /dev/null
+  if [ '0' = "$?" ]; then
+    MARKDOWN_BIN=`which markdown_py2`
+  fi
+  # python markdown2 arch
+  which markdown_py &> /dev/null
+  if [ '0' = "$?" ]; then
+    MARKDOWN_BIN=`which markdown_py`
+  fi
+
   if [ -f $mdFile ]; then
     rm -f $outputHtml
     touch $outputHtml
 
     print_head >> $outputHtml
-    markdown2 $mdFile >> $outputHtml
+    $MARKDOWN_BIN $mdFile >> $outputHtml
     print_foot >> $outputHtml
 
     sed -i 's/<hr\ \/>/<\/article><article>/' $outputHtml
