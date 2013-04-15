@@ -12,6 +12,7 @@ function do_debian()
 function do_arch()
 {
   local dev="$1"
+  local prof="$2"
 
   if [ -z "$dev" ]; then
     echo ">>>>> usage '${0} eth0'"
@@ -21,7 +22,7 @@ function do_arch()
   while true; do
     if [ -z "`ip -4 ad show $dev`" ]; then
       echo ">>>>> restart attempting [${dev}]  [`date`]"
-      systemctl restart netcfg
+      systemctl restart netctl@${prof}
     else
       exit 0
     fi
@@ -30,12 +31,10 @@ function do_arch()
 
 main()
 {
-  local dev="$1"
-
   if [ -f /etc/debian_version ]; then
     do_debian
   elif [ -f /etc/arch-release ]; then
-    do_arch $dev
+    do_arch $@
   fi
 }
 
