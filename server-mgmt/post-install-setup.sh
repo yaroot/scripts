@@ -1,16 +1,18 @@
 #!/bin/sh
 # curl -L https://github.com/yaroot/scripts/raw/master/server-mgmt/post-install-setup.sh | sh
 
-PACKAGES="base-devel sudo iptables start-stop-daemon \
-  openssh dante sshguard ntp curl wget netcfg  python2 lesspipe \
-  vim tmux git zsh atool unzip unrar iotop htop bwm-ng ack rsync"
-
 DIST=''
 if [ -f /etc/arch-release ]; then
   DIST='arch'
 elif [ -f /etc/debian_version ]; then
   DIST='debian'
 fi
+
+PACKAGES="base-devel sudo iptables start-stop-daemon \
+  openssh dante sshguard ntp curl wget netctl  python2 lesspipe \
+  vim tmux git zsh atool unzip unrar iotop htop bwm-ng ack rsync"
+
+
 
 run() {
   echo "-> $@"
@@ -26,9 +28,11 @@ save_file_to() {
 
 install_packages() {
   if [ 'debian' = "$DIST" ]; then
-    run apt-get install -y $PACKAGES
+    run apt-get install --no-install-recommends -y $PACKAGES
   elif [ 'arch' = "$DIST" ]; then
     run pacman -Syy
+    run pacman-keyring --init
+    run pacman-keyring --populate archlinux
     run pacman -S --noconfirm archlinux-keyring
     run pacman -Su --needed --noconfirm $PACKAGES
     run pacman -Scc --noconfirm
