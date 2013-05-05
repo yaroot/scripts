@@ -33,10 +33,10 @@ gen_list() {
 }
 
 case $1 in
-  jaist) gen_list 'ftp.jaist.ac.jp/pub/Linux' 'squeeze' ;;
-  osuosl) gen_list 'mirrors.osuosl.org' 'squeeze' ;;
-  kernel) gen_list 'mirrors.us.kernel.org' 'squeeze' ;;
-  nchc) gen_list 'ftp.nchc.org.tw' 'squeeze' ;;
-  163) gen_list 'mirrors.163.com' 'squeeze' ;;
+  jaist) gen_list 'ftp.jaist.ac.jp/pub/Linux' 'stable' ;;
+  osuosl) gen_list 'mirrors.osuosl.org' 'stable' ;;
+  kernel) gen_list 'mirrors.us.kernel.org' 'stable' ;;
+  nchc) gen_list 'ftp.nchc.org.tw' 'stable' ;;
+  163) gen_list 'mirrors.163.com' 'stable' ;;
 esac
 
