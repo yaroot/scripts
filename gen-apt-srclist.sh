@@ -38,5 +38,6 @@ case $1 in
   kernel) gen_list 'mirrors.us.kernel.org' 'stable' ;;
   nchc) gen_list 'ftp.nchc.org.tw' 'stable' ;;
   163) gen_list 'mirrors.163.com' 'stable' ;;
+  ftp) gen_list 'ftp.debian.org' 'stable' ;;
 esac
 
