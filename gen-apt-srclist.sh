@@ -32,12 +32,17 @@ gen_list() {
   echo ''
 }
 
+CODE='wheezy'
+if [ -n "$2" ];
+  CODE="$2"
+fi
+
 case $1 in
-  jaist) gen_list 'ftp.jaist.ac.jp/pub/Linux' 'stable' ;;
-  osuosl) gen_list 'mirrors.osuosl.org' 'stable' ;;
-  kernel) gen_list 'mirrors.us.kernel.org' 'stable' ;;
-  nchc) gen_list 'ftp.nchc.org.tw' 'stable' ;;
-  163) gen_list 'mirrors.163.com' 'stable' ;;
-  ftp) gen_list 'ftp.debian.org' 'stable' ;;
+  jaist) gen_list 'ftp.jaist.ac.jp/pub/Linux' "$CODE" ;;
+  osuosl) gen_list 'mirrors.osuosl.org' "$CODE" ;;
+  kernel) gen_list 'mirrors.us.kernel.org' "$CODE" ;;
+  nchc) gen_list 'ftp.nchc.org.tw' "$CODE" ;;
+  163) gen_list 'mirrors.163.com' "$CODE" ;;
+  ftp) gen_list 'ftp.debian.org' "$CODE" ;;
 esac
 
