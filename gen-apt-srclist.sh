@@ -33,7 +33,7 @@ gen_list() {
 }
 
 CODE='wheezy'
-if [ -n "$2" ];
+if [ -n "$2" ]; then
   CODE="$2"
 fi
 
