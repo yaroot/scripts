@@ -15,51 +15,37 @@ FNAME = '<input type="hidden" name="name" value="'
 FLIST = '<input type="hidden" name="inf" value="'
 
 def ParseDownloadLinks(page):
-    found = False
-    linkList = list()
+    linkList = None
     name = None
-    c = 1
 
     for line in page.splitlines():
         if line.find(FNAME) > -1:
-            name = line[len(FNAME): len(line)-2]
+            name = line[len(FNAME): -2]
 
         if line.find(FLIST) > -1:
-            found = True
-        if found:
-            if line.find('"/>') == 0:
-                break
-            if line.find(FLIST) > -1:
-                pair = dict()
-                pair['url'] = line[len(FLIST):]
-                pair['name'] = name + str(c).decode('utf-8')
-                linkList.append(pair)
-                c = c+1
-            else:
-                pair = dict()
-                pair['url'] = line
-                pair['name'] = name + str(c).decode('utf-8')
-                linkList.append(pair)
-                c = c+1
+            l = line[len(FLIST): -4]
+            linkList = l.split('|')
 
-    return linkList
+    if name is not None and linkList is not None:
+        return (name, linkList)
+    else:
+        return None
 
 
-def DownloadFlv(links):
-    for pair in links:
-        name = '%s.flv' % pair['name']
-        url  = pair['url']
-
+def DownloadFlv(name, links):
+    for i, url in enumerate(links):
+        fname = '%s%d.flv' % (name, i)
         try_curl = False
+
         try:
             subprocess.call(['wget', '--user-agent', FirefoxUA,
-                '-O', name, url])
+                '-O', fname, url])
         except OSError:
             try_curl = True
         if try_curl:
             try:
                 subprocess.call(['curl', '--user-agent', FirefoxUA,
-                    '-L', '-o', name, url])
+                    '-L', '-o', fname, url])
             except OSError:
                 pass
 
@@ -71,9 +57,10 @@ def RequestDownloadLink(link):
 
     r = requests.get('http://www.flvcd.com/parse.php', params=payload)
     webcontent = r.content.decode('GBK')
-    links = ParseDownloadLinks(webcontent)
-    if len(links) > 0:
-        DownloadFlv(links)
+    result = ParseDownloadLinks(webcontent)
+    if result is not None:
+        name, links = result
+        DownloadFlv(name, links)
 
 
 def main():
