@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding=utf-8
 
-from __future__ import absolute_import, print_function, unicode_literals, division
+from __future__ import print_function, unicode_literals, division
 import sys
 import subprocess
 try:
@@ -14,7 +14,7 @@ FirefoxUA = '''Mozilla/5.0 (Windows NT 6.1; WOW64; rv:14.0) Gecko/20100101 Firef
 FNAME = '<input type="hidden" name="name" value="'
 FLIST = '<input type="hidden" name="inf" value="'
 
-def ParseDownloadLinks(page):
+def parse_flvcd_page(page):
     linkList = None
     name = None
 
@@ -32,41 +32,40 @@ def ParseDownloadLinks(page):
         return None
 
 
-def DownloadFlv(name, links):
-    for i, url in enumerate(links):
-        fname = '%s%d.flv' % (name, i)
-        try_curl = False
+def download(url, fname):
+    try_curl = False
 
+    try:
+        subprocess.call(['wget', '--user-agent', FirefoxUA,
+            '-O', fname, url])
+    except OSError:
+        try_curl = True
+    if try_curl:
         try:
-            subprocess.call(['wget', '--user-agent', FirefoxUA,
-                '-O', fname, url])
+            subprocess.call(['curl', '--user-agent', FirefoxUA,
+                '-L', '-o', fname, url])
         except OSError:
-            try_curl = True
-        if try_curl:
-            try:
-                subprocess.call(['curl', '--user-agent', FirefoxUA,
-                    '-L', '-o', fname, url])
-            except OSError:
-                pass
-
-
-def RequestDownloadLink(link):
-    payload = { 'kw': link,
-            'format': 'super' }
-            # 'flag': 'one',
-
-    r = requests.get('http://www.flvcd.com/parse.php', params=payload)
-    webcontent = r.content.decode('GBK')
-    result = ParseDownloadLinks(webcontent)
-    if result is not None:
-        name, links = result
-        DownloadFlv(name, links)
+            pass
 
 
 def main():
     if len(sys.argv) < 1:
         raise Exception("Need at least one URL")
-    RequestDownloadLink(sys.argv[1])
+    payload = { 'kw': sys.argv[1],
+            'format': 'super' }
+            # 'flag': 'one',
+
+    r = requests.get('http://www.flvcd.com/parse.php', params=payload)
+    if not r.ok:
+        sys.stderr.write("[ERROR] unable to fetch download url from flvcd.com")
+        sys.exit(1)
+
+    result = parse_flvcd_page(r.content.decode('GBK'))
+    if result is not None:
+        name, links = result
+        for i, url in enumerate(links, start=1):
+            file_name = '%s%d.flv' % (name, i)
+            download(url, file_name)
 
 
     pass
