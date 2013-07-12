@@ -43,14 +43,9 @@ main() {
     MARKDOWN_BIN=`which markdown`
   fi
   # python markdown2 pip
-  which markdown_py2 &> /dev/null
+  which markdown2 &> /dev/null
   if [ '0' = "$?" ]; then
-    MARKDOWN_BIN=`which markdown_py2`
-  fi
-  # python markdown2 arch
-  which markdown_py &> /dev/null
-  if [ '0' = "$?" ]; then
-    MARKDOWN_BIN=`which markdown_py`
+    MARKDOWN_BIN=`which markdown2`
   fi
 
   if [ -f $mdFile ]; then
