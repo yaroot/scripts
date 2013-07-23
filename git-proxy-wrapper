@@ -2,6 +2,11 @@
 # export GIT_PROXY_COMMAND=`which git-proxy-wrapper`
 # $1 = hostname, $2 = port
 
+if [ 0 = $# ]; then
+  echo "export GIT_PROXY_COMMAND='`which $0`'"
+  exit 0
+fi
+
 socks_server='127.0.0.1'
 socks_port='7071'
 
