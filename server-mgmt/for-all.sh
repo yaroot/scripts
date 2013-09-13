@@ -7,7 +7,7 @@ main(){
   shift;
 
   for node in "$@"; do
-    ./remote.sh $node $cmd
+    $cmd $node
   done
 }
 

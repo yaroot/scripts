@@ -42,7 +42,7 @@ main() {
   if [ '0' = "$?" ]; then
     MARKDOWN_BIN=`which markdown`
   fi
-  # python markdown2 pip
+  # pip install markdown2
   which markdown2 &> /dev/null
   if [ '0' = "$?" ]; then
     MARKDOWN_BIN=`which markdown2`
