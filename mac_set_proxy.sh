@@ -18,9 +18,24 @@ if [ ! -f $HOME/.network_bypass.list ]; then
     exit -1
 fi
 
-BYPASS_LIST=`cat $HOME/.network_bypass.list | head -n1 | sed 's/,//g'`
+BYPASS_LIST=''
+# `cat $HOME/.network_bypass.list | head -n1 | sed 's/,//g'`
 
-for DEV in `echo Ethernet Wi-Fi`; do
-    networksetup -setproxybypassdomains $DEV $BYPASS_LIST
+for domain in `cat $HOME/.network_bypass.list`; do
+    if [ -n "$domain" ]; then
+        if [ -z "$BYPASS_LIST" ]; then
+            BYPASS_LIST="$domain"
+        else
+            BYPASS_LIST="${BYPASS_LIST}, $domain"
+        fi
+    fi
 done
+
+if [ "$1" = '-n' ]; then
+    echo $BYPASS_LIST
+else
+    for DEV in `echo Ethernet Wi-Fi`; do
+        networksetup -setproxybypassdomains $DEV $BYPASS_LIST
+    done
+fi
 
