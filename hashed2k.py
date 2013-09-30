@@ -1,11 +1,12 @@
 #!/usr/bin/env python
-# coding=utf-8
+# encoding=utf-8
 
+from __future__ import unicode_literals
 import hashlib
 
 # https://www.radicand.org/edonkey2000-hash-in-python/
 def hash_file(file_path):
-    """ Returns the ed2k hash of a given file. 
+    """ Returns the ed2k hash of a given file.
 
         credit: https://www.radicand.org/edonkey2000-hash-in-python/
     """
@@ -29,7 +30,7 @@ def hash_file(file_path):
         if len(hashes) == 1:
             return hashes[0].encode("hex")
         else:
-            return md4_hash(reduce(lambda a,d: a + d, hashes, "")).hexdigest()
+            return md4_hash(reduce(lambda a,d: a + d, hashes)).hexdigest()
 
 
 if __name__ == '__main__':
@@ -37,9 +38,13 @@ if __name__ == '__main__':
     from os.path import basename, getsize
 
     filename = sys.argv[1]
+    _hash = hash_file(filename).decode('utf-8')
 
-    sys.stdout.write(u'ed2k://|file|%s|%d|%s|/\n' % (basename(filename),
-            getsize(filename),
-            hash_file(filename)
-            ))
+    link = 'ed2k://|file|%s|%d|%s|/\n' % (
+        basename(filename).decode('utf-8'),
+        getsize(filename),
+        _hash
+    )
+
+    sys.stdout.write(link.encode('utf-8'))
 
