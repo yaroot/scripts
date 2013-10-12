@@ -35,7 +35,7 @@ if [ "$1" = '-n' ]; then
     echo $BYPASS_LIST
 else
     for DEV in `echo Ethernet Wi-Fi`; do
-        networksetup -setproxybypassdomains $DEV $BYPASS_LIST
+        networksetup -setproxybypassdomains $DEV "$BYPASS_LIST"
     done
 fi
 
