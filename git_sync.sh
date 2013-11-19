@@ -16,7 +16,7 @@ main(){
   if [ -n "$1" ]; then
     branch="$1"
   else
-    branch=`basename $branch`
+    branch=${branch#refs/heads/}
   fi
 
   local has_stash=false
