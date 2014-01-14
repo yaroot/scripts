@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# dead simple script to run multiple versions play-framework
-# should add sbt support at some point?
+# dead simple script to run multiple versions of play-framework
 
 
 if [ -z "$PLAY_INSTALLATION_BASE" ]; then
