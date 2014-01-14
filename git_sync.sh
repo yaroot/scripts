@@ -7,7 +7,7 @@ set -e
 SVN_PREFIX='svn'
 
 run() {
-  echo "-> running [$1]"
+  echo "[INFO] Running >>> $@"
   eval "$1"
 }
 
@@ -45,11 +45,11 @@ main(){
   fi
 
   for remote in `git remote`; do
-    local flag=''
+    cmd="git push $remote ${branch}$flag"
     if $is_git_svn_repo; then
-      flag=' -f'
+      cmd="$cmd -f"
     fi
-    run "git push $remote ${branch}$flag"
+    run "$cmd"
   done
 
   if $has_stash; then
