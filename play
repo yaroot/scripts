@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# dead simple script to run multiple versions play-framework
+# should add sbt support at some point?
+
+
+if [ -z "$PLAY_INSTALLATION_BASE" ]; then
+    PLAY_INSTALLATION_BASE="$HOME/.local/opt"
+fi
+
+play_version=''
+play_version_file="$PLAY_INSTALLATION_BASE/play_version"
+
+if [ -f "$play_version_file" ]; then
+    play_version=`cat "$play_version_file"`
+fi
+
+if [ -n "$PLAY_VERSION" ]; then
+    play_version="$PLAY_VERSION"
+fi
+
+_use() {
+    echo $play_version_file
+    echo "$1" | tee  $play_version_file > /dev/null
+}
+
+_session() {
+    echo "[INFO] Please run this command (eval) or source this script"
+    echo "export PLAY_VERSION='$1'"
+    export PLAY_VERSION=$1
+}
+
+_play() {
+    if [ -z "$play_version" ]; then
+        echo "[ERROR] Please run 'play use _version_' or use '\$PLAY_VERSION' to specify a version first"
+        exit -1
+    fi
+
+    play_bin="${PLAY_INSTALLATION_BASE}/play-${play_version}/play"
+    if [ -x "$play_bin" ]; then
+        echo "[INFO] Executing $play_bin"
+        echo ">>>>> play $@"
+
+        exec $play_bin $@
+    fi
+}
+
+
+action=$1
+shift;
+
+case $action in
+    use)        _use $1 ;;
+    session)    _session $1 ;;
+    *)          _play $action $@ ;;
+esac
+
