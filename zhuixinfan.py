@@ -12,7 +12,6 @@ def parse_obscured_links(line):
         种子</a><a href=""
     """
     if line.find('种子') > 0:
-        print line
         match = re.search('''种子</a><a href="(.+?)"''', line)
         if match:
             grps = match.groups()
@@ -29,7 +28,7 @@ def parse_base64_str_from_url(url):
 
 
 def decode_b64_ed2k(b64):
-    almost_ed2k = base64.b64decode(b64)
+    almost_ed2k = base64.b64decode(b64).decode('ascii')
     i = almost_ed2k.find('ed2k://')
     return almost_ed2k[i:]
 
@@ -45,7 +44,7 @@ def main(url):
     base64grp = [ parse_base64_str_from_url(url) for url in obs_urls ]
     ed2ks = [ decode_b64_ed2k(b) for b in base64grp ]
     for e in ed2ks:
-        print e.encode('utf-8')
+        print e
 
 
 if __name__ == '__main__':
