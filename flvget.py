@@ -64,7 +64,7 @@ def main():
     if result is not None:
         name, links = result
         for i, url in enumerate(links, start=1):
-            file_name = '%s%d.flv' % (name, i)
+            file_name = '%s.%d.flv' % (name, i)
             download(url, file_name)
 
 
