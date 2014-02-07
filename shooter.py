@@ -79,7 +79,7 @@ def download_sub_file(subs, fname):
 
 def download_subtitle(f):
     fpath = f.name
-    fname = os.path.basename(fpath)
+    fname = os.path.basename(fpath).decode('utf-8')
     fd = f.fileno()
     fsize = os.lseek(f.fileno(), 0, os.SEEK_END)
     fhash = hash_file(f, fsize)
