@@ -24,7 +24,7 @@ def parse_base64_str_from_url(url):
     _ENCRYPT = 'encypt='
     i = url.find(_ENCRYPT)
     b64 = url[i + len(_ENCRYPT):]
-    return b64.replace('%3D%3D', '==')
+    return b64.replace('%3D', '=')
 
 
 def decode_b64_ed2k(b64):
