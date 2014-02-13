@@ -30,7 +30,7 @@ _session() {
 
 _play() {
     if [ -z "$play_version" ]; then
-        echo "[ERROR] Please run 'play use _version_' or use '\$PLAY_VERSION' to specify a version first"
+        echo "[ERROR] no version specified, use 'use' or 'session' command first"
         exit -1
     fi
 
@@ -40,6 +40,9 @@ _play() {
         echo ">>>>> play $@"
 
         exec $play_bin $@
+    else
+        echo "[ERROR] NO play distribution available"
+        echo "Please download it at http://downloads.typesafe.com/play/${play_version}/play-${play_version}.zip"
     fi
 }
 
