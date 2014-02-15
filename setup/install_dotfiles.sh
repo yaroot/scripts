@@ -33,6 +33,7 @@ _install yaroot/spiped-PKGBUILD $HOME/repos/spiped-PKGBUILD
 _install yaroot/tabbed-PKGBUILD $HOME/repos/tabbed-PKGBUILD
 _install yaroot/shadowsocks-go-PKGBUILD $HOME/repos/shadowsocks-go-PKGBUILD
 _install yaroot/network.sh $HOME/repos/network.sh
+_install yaroot/cheats $HOME/repos/cheats
 _install yaroot/emacsd "$HOME/.emacs.d"
 
 if [ -f '/etc/os-release' ]; then
