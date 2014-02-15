@@ -1,20 +1,15 @@
 #!/usr/bin/env sh
 
 REPO_URL="$1"
-LOCAL_CLONE="$2"
+CLONE_PATH="$2"
 
-if [ ! -d "$LOCAL_CLONE" ]; then
-  mkdir -p "$LOCAL_CLONE"
-fi
-cd "$LOCAL_CLONE"
+if [ -d "$CLONE_PATH" ]; then
+  cd $CLONE_PATH
 
-#if [ `git rev-parse --git-dir > /dev/null 2>&1` ]; then
-if [ -d '.git' ]; then
   echo ">>>>> Updating [`pwd`]"
   git pull --ff-only
 else
-  echo ">>>>> Cloning [${REPO_URL}] into [`pwd`]"
-  git clone "$REPO_URL" .
+  echo ">>>>> Cloning [${REPO_URL}] into [${CLONE_PATH}]"
+  git clone "$REPO_URL" $CLONE_PATH
 fi
-
 
