@@ -3,7 +3,7 @@
 function main()
 {
   local limit="$1"
-  test -z "$timer" && limit=25
+  test -z "$limit" && limit=25
 
   local date_format="+%R"
   local counter=0
