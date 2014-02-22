@@ -54,12 +54,12 @@ def request_subtitle(link):
     return None
 
 
-def gen_subtitle_fname(fname, ext):
-    i = fname.rfind('.')
-    if i < 1:
-        return None
-    name = fname[:i]
-    return '%s.%s' % (name, ext)
+# def gen_subtitle_fname(fname, ext):
+#     i = fname.rfind('.')
+#     if i < 1:
+#         return None
+#     name = fname[:i]
+#     return '%s.%s' % (name, ext)
 
 
 def download_sub_file(subs, fname):
@@ -68,7 +68,7 @@ def download_sub_file(subs, fname):
         link = sub['Link']
 
         subcontent = request_subtitle(link)
-        subfname = gen_subtitle_fname(fname, ext)
+        subfname = '%s.%s' % (fname, ext) # gen_subtitle_fname(fname, ext)
         if subfname is None or subcontent is None:
             print 'Not be able to download subtitles for: %s' % fname
         with open(subfname, 'wb') as f:
