@@ -33,16 +33,10 @@ gen_list() {
 }
 
 CODE='wheezy'
-if [ -n "$2" ]; then
+if [ -z "$2" ]; then
   CODE="$2"
 fi
 
-case $1 in
-  jaist) gen_list 'ftp.jaist.ac.jp/pub/Linux' "$CODE" ;;
-  osuosl) gen_list 'mirrors.osuosl.org' "$CODE" ;;
-  kernel) gen_list 'mirrors.us.kernel.org' "$CODE" ;;
-  nchc) gen_list 'ftp.nchc.org.tw' "$CODE" ;;
-  163) gen_list 'mirrors.163.com' "$CODE" ;;
-  ftp) gen_list 'ftp.debian.org' "$CODE" ;;
-esac
+BASE="$1"
 
+gen_list $BASE $CODE
