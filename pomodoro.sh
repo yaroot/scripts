@@ -10,17 +10,20 @@ function main()
   local starttime=`date $date_format -d 'now'`
   local endtime=`date $date_format -d "now + $limit min"`
 
-  echo "[Pomodoro] started, stint will end at <$endtime>"
-  notify-send --urgency low "[Pomodoro] started" "stint will end at $endtime"
+  echo "[Pomodoro] stint start, push push push until <$endtime>"
+  notify-send --urgency low "Pomodoro [$endtime]" "push push push"
+
+  local left
 
   while [ $counter != $limit ]; do
     let "counter++"
-    echo "[Pomodoro] `expr $limit - $counter + 1` min left"
-    sleep 1m
+    left=`expr $limit - $counter + 1`
+    echo "[Pomodoro] ${left} min to go"
+    # sleep 1m
   done
 
   echo "[Pomodoro] stint ended (started at <$starttime>)"
-  notify-send --urgency critical  "[Pomodoro] ended" "started at $starttime"
+  notify-send --urgency critical  "Pomodoro [$starttime]" "box box box"
 }
 
 main $*
