@@ -77,7 +77,7 @@ def download_sub_file(subs, fname):
 
 
 
-def download_subtitle(f):
+def download_subtitle(f, list_only=False, file_no=None):
     fpath = f.name
     fname = os.path.basename(fpath).decode('utf-8')
     fd = f.fileno()
@@ -93,15 +93,26 @@ def download_subtitle(f):
         print 'Not be able to download subtitles for: %s' % fname
         return
 
-    download_sub_file(subs[0]['Files'], fname)
+    if list_only:
+        print '>', fname
+        for i, sub in enumerate(subs, 1):
+            exts = [s['Ext'] for s in sub['Files']]
+            print i, ','.join(exts), '(delay %d)' % sub['Delay']
+    else:
+        if file_no is None:
+            file_no = 1
+        download_sub_file(subs[file_no - 1]['Files'], fname)
 
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser('download subtitles from shooter')
-    parser.add_argument('video_files', metavar='file', type=file, nargs='+')
+    parser.add_argument('--list', '-l', action='store_true', help='list available subs')
+    parser.add_argument('--file', '-f', type=int, dest='file_no', help='choose which sub to download')
+    parser.add_argument('video_files', metavar='file', type=file, nargs='+', help='video files')
 
     args = parser.parse_args()
+
     for f in args.video_files:
-        download_subtitle(f)
+        download_subtitle(f, args.list, args.file_no)
 
