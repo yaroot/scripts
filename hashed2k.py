@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # encoding=utf-8
 
 from __future__ import unicode_literals
@@ -32,12 +32,7 @@ def hash_file(file_path):
         else:
             return md4_hash(reduce(lambda a,d: a + d, hashes)).hexdigest()
 
-
-if __name__ == '__main__':
-    import sys
-    from os.path import basename, getsize
-
-    filename = sys.argv[1]
+def gen_ed2k_url(filename):
     _hash = hash_file(filename).decode('utf-8')
 
     link = 'ed2k://|file|%s|%d|%s|/\n' % (
@@ -45,6 +40,12 @@ if __name__ == '__main__':
         getsize(filename),
         _hash
     )
+    return link
 
-    sys.stdout.write(link.encode('utf-8'))
+if __name__ == '__main__':
+    import sys
+    from os.path import basename, getsize
+
+    for f in sys.argv[1:]:
+        print gen_ed2k_url(f).encode('utf-8')
 
