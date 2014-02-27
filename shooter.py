@@ -71,6 +71,7 @@ def download_sub_file(subs, fname):
         subfname = '%s.%s' % (fname, ext) # gen_subtitle_fname(fname, ext)
         if subfname is None or subcontent is None:
             print 'Not be able to download subtitles for: %s' % fname
+            return
         with open(subfname, 'wb') as f:
             print 'Writing: %s' % subfname
             f.write(subcontent)
