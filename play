@@ -22,6 +22,10 @@ _use() {
     echo "$1" | tee  $play_version_file > /dev/null
 }
 
+_version () {
+    echo ">>>>> Using play $play_version"
+}
+
 _session() {
     echo "[INFO] Please run this command (eval) or source this script"
     echo "export PLAY_VERSION='$1'"
@@ -51,8 +55,13 @@ action=$1
 shift;
 
 case $action in
-    use)        _use $1 ;;
-    session)    _session $1 ;;
-    *)          _play $action $@ ;;
+    use)        _use $1
+        ;;
+    session)    _session $1
+        ;;
+    version)    _version
+        ;;
+    *)          _play $action $@
+        ;;
 esac
 
