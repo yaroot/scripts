@@ -17,13 +17,20 @@ sample config file [WoW_install_directory]/Interface/addons.cfg]:
     http://www.curse.com/addons/wow/deadly-boss-mods
     #http://www.wowinterface.com/downloads/info7017-LightHeaded.html
 
-put this script in the same directory, `cd path/to/Interface` 
+put this script in the same directory, `cd path/to/Interface`
 then run `./update_addon.py`.
 
 """
 
+
+
 from __future__ import absolute_import, print_function, unicode_literals, division
 
+from gevent import monkey
+monkey.patch_socket()
+
+import gevent
+# import grequests as requests
 import requests
 import re
 import os
@@ -53,8 +60,8 @@ def unexcape_html(a):
 def init_dir():
     if not os.path.exists('files'):
         os.mkdir('files')
-    if not os.path.exists('AddOns'):
-        os.mkdir('AddOns')
+    # if not os.path.exists('AddOns'):
+    #     os.mkdir('AddOns')
 
 
 def is_file_downloaded(file_name):
@@ -86,7 +93,7 @@ def download_file(info):
     link = info['url']
     print(">>> Downloading " + link)
     r = requests.get(info['url'], headers=headers)
-    if r.status_code == requests.codes.ok:
+    if r.ok:
         save_file(append_path('files', info['file_name']), r.content)
 
 
@@ -107,7 +114,7 @@ def parse_dlpage_wowace(page):
                     return group[0]
 
 
-wowi_dlpage_re = re.compile(r'a href="(.+)" onClick')
+wowi_dlpage_re = re.compile(r'a href="(.+)" onClick', flags=re.IGNORECASE)
 wowi_md5_re = re.compile(r'value="(.+)" /></td>')
 def parse_dlpage_wowi(page, info):
     for line in page.splitlines():
@@ -129,7 +136,7 @@ def parse_dlink_wowi(info):
     fh = r.headers['content-disposition']
     info['file_name'] = fh.split('filename=')[-1].strip('"').strip("'")
     info['url'] = r.url
-    
+
 
 wowace_filename_re = re.compile(r'<dd><a href="(.+)">(.+)</a></dd>')
 wowace_md5_re = re.compile(r'<dd>(.+)</dd>')
@@ -162,14 +169,14 @@ def extract_download_info_wowace(link):
     files_page = append_path(link, 'files')
 
     r = requests.get(files_page, headers=headers)
-    if(r.status_code != requests.codes.ok):
+    if not r.ok:
         return STATUS_FAIL
     download_page_link = parse_dlpage_wowace(r.text)
     if download_page_link is None:
         return STATUS_FAIL
 
     r = requests.get(urlparse.urljoin(link, download_page_link), headers=headers)
-    if(r.status_code != requests.codes.ok):
+    if not r.ok:
         return STATUS_FAIL
     file_info = parse_file_info_wowace(r.text)
     return file_info
@@ -179,7 +186,7 @@ curse_download_link_re = re.compile(r'data\-href="(.+)" class="download\-link"')
 def extract_download_info_curse(link):
     dl_page = append_path(link, 'download')
     r = requests.get(dl_page, headers=headers)
-    if r.status_code != requests.codes.ok:
+    if not r.ok:
         return STATUS_FAIL
     info = dict()
     for line in r.text.splitlines():
@@ -195,7 +202,7 @@ def extract_download_info_curse(link):
 
 def extract_download_info_wowi(link):
     r = requests.get(link, headers=headers)
-    if r.status_code != requests.codes.ok:
+    if not r.ok:
         return STATUS_FAIL
     info = dict()
     parse_dlpage_wowi(r.text, info)
@@ -208,7 +215,7 @@ def download_and_install(info):
     if is_file_downloaded(info['file_name']):
         return
     download_with_fileinfo(info)
-    install_addon(info)
+    # install_addon(info)
 
 
 def download_wowace(link):
@@ -272,8 +279,8 @@ def checkout_git(link):
 
 
 def download(link):
-    if link.find('#') < 0:
-        print(">>> Parsing " + link)
+    # if link.find('#') < 0:
+    #     print(">>> Parsing " + link)
     sch, netloc, path, par, query, fra = urlparse.urlparse(link)
 
     if 'git' in sch:
@@ -293,8 +300,10 @@ def main(argv):
     with open('addons.cfg') as f:
         for l in f.readlines():
             addon_list.append(l.strip())
-    for l in addon_list:
-        download(l)
+    threads = [ gevent.spawn(download, l) for l in addon_list ]
+    gevent.joinall(threads)
+    # for l in addon_list:
+    #     download(l)
 
 if __name__ == '__main__':
     import sys
