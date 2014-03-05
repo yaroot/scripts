@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# usage: backup_repo  path/to/repos  back.up.server.net:path/to/repos
+
+BACKUP_BASE="$1" # readlink -f $1
+BACKUP_TARGET_BASE="$2"
+
+if [ -z "$BACKUP_BASE" ]; then
+  exit -1
+fi
+
+if [ -z "$BACKUP_TARGET_BASE" ]; then
+  exit -1
+fi
+
+RSYNC_ARGS=''
+
+pushd $BACKUP_BASE
+
+for dir in *; do
+  echo '>>>>>' $dir
+  if [ -d "$dir" ]; then
+    for repo_dir in `echo .hg .git .svn`; do
+      if [ -d "$dir/$repo_dir" ]; then
+        RSYNC_ARGS="--include '$dir/$repo_dir' --exclude '$dir/*'"
+      fi
+    done
+  fi
+
+  cmd="rsync -rltv -z --delete --progress $RSYNC_ARGS ./$dir $BACKUP_TARGET_BASE/."
+  echo '>>>>>' $cmd
+  eval $cmd
+
+  if [ '0' != "$?" ]; then
+    exit $?
+  fi
+done
+
