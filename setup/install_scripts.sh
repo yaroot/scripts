@@ -34,14 +34,14 @@ download_file_into() {
   curl -sL "$uri" | tee "${path}/${filename}" > /dev/null
 }
 
-download_file_into http://gemi.fedorapeople.org/haskell/_ghc   _ghc $ZSHCOMP
-download_file_into http://gemi.fedorapeople.org/haskell/_hugs  _hugs $ZSHCOMP
-download_file_into http://gemi.fedorapeople.org/haskell/_cabal _cabal $ZSHCOMP
+# download_file_into http://gemi.fedorapeople.org/haskell/_ghc   _ghc $ZSHCOMP
+# download_file_into http://gemi.fedorapeople.org/haskell/_hugs  _hugs $ZSHCOMP
+# download_file_into http://gemi.fedorapeople.org/haskell/_cabal _cabal $ZSHCOMP
 
 # ./git_install.sh git://github.com/defunkt/hub.git $HOME/repos/hub
-download_file_into http://defunkt.io/hub/standalone hub "$HOME/.local/bin"
-download_file_into https://github.com/defunkt/hub/raw/master/etc/hub.zsh_completion _hub $ZSHCOMP
-chmod +x $HOME/.local/bin/hub
+# download_file_into http://defunkt.io/hub/standalone hub "$HOME/.local/bin"
+# download_file_into https://github.com/defunkt/hub/raw/master/etc/hub.zsh_completion _hub $ZSHCOMP
+# chmod +x $HOME/.local/bin/hub
 
 
 ./git_install.sh git://github.com/icy/pacapt.git "$HOME/repos/pacapt"
