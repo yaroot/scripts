@@ -20,6 +20,14 @@ _install() {
     repo="git://github.com/${repo}.git"
   fi
 
+  if $use_ssh; then
+    if [ -d "$dir/.git" ]; then
+      pushd "$dir" > /dev/null
+      git remote set-url origin $repo
+      popd > /dev/null
+    fi
+  fi
+
   ./git_install.sh "$repo" "$dir"
 }
 
