@@ -7,8 +7,8 @@ if [ 0 = $# ]; then
   exit 0
 fi
 
-socks_server='127.0.0.1'
-socks_port='7071'
+socks_server="$GIT_PROXY_HOST"
+socks_port="$GIT_PROXY_PORT"
 
 # openbsd-netcat
 exec nc -x${socks_server}:${socks_port} -X5 $@
