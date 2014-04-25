@@ -7,6 +7,14 @@ import requests
 import base64
 
 
+def Try(func):
+    def wrapped(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except:
+            return None
+    return wrapped
+
 def parse_obscured_links(line):
     """
         种子</a><a href=""
@@ -20,6 +28,7 @@ def parse_obscured_links(line):
     return None
 
 
+@Try
 def parse_base64_str_from_url(url):
     _ENCRYPT = 'encypt='
     i = url.find(_ENCRYPT)
@@ -27,6 +36,7 @@ def parse_base64_str_from_url(url):
     return b64.replace('%3D', '=')
 
 
+@Try
 def decode_b64_ed2k(b64):
     almost_ed2k = base64.b64decode(b64).decode('ascii')
     i = almost_ed2k.find('ed2k://')
