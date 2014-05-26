@@ -22,7 +22,7 @@ function main()
     sleep 1m
   done
 
-  echo "[Pomodoro] <$starttime> box box box"
+  echo "[Pomodoro] <$starttime> box box box\a"
   notify-send --urgency critical  "Pomodoro [$starttime]" "box box box"
 }
 
