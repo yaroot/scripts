@@ -1,8 +1,11 @@
 #!/usr/bin/env python2
 
 from __future__ import unicode_literals
-import simplejson
 import sys
+try:
+    import json as simplejson
+except:
+    import simplejson
 
 MAGIC_BOMB = '\uFEFF'
 
