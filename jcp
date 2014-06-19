@@ -1,0 +1,14 @@
+#!/bin/sh
+
+dir=$1
+test -z $dir && exit 1
+test -d $dir || exit 1
+
+classpath=''
+
+for jar in `find $1 -name '*.jar' -type f`; do
+  classpath="$classpath:$jar"
+done
+
+echo ${classpath:1}
+
