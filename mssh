@@ -47,7 +47,7 @@ main()
 
   # kill the first pane
   tmux kill-pane -t "${TMUXWINDOW}.0"
-  tmux select-layout -t $TMUXWINDOW even-horizontal
+  tmux select-layout -t $TMUXWINDOW even-vertical
   tmux set-window-option -t $TMUXWINDOW synchronize-panes on
 }
 
