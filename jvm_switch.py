@@ -74,17 +74,17 @@ def switch_java_version(new_ver):
 
     old_path = os.environ['PATH'].split(':')
     clean_path = clean_up_path(old_path, java_home)
-    new_path = clean_path + [
+    new_path = [
         os.path.join(new_java_home, 'jre/bin'),
         os.path.join(new_java_home, 'bin'),
-    ]
+    ] + clean_path
     print_switch_info(new_java_home, new_path)
     print_switch_eval(new_java_home, new_path)
     return True
 
 def print_eval_usage(argv):
     sys.stdout.write('# Please re-run using `eval` to take effect:\n')
-    sys.stdout.write('#     eval `%s`\n' % ' '.join(argv))
+    sys.stdout.write('#     eval "`%s`"\n' % ' '.join(argv))
 
 
 if __name__ == '__main__':
