@@ -21,17 +21,23 @@ def clean_up_path(path, cur_jvm_home):
         if not p.startswith(cur_jvm_home)
     ]
 
+
+def match_jvm_home(token, base):
+    return glob.glob(os.path.join(base, token + '*'))
+
+
 def find_jvm_home_by_token(token):
     if os.path.isdir(token):
         return token
 
-    # try find it in /opt
-    p = os.path.join('/opt', token)
-    if os.path.isdir(p):
-        return p
+    matches = [
+        match
+        for base in ['/opt', '/usr/lib/jvm']
+        for match in match_jvm_home(token, base)
+        if os.path.isfile(os.path.join(match, 'bin/java'))
+        if os.access(os.path.join(match, 'bin/java'), os.X_OK)
+    ]
 
-    # try glob match token in opt
-    matches = glob.glob(os.path.join('/opt', token + '*'))
     if len(matches) == 1:
         return matches[0]
     elif len(matches) > 1:
