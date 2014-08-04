@@ -56,10 +56,9 @@ def print_switch_info(new_java_home, new_path):
 
 def print_switch_eval(new_java_home, new_path):
     np = ':'.join(new_path)
-    sys.stdout.write('''##### EVAL START ####\n''')
-    sys.stdout.write('''export PATH='%s';\n''' % np)
-    sys.stdout.write('''export JAVA_HOME='%s';\n''' % new_java_home)
-    sys.stdout.write('''##### EVAL END ####\n''')
+    sys.stdout.write("PATH='%s';" % np)
+    sys.stdout.write("JAVA_HOME='%s';"  % new_java_home)
+    sys.stdout.write('export PATH; export JAVA_HOME')
 
 
 def switch_java_version(new_ver):
@@ -82,9 +81,10 @@ def switch_java_version(new_ver):
     print_switch_eval(new_java_home, new_path)
     return True
 
-def print_eval_usage(argv):
-    sys.stdout.write('# Please re-run using `eval` to take effect:\n')
-    sys.stdout.write('#     eval "`%s`"\n' % ' '.join(argv))
+
+# def print_eval_usage(argv):
+#     sys.stdout.write('# Please re-run using `eval` to take effect:\n')
+#     sys.stdout.write('#     eval "`%s`"\n' % ' '.join(argv))
 
 
 if __name__ == '__main__':
@@ -93,8 +93,8 @@ if __name__ == '__main__':
         print_current_version()
     elif argc == 2:
         _, new_ver = sys.argv
-        if switch_java_version(new_ver):
-            print_eval_usage(sys.argv)
+        switch_java_version(new_ver)
+        # print_eval_usage(sys.argv)
     else:
         sys.stderr.write('JVM Version Switcher: usage => jvm_switch [new_ver]')
 
