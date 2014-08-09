@@ -19,11 +19,13 @@ def parse_flvcd_page(page):
     name = None
 
     for line in page.splitlines():
-        if line.find(FNAME) > -1:
-            name = line[len(FNAME): -2]
+        idx = line.find(FNAME)
+        if idx > -1:
+            name = line[idx+len(FNAME): -2]
 
-        if line.find(FLIST) > -1:
-            l = line[len(FLIST): -4]
+        idx = line.find(FLIST)
+        if idx > -1:
+            l = line[idx+len(FLIST): -4]
             linkList = l.split('|')
 
     if name is not None and linkList is not None:
