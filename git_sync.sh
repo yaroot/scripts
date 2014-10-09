@@ -45,7 +45,7 @@ main(){
   fi
 
   for remote in `git remote`; do
-    cmd="git push $remote ${branch}$flag"
+    cmd="git push $remote ${branch}"
     if $is_git_svn_repo; then
       cmd="$cmd -f"
     fi
