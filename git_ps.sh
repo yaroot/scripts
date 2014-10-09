@@ -7,7 +7,7 @@ SVN_PREFIX='svn'
 
 run() {
   echo "[INFO] Running >>> $@"
-#  eval "$1"
+  eval "$1"
 }
 
 main(){
