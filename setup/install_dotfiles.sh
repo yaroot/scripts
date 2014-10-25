@@ -42,8 +42,6 @@ _install "yaroot/dotfiles" "$HOME/.dotfiles"
 _install "yaroot/scripts" "$HOME/.bin"
 _install "yaroot/vimrc" "$HOME/.vim"
 
-which irssi &> /dev/null && _install "yaroot/dotirssi" "$HOME/.irssi/scripts/autorun"
-
 # _install yaroot/spiped-PKGBUILD $HOME/repos/spiped-PKGBUILD
 # _install yaroot/tabbed-PKGBUILD $HOME/repos/tabbed-PKGBUILD
 # _install yaroot/shadowsocks-go-PKGBUILD $HOME/repos/shadowsocks-go-PKGBUILD
