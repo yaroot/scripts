@@ -1,15 +1,22 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 
 mkdir -p $HOME/.local/bin
 mkdir -p $HOME/.mnt
 # mkdir -p $HOME/.mnt/private
 
+use_ssh=true
+# if [ '-n' = "${1}" ]; then
+#   use_ssh=false
+# fi
+while getopts "n" opt; do
+  case $opt in
+    n)
+      use_ssh=false
+  esac
+done
 
-use_ssh=false
-if [ '--ssh' = "${1}" ]; then
-  use_ssh=true
-fi
+echo "SSH protocol: $use_ssh"
 
 _install() {
   local repo="$1"
