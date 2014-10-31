@@ -1,11 +1,29 @@
 #!/bin/sh
 
+skipping=false
+until=''
+if [ -n "$1" ]; then
+    until="$1"
+    skipping=true
+fi
+
 for d in *; do
+    if [ "$skipping" = true ]; then
+        if [ "$until" != "$d" ]; then
+            continue
+        fi
+        skipping=false
+    fi
+
     if [ -d "$d/.git" ]; then
         pushd $d > /dev/null
         echo ">>> $d"
         git fetch --prune
         rm -rf .git/objects/pack/tmp_pack_*
         popd > /dev/null
+    fi
+
+    if [ -d "$d/.hg" ]; then
+        hg pull
     fi
 done
