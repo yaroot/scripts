@@ -1,0 +1,16 @@
+#!/bin/sh
+
+for d in *; do
+    if [ -d $d/.git ]; then
+        n=`find $d/.git/objects -type f | \grep -v pack | wc -l`
+        # test $n -gt 0 && echo "[$d] found $n"
+        if [ $n -gt 20 ]; then
+            pushd $d > /dev/null
+            echo "[GC] $d"
+            #git gc --prune=now
+            git gc --auto --prune=now
+            popd > /dev/null
+        fi
+    fi
+done
+

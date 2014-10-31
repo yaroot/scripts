@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+for x in *; do
+  if [ -d $x/.git ]; then
+    echo $x
+    echo ">>>>>> GC [$x]"
+    eval "pushd '$x' > /dev/null"
+    git gc --auto --prune=now
+    # git clean -xdf
+    popd > /dev/null
+  fi
+done
+

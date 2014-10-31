@@ -1,0 +1,11 @@
+#!/bin/sh
+
+for d in *; do
+    if [ -d "$d/.git" ]; then
+        pushd $d > /dev/null
+        echo ">>> $d"
+        git fetch --prune
+        rm -rf .git/objects/pack/tmp_pack_*
+        popd > /dev/null
+    fi
+done
