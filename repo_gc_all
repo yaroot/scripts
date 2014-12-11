@@ -6,6 +6,7 @@ for x in *; do
     echo ">>>>>> GC [$x]"
     eval "pushd '$x' > /dev/null"
     git gc --auto --prune=now
+    git prune
     # git clean -xdf
     popd > /dev/null
   fi

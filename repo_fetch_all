@@ -15,15 +15,15 @@ for d in *; do
         skipping=false
     fi
 
-    if [ -d "$d/.git" ]; then
-        pushd $d > /dev/null
-        echo ">>> $d"
+    pushd "$d" > /dev/null
+    echo ">>> $d"
+
+    if [ -d ".git" ]; then
         git fetch --prune
         rm -rf .git/objects/pack/tmp_pack_*
-        popd > /dev/null
-    fi
-
-    if [ -d "$d/.hg" ]; then
+    elif [ -d ".hg" ]; then
         hg pull
     fi
+
+    popd > /dev/null
 done
