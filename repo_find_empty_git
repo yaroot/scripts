@@ -1,0 +1,9 @@
+#!/bin/sh
+
+for d in *; do
+  if [ ! -d "$d/.git" ]; then
+    if [ -z "`find $d/.git/`" ]; then
+      echo ">> $d"
+    fi
+  fi
+done
