@@ -20,10 +20,10 @@ for d in *; do
 
     if [ -d ".git" ]; then
         git fetch --prune --all
-        rm -rf .git/objects/pack/tmp_pack_*
         if [ -n "`cat .git/config | grep '\[svn\-remote'`" ]; then
             git svn fetch
         fi
+        rm -rf .git/objects/pack/tmp_pack_*
     elif [ -d ".hg" ]; then
         hg pull
     fi
