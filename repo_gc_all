@@ -7,6 +7,7 @@ for x in *; do
     eval "pushd '$x' > /dev/null"
     git gc --auto --prune=now
     git prune
+    rm -rf .git/objects/pack/tmp_pack_*
     # git clean -xdf
     popd > /dev/null
   fi
