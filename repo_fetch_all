@@ -19,8 +19,11 @@ for d in *; do
     echo ">>> $d"
 
     if [ -d ".git" ]; then
-        git fetch --prune
+        git fetch --prune --all
         rm -rf .git/objects/pack/tmp_pack_*
+        if [ -n "`cat .git/config | grep '\[svn\-remote'`" ]; then
+            git svn fetch
+        fi
     elif [ -d ".hg" ]; then
         hg pull
     fi
