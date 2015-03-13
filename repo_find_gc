@@ -2,7 +2,7 @@
 
 for d in *; do
     if [ -d $d/.git ]; then
-        n=`find $d/.git/objects -type f | \grep -v pack | wc -l`
+        n=`find $d/.git/objects -type f | grep -v pack | wc -l`
         # test $n -gt 0 && echo "[$d] found $n"
         # [ $n -gt 20 ] || continue
         pushd $d > /dev/null
