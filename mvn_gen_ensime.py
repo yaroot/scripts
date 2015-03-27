@@ -61,6 +61,12 @@ def scala_ver(deps):
             return ss[:ss.find('/')]
 
 
+def deps_to_source_jar(p):
+    if p.endswith('.jar'):
+        return p[:-4] + '-sources.jar'
+    return p
+
+
 def add_path(props, proj_props, base_dir):
     deps = get_deps(scope='')
     # proj_props['compile-deps'] = 
@@ -69,9 +75,9 @@ def add_path(props, proj_props, base_dir):
     # proj_props['compile-deps'] = get_deps(scope='')
     proj_props['compile-deps'] = deps
     proj_props['runtime-deps'] = deps
+    proj_props['reference-source-roots'] = map(deps_to_source_jar, deps)
 
     props['scala-version'] = scala_ver(deps)
-
     proj_props['source-roots'] = [
         os.path.join(base_dir, 'src/main/scala'),
         os.path.join(base_dir, 'src/test/scala')
