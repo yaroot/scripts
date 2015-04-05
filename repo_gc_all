@@ -5,7 +5,7 @@ for x in *; do
     echo $x
     echo ">>>>>> GC [$x]"
     eval "pushd '$x' > /dev/null"
-    git prune
+    # git prune
     git gc --auto --prune=now
     rm -rf .git/objects/pack/tmp_pack_*
     # git clean -xdf
