@@ -10,7 +10,7 @@ local string, setmetatable, assert = string, setmetatable, assert
 local print = print
 local io = io
 
-_ENV = nil
+-- _ENV = nil
 
 -- Initialize table of round constants
 -- (first 32 bits of the fractional parts of the cube roots of the first
@@ -245,3 +245,13 @@ return {
 }
 ]]
 
+print '= site ?'
+site = io.read('*l')
+print '= secret ?'
+secret = io.read('*l')
+_eol = '\n'
+
+_h = hash256(secret .. _eol) .. _eol
+-- print(hash256(secret .. _eol))
+-- print(site .. _h)
+print(hash256(site .. _h):sub(2, 11))
