@@ -5,9 +5,13 @@ for d in *; do
   pushd "$d" > /dev/null
 
   if [ -d .git ]; then
-    while read line; do
-      echo '=git' $d $line
-    done < <(git remote -v)
+    if [ -n "`cat .git/config | grep '\[svn\-remote'`" ]; then
+      echo '=git-svn' $d `git config --get 'svn-remote.svn.url'`
+    else
+      while read line; do
+        echo '=git' $d $line
+      done < <(git remote -v)
+    fi
   elif [ -d .hg ]; then
     echo '=hg' $d `hg paths`
   else
