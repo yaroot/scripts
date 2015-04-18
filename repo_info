@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+for d in *; do
+  echo '>>>' $d
+  pushd "$d" > /dev/null
+
+  if [ -d .git ]; then
+    while read line; do
+      echo '=git' $d $line
+    done < <(git remote -v)
+  elif [ -d .hg ]; then
+    echo '=hg' $d `hg paths`
+  else
+    echo '=unknown' $d
+  fi
+
+  popd > /dev/null
+done
