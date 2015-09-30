@@ -15,19 +15,28 @@ main()
 
   local SSH_CMD='ssh'
   local charset=''
+  local port=''
 
-  while getopts "c:" OPTION
+  while getopts "c:p:" OPTION
   do
     case $OPTION in
       c)
         charset=$OPTARG
         ;;
+      p)
+        port=$OPTARG
+        ;;
     esac
   done
 
+  shift $(( OPTIND - 1 ))
+
   if [ -n "$charset" ]; then
     SSH_CMD="luit -encoding $charset ssh"
-    shift;shift;
+  fi
+
+  if [ -n "$port" ]; then
+    SSH_CMD="$SSH_CMD -p$port"
   fi
 
   # already in a tmux session, won't need to specify session
@@ -40,6 +49,7 @@ main()
 
   # split window and `ssh` to `host`
   for host in "$@"; do
+    # echo "[$SSH_CMD $host]"
     tmux split-window -t $TMUXWINDOW
     local TMUXPANE=`tmux list-panes -t $TMUXWINDOW | awk -F: 'END { print $1 }'`
     tmux send-key -t "${TMUXWINDOW}.${TMUXPANE}" "$SSH_CMD $host" Enter
