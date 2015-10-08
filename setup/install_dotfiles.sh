@@ -53,7 +53,7 @@ if [ -f '/etc/os-release' ]; then
   if [ "$NAME" = 'Arch Linux' ]; then
     if [ -z `which cower` ]; then
       # http://github.com/falconindy/cower
-      wget https://aur4.archlinux.org/cgit/aur.git/snapshot/cower.tar.gz
+      wget https://aur.archlinux.org/cgit/aur.git/snapshot/cower.tar.gz
     fi
   fi
 fi
