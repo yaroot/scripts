@@ -24,6 +24,8 @@ symlink $HOME/.rbenv/completions/rbenv.zsh $HOME/.local/zshcomp/_rbenv
 
 # ./git_install.sh git://github.com/pypa/virtualenv.git $HOME/repos/virtualenv
 
+./git_install.sh git://github.com/syl20bnr/spacemacs.git $HOME/.emacs.d
+
 ./git_install.sh git://github.com/zsh-users/zsh-completions.git $HOME/.local/zsh-completions
 
 download_file_into() {

@@ -46,7 +46,7 @@ _install "yaroot/vimrc" "$HOME/.vim"
 # _install yaroot/tabbed-PKGBUILD $HOME/repos/tabbed-PKGBUILD
 # _install yaroot/shadowsocks-go-PKGBUILD $HOME/repos/shadowsocks-go-PKGBUILD
 # _install yaroot/network.sh $HOME/repos/network.sh
-_install yaroot/emacsd "$HOME/.emacs.d"
+_install yaroot/emacsd "$HOME/.emacs.d.yaroot"
 
 if [ -f '/etc/os-release' ]; then
   source '/etc/os-release'
