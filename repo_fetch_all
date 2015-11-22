@@ -2,20 +2,25 @@
 
 skipping=false
 until=''
+problematic_package=''
 if [ -n "$1" ]; then
     until="$1"
     skipping=true
 fi
 
+if [ -n "$2" ]; then
+    problematic_package="$2"
+fi
+
 for d in *; do
-    if [ "$d" = "_some_problematic_package_" ]; then
-        continue
-    fi
     if [ "$skipping" = true ]; then
         if [ "$until" != "$d" ]; then
             continue
         fi
         skipping=false
+    fi
+    if [ "$d" = "$problematic_package" ]; then
+        continue
     fi
 
     pushd "$d" > /dev/null
