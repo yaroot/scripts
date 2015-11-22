@@ -16,10 +16,10 @@ for d in *; do
     fi
 
     pushd "$d" > /dev/null
-    echo ">>> $d"
     rt=1
 
     while [ "0" != "$rt" ]; do
+        echo ">>> $d"
         if [ -d ".git" ]; then
             git fetch --prune --all
             rt="$?"
