@@ -17,16 +17,21 @@ for d in *; do
 
     pushd "$d" > /dev/null
     echo ">>> $d"
+    rt=1
 
-    if [ -d ".git" ]; then
-        git fetch --prune --all
-        if [ -n "`cat .git/config | grep '\[svn\-remote'`" ]; then
-            git svn fetch
+    while [ "0" != "$rt" ]; do
+        if [ -d ".git" ]; then
+            git fetch --prune --all
+            rt="$?"
+            # if [ -n "`cat .git/config | grep '\[svn\-remote'`" ]; then
+            #     git svn fetch
+            # fi
+            rm -rf .git/objects/pack/tmp_pack_*
+        elif [ -d ".hg" ]; then
+            hg pull
+            rt="$?"
         fi
-        rm -rf .git/objects/pack/tmp_pack_*
-    elif [ -d ".hg" ]; then
-        hg pull
-    fi
+    done
 
     popd > /dev/null
 done
