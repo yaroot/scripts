@@ -11,6 +11,12 @@ from urlparse import urlparse
 import subprocess
 
 
+def download(url, filename):
+    cmd = ['curl', url, '--output', filename]
+    logging.info('Starting [%s]', ' '.join(cmd))
+    subprocess.call(cmd, stderr=sys.stderr, stdin=sys.stdin, stdout=sys.stdout)
+
+
 def parse_video_id(url):
     parsed = urlparse(url)
     return re.match(r'^/tutorial/([^/]+)$', parsed.path).groups()[0]
@@ -25,9 +31,7 @@ def parse_downloadable_medias(details):
             sequence += 1
             ext = f['format']
             url = f['httpDownloadURL']
-            cmd = ['curl', url, '--output', '%s-%d.%s' % (slug, sequence, ext.lower())]
-            logging.info('Starting [%s]', ' '.join(cmd))
-            subprocess.call(cmd, stderr=sys.stderr, stdin=sys.stdin, stdout=sys.stdout)
+            download(url, '%s-%d.%s' % (slug, sequence, ext.lower()))
 
 
 def request_media_files(video_id):
