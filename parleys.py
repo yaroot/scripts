@@ -31,7 +31,7 @@ def parse_downloadable_medias(details):
             sequence += 1
             ext = f['format']
             url = f['httpDownloadURL']
-            download(url, '%s-%d.%s' % (slug, sequence, ext.lower()))
+            download(url, '%s-%03d.%s' % (slug, sequence, ext.lower()))
 
 
 def request_media_files(video_id):
