@@ -50,6 +50,5 @@ def main(url):
         logging.exception('error downloading %s', url)
 
 
-
 if __name__ == '__main__':
     map(main, sys.argv[1:])
