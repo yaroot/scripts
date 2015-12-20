@@ -26,7 +26,7 @@ def parse_downloadable_medias(details):
             ext = f['format']
             url = f['httpDownloadURL']
             cmd = ['curl', url, '--output', '%s-%d.%s' % (slug, sequence, ext.lower())]
-            # print cmd
+            logging.info('Starting [%s]', ' '.join(cmd))
             subprocess.call(cmd, stderr=sys.stderr, stdin=sys.stdin, stdout=sys.stdout)
 
 
