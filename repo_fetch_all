@@ -24,9 +24,10 @@ for d in *; do
     fi
 
     pushd "$d" > /dev/null
-    rt=1
+    tries=0
 
-    while [ "0" != "$rt" ]; do
+    while [ "10" -gt "$tries" ]; do
+        rt=1
         echo ">>> $d"
         if [ -d ".git" ]; then
             git fetch --prune --all
@@ -39,6 +40,8 @@ for d in *; do
             hg pull
             rt="$?"
         fi
+        test "$rt" = "0" && break
+        tries=`expr $tries + 1`
     done
 
     popd > /dev/null
