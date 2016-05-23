@@ -1,4 +1,10 @@
 #!/usr/bin/env python2
+"""
+dump image list from v1 registry for migration
+if you need more features please use https://github.com/docker/migrator
+
+v2 registry doesn't support search endpoint yet
+"""
 
 from __future__ import print_function, unicode_literals, division
 
