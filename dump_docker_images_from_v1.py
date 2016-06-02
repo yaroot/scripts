@@ -31,7 +31,7 @@ def dump_all_images_with_tags(registry_base):
     for image in dump_all_images(registry_base):
         sys.stderr.write('> fetching tags for %s\n' % image)
         for tag in dump_all_tags(registry_base, image):
-            sys.stdout.write('%s:%s\n' % (image, tag))
+            sys.stdout.write('"%s" "%s"\n' % (image, tag))
 
 
 def main():
