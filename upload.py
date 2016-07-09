@@ -1,69 +1,59 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
-import BaseHTTPServer
-import re
-import StringIO
+from flask import Flask, request, redirect, url_for
+import os
 
+_UPLOAD_DIR = os.environ.get("UPLOAD_DIR")
+if not _UPLOAD_DIR:
+    _UPLOAD_DIR = os.path.join(os.environ['HOME'], '.local', 'uploads')
+
+app = Flask(__name__)
 
 UPLOAD_HTML = """
 <form enctype="multipart/form-data" method="post" action="/">
-<input name="file" type="file"/>
+<input type="file" name="files" multiple />
 <input type="submit" value="upload"/>
 </form>
 """
 
 
-class SimpleHttpUploadHandler(BaseHTTPServer.BaseHTTPRequestHandler):
-    def save_file(self):
-        boundary = self.headers.plisttext.split('=')[1]
-        assert len(boundary) > 5
+def render_list_dir(files):
+    return ''.join(['%s\n<br>' % f for f in files])
 
-        bytestoread = int(self.headers['Content-Length'])
 
-        line = self.rfile.readline()
-        assert boundary in line
-        bytestoread -= len(line)
+def strip_left(orig, target):
+    if orig.startswith(target):
+        return orig[len(target) + 1:]
+    else:
+        return orig
 
-        line = self.rfile.readline()
-        fname_match = re.match(r'.*filename="(.*)"', line)
-        assert fname_match is not None
-        fname, = fname_match.groups()
-        bytestoread -= len(line)
 
-        line = self.rfile.readline()
-        bytestoread -= len(line)
-        line = self.rfile.readline()
-        bytestoread -= len(line)
+def walk_upload_dir(base):
+    for dirpath, dirnames, filenames in os.walk(base):
+        for f in filenames:
+            yield strip_left(os.path.join(dirpath, f), base)
 
-        tmp = StringIO.StringIO()
-        while bytestoread > 0:
-            line = self.rfile.readline()
-            bytestoread -= len(line)
-            if boundary not in line:
-                tmp.write(line)
-        with open(fname, 'wb') as f:
-            f.write(tmp.getvalue()[:-2])
 
-    def do_POST(self):
-        self.save_file()
-        self.send_response(200)
-        self.send_header("Content-Type", "text/html")
-        self.end_headers()
-        self.wfile.write("SUCCESS")
+def save_file(f):
+    save_path = os.path.join(_UPLOAD_DIR, f.filename)
+    if not os.path.exists(save_path):
+        f.save(save_path)
 
-    def do_GET(self):
-        if self.path == '/':
-            self.send_response(200)
-            self.send_header("Content-Type", "text/html")
-            self.end_headers()
-            self.wfile.write(UPLOAD_HTML)
-        else:
-            self.send_response(200)
-            self.end_headers()
 
-def test(HandlerClass=SimpleHttpUploadHandler, ServerClass=BaseHTTPServer.HTTPServer):
-    BaseHTTPServer.test(HandlerClass, ServerClass)
+@app.route('/', methods=['POST'])
+def upload():
+    files = request.files.getlist('files')
+    for f in files:
+        save_file(f)
+    import ipdb; ipdb.set_trace()
+    return redirect(url_for('index'))
+
+
+@app.route("/")
+def index():
+    file_list = list(walk_upload_dir(_UPLOAD_DIR))
+    return UPLOAD_HTML + '\n<hr>\n' + render_list_dir(file_list)
 
 
 if __name__ == '__main__':
-    test()
+    app.run(debug=True)
