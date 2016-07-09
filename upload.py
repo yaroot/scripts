@@ -56,4 +56,6 @@ def index():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    print '*** Running dev server, you should use something like gunicorn ***'
+    app.run(debug=False)
+
