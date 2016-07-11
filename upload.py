@@ -35,6 +35,8 @@ def walk_upload_dir(base):
 
 
 def save_file(f):
+    if '..' in f.filename or '/' in f.filename:
+        return
     save_path = os.path.join(_UPLOAD_DIR, f.filename)
     if not os.path.exists(save_path):
         f.save(save_path)
@@ -45,7 +47,6 @@ def upload():
     files = request.files.getlist('files')
     for f in files:
         save_file(f)
-    import ipdb; ipdb.set_trace()
     return redirect(url_for('index'))
 
 
@@ -56,6 +57,6 @@ def index():
 
 
 if __name__ == '__main__':
-    print '*** Running dev server, you should use something like gunicorn ***'
-    app.run(debug=False)
+    print('*** Running dev server, you should use something like gunicorn ***')
+    app.run(host='', port=5005, debug=False)
 
