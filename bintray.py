@@ -19,12 +19,12 @@ def usage():
     print("""
 sub-commands:
     repos  <user>
-    pkgs   <user> <repo>
-    pkg-vers  <user> <repo> <pkg>
-    pkg-files <user> <repo> <pkg>
-    pkg-ver-files <user> <repo> <pkg> <ver>
-    del-ver <user> <repo> <pkg> [<ver> ...]
-    del-file <user> <repo> [<path> ...]
+    pkgs   <user>/<repo>
+    pkg-vers  <user>/<repo>/<pkg>
+    pkg-files <user>/<repo>/<pkg>
+    pkg-ver-files <user>/<repo>/<pkg>/<ver>
+    del-ver   <user>/<repo>/<pkg> [<ver> ...]
+    del-file  <user>/<repo> [<path> ...]
     """)
 
 """
