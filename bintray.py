@@ -17,14 +17,14 @@ http_sess.auth = (BINTRAY_USER, BINTRAY_SECRET)
 
 def usage():
     print("""
-    sub-commands:
-        repos  <user>
-        pkgs   <user> <repo>
-        pkg-vers  <user> <repo> <pkg>
-        pkg-files <user> <repo> <pkg>
-        pkg-ver-files <user> <repo> <pkg> <ver>
-        del-ver <user> <repo> <pkg> [<ver> ...]
-        del-file <user> <repo> [<path> ...]
+sub-commands:
+    repos  <user>
+    pkgs   <user> <repo>
+    pkg-vers  <user> <repo> <pkg>
+    pkg-files <user> <repo> <pkg>
+    pkg-ver-files <user> <repo> <pkg> <ver>
+    del-ver <user> <repo> <pkg> [<ver> ...]
+    del-file <user> <repo> [<path> ...]
     """)
 
 """
@@ -53,9 +53,9 @@ DELETE /content/:subject/:repo/:file_path
 
 def main():
     import sys
-    if len(sys.argv) < 2:
-        usage()
-        return
+    if len(sys.argv) < 2: return usage()
+    if sys.argv[1] == '-h': return usage()
+
     cmd, rest = sys.argv[1:]
     print(cmd, rest)
 
