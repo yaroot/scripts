@@ -2,18 +2,17 @@
 
 for d in *; do
     if [ -d $d/.git ]; then
-        pushd $d > /dev/null
-        echo "GC -> $d"
-        git gc --auto
-        popd > /dev/null
-        # n=`find $d/.git/objects -type f | grep -v pack | wc -l`
+        n=`find $d/.git/objects -type f | grep -v 'pack$' | grep -v 'idx$' | wc -l`
         # # test $n -gt 0 && echo "[$d] found $n"
-        # test $n -gt 10 || continue
-        # pushd $d > /dev/null
-        # echo "[GC] $d $n"
-        # git gc --prune=now
-        # # git gc --auto --prune=now
-        # popd > /dev/null
+        test $n -gt 20 || continue
+
+        echo "[GC] $d $n"
+        pushd $d > /dev/null
+        git gc
+        # git gc --auto --prune=now
+        # git gc --auto
+        popd > /dev/null
+        sleep 1s
     fi
 done
 
