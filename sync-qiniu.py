@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+# http://developer.qiniu.com/article/index.html
+
 from __future__ import unicode_literals, division
 import requests as _requests
 import hmac
