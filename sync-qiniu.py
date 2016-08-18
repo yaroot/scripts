@@ -7,6 +7,7 @@ from hashlib import sha1
 from base64 import urlsafe_b64encode
 import logging
 from urllib.parse import urlparse
+from path import Path
 
 # global pool
 requests = _requests.session()
@@ -46,6 +47,11 @@ def main():
     print(urlparse('qiniu://bucket'))
     print(urlparse('qiniu://bucket/aaaa'))
     print(urlparse('~/blahblahblah'))
+    """
+    ParseResult(scheme='qiniu', netloc='bucket', path='', params='', query='', fragment='')
+    ParseResult(scheme='qiniu', netloc='bucket', path='/aaaa', params='', query='', fragment='')
+    ParseResult(scheme='', netloc='', path='~/some/path', params='', query='', fragment='')
+    """
     pass
 
 if __name__ == '__main__':
