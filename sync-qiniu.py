@@ -35,6 +35,54 @@ def retry(max_retry=3):
     return _retry
 
 
+class Storage(object):
+    @staticmethod
+    def new(url):
+        # ParseResult(scheme='qiniu', netloc='bucket', path='', params='', query='', fragment='')
+        # ParseResult(scheme='qiniu', netloc='bucket', path='/aaaa', params='', query='', fragment='')
+        # ParseResult(scheme='', netloc='', path='~/some/path', params='', query='', fragment='')
+        result = urlparse(url)
+        assert result.scheme in ('qiniu', '', 'file'), 'scheme error (should be qiniu or local): ' + url
+        if result.scheme == 'qiniu':
+            return QiniuStorage(result)
+        else:
+            return LocalStorage(result)
+
+    def scan(self):
+        pass
+    pass
+
+
+class LocalStorage(Storage):
+    def __init__(self, uri):
+        pass
+
+    def scan(self):
+        pass
+    pass
+
+
+class QiniuStorage(Storage):
+    def __init__(self, uri):
+        pass
+
+    def scan(self):
+        pass
+    pass
+
+
+class FileObject(object):
+    pass
+
+
+class LocalObject(FileObject):
+    pass
+
+
+class QiniuObject(FileObject):
+    pass
+
+
 def main():
     import argparse
     parser = argparse.ArgumentParser(description='sync qiniu')
@@ -48,9 +96,6 @@ def main():
     print(urlparse('qiniu://bucket/aaaa'))
     print(urlparse('~/blahblahblah'))
     """
-    ParseResult(scheme='qiniu', netloc='bucket', path='', params='', query='', fragment='')
-    ParseResult(scheme='qiniu', netloc='bucket', path='/aaaa', params='', query='', fragment='')
-    ParseResult(scheme='', netloc='', path='~/some/path', params='', query='', fragment='')
     """
     pass
 
