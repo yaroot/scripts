@@ -35,10 +35,17 @@ def retry(max_retry=3):
 
 
 def main():
-    import sys
     import argparse
     parser = argparse.ArgumentParser(description='sync qiniu')
-    print(urlparse('qiniu://bucket/pathxxxxx'))
+    parser.add_argument('source', type=str, help='local path or `qiniu://<bucket>/optional/path`')
+    parser.add_argument('target', type=str, help='same with source, one should be local path, the other should be remote url')
+    parser.add_argument('-f', metavar='force', type=bool, default=False)
+    parser.add_argument('-d', metavar='delete', type=bool, default=False)
+    args = parser.parse_args()
+    print(args)
+    print(urlparse('qiniu://bucket'))
+    print(urlparse('qiniu://bucket/aaaa'))
+    print(urlparse('~/blahblahblah'))
     pass
 
 if __name__ == '__main__':
