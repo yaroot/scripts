@@ -37,6 +37,18 @@ def retry(max_retry=3):
     return _retry
 
 
+def joinpath(*args):
+    agg = ''
+    for seg in args:
+        if agg == '':
+            # first one, preserve `/` in the left
+            agg += seg
+        else:
+            agg += '/'
+            agg += seg.lstrip('/')
+    return agg
+
+
 class Storage(object):
     @staticmethod
     def new(url):
@@ -97,8 +109,6 @@ def main():
     print(urlparse('qiniu://bucket'))
     print(urlparse('qiniu://bucket/aaaa'))
     print(urlparse('~/blahblahblah'))
-    """
-    """
     pass
 
 if __name__ == '__main__':
