@@ -68,7 +68,14 @@ class LocalStorage(Storage):
         self.filelist = self.scan()
 
     def scan(self):
-        pass
+        p = Path(self.basepath)
+        assert p.exists()
+        if p.isfile():
+            pass
+        elif p.isdir():
+            pass
+        else:
+            raise RuntimeError("path doesn't exist: {}".format(self.basepath))
 
 
 class QiniuStorage(Storage):
