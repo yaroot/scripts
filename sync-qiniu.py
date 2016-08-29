@@ -8,7 +8,6 @@ import hmac
 from hashlib import sha1
 from base64 import urlsafe_b64encode
 import logging
-from urllib.parse import urlparse
 from path import Path
 
 # global pool
@@ -51,16 +50,12 @@ def joinpath(*args):
 
 class Storage(object):
     @staticmethod
-    def new(url):
-        # ParseResult(scheme='qiniu', netloc='bucket', path='', params='', query='', fragment='')
-        # ParseResult(scheme='qiniu', netloc='bucket', path='/aaaa', params='', query='', fragment='')
-        # ParseResult(scheme='', netloc='', path='~/some/path', params='', query='', fragment='')
-        result = urlparse(url)
-        assert result.scheme in ('qiniu', ''), 'scheme error (should be qiniu or local path): ' + url
-        if result.scheme == 'qiniu':
-            return QiniuStorage(url, result)
-        else:
-            return LocalStorage(url, result)
+    def new_qiniu(url):
+        return QiniuStorage(url)
+
+    @staticmethod
+    def new_local(url):
+        return LocalStorage(url)
 
     def scan(self):
         pass
@@ -68,18 +63,20 @@ class Storage(object):
 
 
 class LocalStorage(Storage):
-    def __init__(self, url, uri):
+    def __init__(self, url):
         self.basepath = url
+        self.filelist = self.scan()
 
     def scan(self):
         pass
 
 
 class QiniuStorage(Storage):
-    def __init__(self, url, uri):
-        assert len(uri.netloc) > 0
-        self.bucket = uri.netloc
-        self.basepath = uri.path
+    def __init__(self, url):
+        bucket, basepath = url.split('/', 1)
+        self.bucket = bucket
+        self.basepath = basepath
+        self.filelist = self.scan()
 
     def scan(self):
         pass
@@ -100,15 +97,13 @@ class QiniuObject(FileObject):
 def main():
     import argparse
     parser = argparse.ArgumentParser(description='sync qiniu')
-    parser.add_argument('source', type=str, help='local path or `qiniu://<bucket>/optional/path`')
+    parser.add_argument('action', type=str, help='upload / download')
+    parser.add_argument('source', type=str, help='local path or `<bucket>/optional/path`')
     parser.add_argument('target', type=str, help='same with source, one should be local path, the other should be remote url')
     parser.add_argument('-f', metavar='force', type=bool, default=False)
     parser.add_argument('-d', metavar='delete', type=bool, default=False)
     args = parser.parse_args()
     print(args)
-    print(urlparse('qiniu://bucket'))
-    print(urlparse('qiniu://bucket/aaaa'))
-    print(urlparse('~/blahblahblah'))
     pass
 
 if __name__ == '__main__':
