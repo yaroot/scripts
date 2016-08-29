@@ -56,11 +56,11 @@ class Storage(object):
         # ParseResult(scheme='qiniu', netloc='bucket', path='/aaaa', params='', query='', fragment='')
         # ParseResult(scheme='', netloc='', path='~/some/path', params='', query='', fragment='')
         result = urlparse(url)
-        assert result.scheme in ('qiniu', '', 'file'), 'scheme error (should be qiniu or local): ' + url
+        assert result.scheme in ('qiniu', ''), 'scheme error (should be qiniu or local path): ' + url
         if result.scheme == 'qiniu':
-            return QiniuStorage(result)
+            return QiniuStorage(url, result)
         else:
-            return LocalStorage(result)
+            return LocalStorage(url, result)
 
     def scan(self):
         pass
@@ -68,21 +68,21 @@ class Storage(object):
 
 
 class LocalStorage(Storage):
-    def __init__(self, uri):
-        pass
+    def __init__(self, url, uri):
+        self.basepath = url
 
     def scan(self):
         pass
-    pass
 
 
 class QiniuStorage(Storage):
-    def __init__(self, uri):
-        pass
+    def __init__(self, url, uri):
+        assert len(uri.netloc) > 0
+        self.bucket = uri.netloc
+        self.basepath = uri.path
 
     def scan(self):
         pass
-    pass
 
 
 class FileObject(object):
