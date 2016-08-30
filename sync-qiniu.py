@@ -9,6 +9,7 @@ from hashlib import sha1
 from base64 import urlsafe_b64encode
 import logging
 from path import Path
+from urllib.parse import urlparse
 
 # global pool
 requests = _requests.session()
@@ -50,12 +51,15 @@ def joinpath(*args):
 
 class Storage(object):
     @staticmethod
-    def new_qiniu(url):
-        return QiniuStorage(url)
-
-    @staticmethod
-    def new_local(url):
-        return LocalStorage(url)
+    def new(url):
+        uri = urlparse(url)
+        # ParseResult(scheme='', netloc='', path='', params='', query='', fragment='')
+        if uri.scheme in ('qiniu', 'q', 'qn'):
+            return QiniuStorage(uri.netloc, uri.path)
+        elif url.scheme in ('', 'file'):
+            return LocalStorage(uri.netloc + uri.path)
+        else:
+            raise RuntimeError("Unknown path format: {}".format(url))
 
     def scan(self):
         pass
@@ -63,9 +67,12 @@ class Storage(object):
 
 
 class LocalStorage(Storage):
-    def __init__(self, url):
-        self.basepath = url
+    def __init__(self, basepath):
+        self.basepath = basepath
         self.filelist = self.scan()
+
+    def type(self):
+        return 'local'
 
     def scan(self):
         p = Path(self.basepath)
@@ -79,11 +86,13 @@ class LocalStorage(Storage):
 
 
 class QiniuStorage(Storage):
-    def __init__(self, url):
-        bucket, basepath = url.split('/', 1)
+    def __init__(self, bucket, basepath):
         self.bucket = bucket
         self.basepath = basepath
         self.filelist = self.scan()
+
+    def type(self):
+        return 'qiniu'
 
     def scan(self):
         pass
@@ -104,7 +113,6 @@ class QiniuObject(FileObject):
 def main():
     import argparse
     parser = argparse.ArgumentParser(description='sync qiniu')
-    parser.add_argument('action', type=str, help='upload / download')
     parser.add_argument('source', type=str, help='local path or `<bucket>/optional/path`')
     parser.add_argument('target', type=str, help='same with source, one should be local path, the other should be remote url')
     parser.add_argument('-f', metavar='force', type=bool, default=False)
