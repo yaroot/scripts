@@ -12,6 +12,10 @@ import logging
 from path import Path
 from urllib.parse import urlparse, urlencode
 import os
+from datetime import datetime, timedelta
+import json
+
+logging.getLogger().setLevel(logging.DEBUG)
 
 # global pool
 requests = _requests.session()
@@ -25,13 +29,15 @@ class Qiniu(object):
     def __init__(self, authkey):
         self.authkey = authkey
 
-    def post(self, host, api_path, queries):
+    def post(self, host, api_path, queries=None, verify=True):
+        if queries is None:
+            queries = {}
         encoded_query = urlencode({k: v for k, v in queries.items() if v is not None})
         if encoded_query != '':
             encoded_query = '?' + encoded_query
         url = 'https://{}{}{}'.format(host, api_path, encoded_query)
-        signature = self.authkey.sign(api_path, encoded_query)
-        return requests.post(url, headers={'Authorization': 'QBox {}'.format(signature)})
+        signature = self.authkey.sign_request(api_path, encoded_query)
+        return requests.post(url, headers={'Authorization': 'QBox {}'.format(signature)}, verify=verify)
 
     def list(self, bucket, limit=None, prefix=None, delimiter=None, marker=None):
         queries = {
@@ -59,22 +65,55 @@ class Qiniu(object):
                 break
         return items
 
+    def upload(self, local_path, bucket, target_path):
+        put_policy = {
+            'scope': '{}:{}'.format(bucket, target_path),
+            'deadline': int((datetime.now() + timedelta(days=1)).timestamp()),
+        }
+        upload_token = self.authkey.sign_upload_policy(json.dumps(put_policy))
+        with open(local_path, 'rb') as f:
+            r = requests.post('https://{}/'.format(self.UP_HOST), verify=False, files={
+                'key': ('', target_path),
+                'token': ('', upload_token),
+                'file': ('', f),
+            })
+        print(r)
+        pass
+
+    def download(self, bucket, target_path, local_path):
+        pass
+
+    def delete(self, bucket, target_path):
+        entry_uri = urlsafe_b64encode('{}:{}'.format(bucket, target_path).encode('utf-8')).decode('utf-8')
+        r = self.post(self.RS_HOST, '/delete/{}'.format(entry_uri), verify=False)
+        assert r.ok
+
 
 class AuthKey(object):
     def __init__(self, key, secret):
         self.key = key
         self.secret = secret
 
-    def sign(self, path, query='', body=''):
+    def hmac_sha1(self, content):
+        # content has to be bytes
+        digest = hmac.new(self.secret.encode('utf-8'), content, sha1).digest()
+        return urlsafe_b64encode(digest).decode('utf-8')
+
+    def sign_request(self, path, query='', body=''):
         signbody = '{}{}\n{}'.format(path, query, body)
-        digest = hmac.new(self.secret.encode('utf-8'), signbody.encode('utf-8'), sha1).digest()
-        return '{}:{}'.format(self.key, urlsafe_b64encode(digest).decode('utf-8'))
+        sign = self.hmac_sha1(signbody.encode('utf-8'))
+        return '{}:{}'.format(self.key, sign)
+
+    def sign_upload_policy(self, policy):
+        encodedPolicy = urlsafe_b64encode(policy.encode('utf-8'))
+        sign = self.hmac_sha1(encodedPolicy)
+        # return hmac.new(content.encode('utf-8'), self.secret.encode('utf-8'), sha1).hexdigest()
+        return '{}:{}:{}'.format(self.key, sign, encodedPolicy.decode('utf-8'))
 
 
 def current_auth_key():
     keyfile = Path(os.path.join(os.path.expanduser('~'), '.qiniu'))
     if keyfile.exists():
-        import json
         with open(keyfile) as f:
             cont = json.loads(f.read())
             return AuthKey(cont['key'], cont['secret'])
@@ -98,7 +137,7 @@ def retry(max_retry=3):
 
 def strip_left(orig, target):
     if orig.startswith(target):
-        return orig[len(target)]
+        return orig[len(target):]
     raise RuntimeError("original string doesn't contain target: <{}>, <{}>".format(orig, target))
 
 
@@ -173,6 +212,7 @@ class QiniuUtil(object):
         Returns:
             输入文件的etag值
         """
+        logging.info('hashing {}'.format(filePath))
         with open(filePath, 'rb') as f:
             return QiniuUtil.etag_stream(f).decode('utf-8')
 
@@ -184,17 +224,23 @@ class Storage(object):
         # ParseResult(scheme='', netloc='', path='', params='', query='', fragment='')
         if uri.scheme in ('qiniu', 'q', 'qn'):
             return QiniuStorage(auth, uri.netloc, uri.path)
-        elif url.scheme in ('', 'file'):
+        elif uri.scheme in ('', 'file'):
             return LocalStorage(uri.netloc + uri.path)
         else:
             raise RuntimeError("Unknown path format: {}".format(url))
+
+    def type(self): pass
+
+    def upload(self, fileobject): pass
+
+    def delete(self, fileobject): pass
 
     pass
 
 
 class LocalStorage(Storage):
     def __init__(self, basepath):
-        self.basepath = basepath.rstrip('/')
+        self.basepath = os.path.expanduser(basepath).rstrip('/')
         self.filelist = self.scan()
         self.fileobjects = [LocalObject(x, self.basepath) for x in self.filelist]
         self.files = {x.path(): x for x in self.fileobjects}
@@ -231,6 +277,14 @@ class QiniuStorage(Storage):
     def scan(self):
         qn = Qiniu(self.auth)
         return qn.list_all(self.bucket, prefix=self.baseprefix)
+
+    def upload(self, fileobject):
+        assert type(fileobject) == LocalObject
+        pass
+
+    def delete(self, fileobject):
+        assert type(fileobject) == QiniuObject
+        pass
 
 
 class FileObject(object):
@@ -300,14 +354,27 @@ class SyncUtil(object):
         toupload = srcpaths.difference(dstpaths)
         toremove = dstpaths.difference(srcpaths)
         tooverride = SyncUtil.check_override(srcpaths.intersection(dstpaths), src, dst)
+        SyncUtil.do_upload(src, dst, [src.files[x] for x in toupload])
+        SyncUtil.do_upload(src, dst, [src.files[x] for x in tooverride])
+        SyncUtil.do_delete(src, dst, [dst.files[x] for x in toremove])
+
+    @staticmethod
+    def do_delete(src, dst, todelete):
+        for fo in todelete:
+            print('delete <{}>'.format(fo.path()))
+
+    @staticmethod
+    def do_upload(src, dst, toupload):
+        for fo in toupload:
+            print('upload <{}>'.format(fo.path()))
 
     @staticmethod
     def check_override(fileset, src, dst):
-        def is_different(a, b):
+        def is_same(a, b):
             return a.size() == b.size() and a.qetag() == b.qetag()
         return [
             p for p in fileset
-            if is_different(src.files[p], dst.files[p])
+            if not is_same(src.files[p], dst.files[p])
         ]
 
 
@@ -323,17 +390,16 @@ def main():
     src = Storage.new(authkey, args.source)
     dst = Storage.new(authkey, args.target)
     SyncUtil.sync(src, dst)
-    print(args)
 
 
 def main2():
     authkey = current_auth_key()
     qiniu = Qiniu(authkey)
-    r = qiniu.list_all('tsu-repos')
-    print(r)
-    print(r.text)
+    # r = qiniu.list_all('???')
+    # qiniu.upload(os.path.expanduser('???'), '???', '???')
+    # qiniu.delete('???', '???')
 
 
 if __name__ == '__main__':
-    # main()
-    main2()
+    main()
+    # main2()
