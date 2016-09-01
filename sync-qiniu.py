@@ -23,13 +23,13 @@ requests = _requests.session()
 
 class Qiniu(object):
     RSF_HOST = 'rsf.qbox.me'
-    RS_HOST = 'rs.qiniu.com'
-    UP_HOST = 'upload.qiniu.com'
+    RS_HOST = 'rs.qbox.me'
+    UP_HOST = 'up.qbox.me'
 
     def __init__(self, authkey):
         self.authkey = authkey
 
-    def post(self, host, api_path, queries=None, verify=True):
+    def post(self, host, api_path, queries=None):
         if queries is None:
             queries = {}
         encoded_query = urlencode({k: v for k, v in queries.items() if v is not None})
@@ -37,7 +37,7 @@ class Qiniu(object):
             encoded_query = '?' + encoded_query
         url = 'https://{}{}{}'.format(host, api_path, encoded_query)
         signature = self.authkey.sign_request(api_path, encoded_query)
-        return requests.post(url, headers={'Authorization': 'QBox {}'.format(signature)}, verify=verify)
+        return requests.post(url, headers={'Authorization': 'QBox {}'.format(signature)})
 
     def list(self, bucket, limit=None, prefix=None, delimiter=None, marker=None):
         queries = {
@@ -66,26 +66,27 @@ class Qiniu(object):
         return items
 
     def upload(self, local_path, bucket, target_path):
+        logging.info('uploading <{}> to <{}:{}>'.format(local_path, bucket, target_path))
         put_policy = {
             'scope': '{}:{}'.format(bucket, target_path),
             'deadline': int((datetime.now() + timedelta(days=1)).timestamp()),
         }
         upload_token = self.authkey.sign_upload_policy(json.dumps(put_policy))
         with open(local_path, 'rb') as f:
-            r = requests.post('https://{}/'.format(self.UP_HOST), verify=False, files={
+            r = requests.post('https://{}/'.format(self.UP_HOST), files={
                 'key': ('', target_path),
                 'token': ('', upload_token),
                 'file': ('', f),
             })
-        print(r)
-        pass
+        assert r.ok
 
     def download(self, bucket, target_path, local_path):
         pass
 
     def delete(self, bucket, target_path):
+        logging.info('delete <{}:{}>'.format(bucket, target_path))
         entry_uri = urlsafe_b64encode('{}:{}'.format(bucket, target_path).encode('utf-8')).decode('utf-8')
-        r = self.post(self.RS_HOST, '/delete/{}'.format(entry_uri), verify=False)
+        r = self.post(self.RS_HOST, '/delete/{}'.format(entry_uri))
         assert r.ok
 
 
@@ -137,7 +138,7 @@ def retry(max_retry=3):
 
 def strip_left(orig, target):
     if orig.startswith(target):
-        return orig[len(target):]
+        return orig[len(target):].lstrip('/')
     raise RuntimeError("original string doesn't contain target: <{}>, <{}>".format(orig, target))
 
 
@@ -148,9 +149,12 @@ def joinpath(*args):
             # first one, preserve `/` in the left
             agg += seg
         else:
-            agg += '/'
-            agg += seg.lstrip('/')
+            agg = '{}/{}'.format(agg.rstrip('/'), seg.lstrip('/'))
     return agg
+
+
+def info(stuff):
+    print(stuff)
 
 
 class QiniuUtil(object):
@@ -259,12 +263,13 @@ class LocalStorage(Storage):
     def walk_dir(self, dirpath):
         for root, _, files in os.walk(dirpath):
             for path in files:
-                yield strip_left(joinpath(root, path), dirpath).lstrip('/')
+                yield strip_left(joinpath(root, path), dirpath)
 
 
 class QiniuStorage(Storage):
     def __init__(self, auth, bucket, basepath):
         self.auth = auth
+        self.qiniu = Qiniu(auth)
         self.bucket = bucket
         self.baseprefix = basepath.lstrip('/')
         self.filelist = self.scan()
@@ -275,16 +280,18 @@ class QiniuStorage(Storage):
         return 'qiniu'
 
     def scan(self):
-        qn = Qiniu(self.auth)
-        return qn.list_all(self.bucket, prefix=self.baseprefix)
+        return self.qiniu.list_all(self.bucket, prefix=self.baseprefix)
 
     def upload(self, fileobject):
         assert type(fileobject) == LocalObject
-        pass
+        localpath = fileobject.fullpath()
+        remotepath = joinpath(self.baseprefix, fileobject.path())
+        self.qiniu.upload(localpath, self.bucket, remotepath)
 
     def delete(self, fileobject):
         assert type(fileobject) == QiniuObject
-        pass
+        remotepath = joinpath(self.baseprefix, fileobject.path())
+        self.qiniu.delete(self.bucket, remotepath)
 
 
 class FileObject(object):
@@ -331,7 +338,7 @@ class QiniuObject(FileObject):
         self.hash = props['hash']
         self.fsize = props['fsize']
         self.putTime = props['putTime']
-        self.rel_path = strip_left(self.key, basepath).lstrip('/')
+        self.rel_path = strip_left(self.key, basepath)
 
     def path(self):
         return self.rel_path
@@ -345,7 +352,7 @@ class QiniuObject(FileObject):
 
 class SyncUtil(object):
     @staticmethod
-    def sync(src, dst):
+    def sync(args, src, dst):
         assert type(src) in (QiniuStorage, LocalStorage)\
                and type(dst) in (QiniuStorage, LocalStorage)\
                and type(dst) != type(src)
@@ -354,19 +361,30 @@ class SyncUtil(object):
         toupload = srcpaths.difference(dstpaths)
         toremove = dstpaths.difference(srcpaths)
         tooverride = SyncUtil.check_override(srcpaths.intersection(dstpaths), src, dst)
-        SyncUtil.do_upload(src, dst, [src.files[x] for x in toupload])
-        SyncUtil.do_upload(src, dst, [src.files[x] for x in tooverride])
-        SyncUtil.do_delete(src, dst, [dst.files[x] for x in toremove])
+        SyncUtil.do_upload(args, src, dst, [src.files[x] for x in toupload])
+        SyncUtil.do_override(args, src, dst, [src.files[x] for x in tooverride])
+        SyncUtil.do_delete(args, src, dst, [dst.files[x] for x in toremove])
 
     @staticmethod
-    def do_delete(src, dst, todelete):
+    def do_delete(args, src, dst, todelete):
         for fo in todelete:
-            print('delete <{}>'.format(fo.path()))
+            info('delete <{}>'.format(fo.path()))
+            if args.force and args.delete:
+                dst.delete(fo)
 
     @staticmethod
-    def do_upload(src, dst, toupload):
+    def do_upload(args, src, dst, toupload):
         for fo in toupload:
-            print('upload <{}>'.format(fo.path()))
+            info('upload <{}>'.format(fo.path()))
+            if args.force:
+                dst.upload(fo)
+
+    @staticmethod
+    def do_override(args, src, dst, tooverride):
+        for fo in tooverride:
+            info('override <{}>'.format(fo.path()))
+            if args.force and args.delete:
+                dst.upload(fo)
 
     @staticmethod
     def check_override(fileset, src, dst):
@@ -383,23 +401,14 @@ def main():
     parser = argparse.ArgumentParser(description='sync qiniu')
     parser.add_argument('source', type=str, help='local path or `<bucket>/optional/path`')
     parser.add_argument('target', type=str, help='same with source, one should be local path, the other should be remote url')
-    parser.add_argument('-f', metavar='force', type=bool, default=False)
-    parser.add_argument('-d', metavar='delete', type=bool, default=False)
+    parser.add_argument('--force', '-f', action='store_true', default=False)
+    parser.add_argument('--delete', '-d', action='store_true', default=False)
     args = parser.parse_args()
     authkey = current_auth_key()
     src = Storage.new(authkey, args.source)
     dst = Storage.new(authkey, args.target)
-    SyncUtil.sync(src, dst)
-
-
-def main2():
-    authkey = current_auth_key()
-    qiniu = Qiniu(authkey)
-    # r = qiniu.list_all('???')
-    # qiniu.upload(os.path.expanduser('???'), '???', '???')
-    # qiniu.delete('???', '???')
+    SyncUtil.sync(args, src, dst)
 
 
 if __name__ == '__main__':
     main()
-    # main2()
