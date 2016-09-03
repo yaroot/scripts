@@ -100,9 +100,9 @@ class Qiniu(object):
         upload_token = self.generate_upload_token(bucket, target_path)
         with open(local_path, 'rb') as f:
             ctxes = [
-                retry(max_retry=3, func=lambda:self.upload_block(blk, upload_token))
+                retry(max_retry=3, func=lambda: self.upload_block(blk, upload_token))
                 for blk in QiniuUtil.iter_file(f)]
-        return self.upload_mkfile(file_size, ctxes, upload_token, bucket, target_path)
+        return retry(max_retry=3, func=lambda: self.upload_mkfile(file_size, ctxes, upload_token, bucket, target_path))
 
     # mkblk response
     # {
