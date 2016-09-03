@@ -96,7 +96,7 @@ class Qiniu(object):
         logger.info('uploading multiblock <{}> to <{}:{}>'.format(local_path, bucket, target_path))
         file_size = Path(local_path).size
         upload_token = self.generate_upload_token(bucket, target_path)
-        pbar = PBarUtil.new(file_size).start()  # not that accurate when retrying
+        pbar = PBarUtil.new(file_size).start()  # will not be accurate during retries
         with open(local_path, 'rb') as f:
             ctxes = [
                 retry(max_retry=3, func=lambda: self.upload_block(pbar, blk, upload_token))
@@ -122,6 +122,7 @@ class Qiniu(object):
             for chunk in chunks:
                 pbar.update(min(pbar.currval + len(chunk), pbar.maxval))
                 yield chunk
+
         r = requests.post(
             'https://{}/mkblk/{}'.format(self.UP_HOST, blk_size),
             data=blk_gen(),
@@ -131,7 +132,6 @@ class Qiniu(object):
             }
         )
 
-        # pbar.update(min(pbar.currval + blk_size, pbar.maxval))
         assert_response(r)
         return r.json()['ctx']
 
@@ -177,7 +177,6 @@ class AuthKey(object):
     def sign_upload_policy(self, policy):
         encodedPolicy = urlsafe_b64encode(policy.encode('utf-8'))
         sign = self.hmac_sha1(encodedPolicy)
-        # return hmac.new(content.encode('utf-8'), self.secret.encode('utf-8'), sha1).hexdigest()
         return '{}:{}:{}'.format(self.key, sign, encodedPolicy.decode('utf-8'))
 
 
@@ -215,7 +214,7 @@ def joinpath(*args):
     agg = ''
     for seg in args:
         if agg == '':
-            # first one, preserve `/` in the left
+            # first one, preserve `/` on the left
             agg += seg
         else:
             agg = '{}/{}'.format(agg.rstrip('/'), seg.lstrip('/'))
