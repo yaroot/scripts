@@ -4,7 +4,6 @@
 # http://developer.qiniu.com/article/index.html
 
 from __future__ import unicode_literals, division
-import requests as _requests
 import hmac
 from hashlib import sha1
 from base64 import urlsafe_b64encode
@@ -14,9 +13,12 @@ from urllib.parse import urlparse, urlencode
 import os
 from datetime import datetime, timedelta
 import json
+import progressbar
+import requests as _requests
+from time import sleep
 
 _logger_factory.basicConfig(
-    level=_logger_factory.DEBUG,
+    level=_logger_factory.WARN,
     format='%(levelname)-5s %(asctime)s %(name)s %(message)s'
 )
 logger = _logger_factory.getLogger(__name__)
@@ -98,10 +100,12 @@ class Qiniu(object):
         logger.info('uploading multiblock <{}> to <{}:{}>'.format(local_path, bucket, target_path))
         file_size = Path(local_path).size
         upload_token = self.generate_upload_token(bucket, target_path)
+        pbar = PBarUtil.new(file_size).start()  # not that accurate when retrying
         with open(local_path, 'rb') as f:
             ctxes = [
-                retry(max_retry=3, func=lambda: self.upload_block(blk, upload_token))
+                retry(max_retry=3, func=lambda: self.upload_block(pbar, blk, upload_token))
                 for blk in QiniuUtil.iter_file(f)]
+        pbar.finish()
         return retry(max_retry=3, func=lambda: self.upload_mkfile(file_size, ctxes, upload_token, bucket, target_path))
 
     # mkblk response
@@ -112,17 +116,26 @@ class Qiniu(object):
     #     "offset":        <Offset        int64>,
     #     "host":         "<UpHost        string>"
     # }
-    def upload_block(self, blk, upload_token):
+    def upload_block(self, pbar, blk, upload_token):
         blk_size = len(blk)
         logger.info('uploading block, size {}'.format(blk_size))
+
+        def blk_gen():
+            chunk_size = 128 * 1024  # 32k
+            chunks = (blk[i:i+chunk_size] for i in range(0, blk_size, chunk_size))
+            for chunk in chunks:
+                pbar.update(min(pbar.currval + len(chunk), pbar.maxval))
+                yield chunk
         r = requests.post(
             'https://{}/mkblk/{}'.format(self.UP_HOST, blk_size),
-            data=blk,
+            data=blk_gen(),
             headers={
                 'Content-Type': 'application/octet-stream',
                 'Authorization': 'UpToken {}'.format(upload_token)
             }
         )
+
+        # pbar.update(min(pbar.currval + blk_size, pbar.maxval))
         assert_response(r)
         return r.json()['ctx']
 
@@ -192,6 +205,7 @@ def retry(func, max_retry=3):
         except:
             logger.exception("error executing {}".format(func))
             n -= 1
+        sleep(0.05)
     raise RuntimeError('max_retry reached, {} failed'.format(func))
 
 
@@ -219,6 +233,24 @@ def info(stuff):
 def assert_response(r):
     if not r.ok:
         raise RuntimeError('request failed {} detail: {}'.format(r.status_code, r.text))
+
+
+class PBarUtil(object):
+    @staticmethod
+    def new(maxval):
+        pbar = progressbar.ProgressBar(
+            maxval=maxval,
+            term_width=80,
+            poll=0.1,
+            left_justify=False,
+            widgets=[
+                progressbar.Bar(), ' ',
+                progressbar.Percentage(), ' ',
+                progressbar.FileTransferSpeed(), ' ',
+                progressbar.ETA(), ' ',
+            ]
+        )
+        return pbar
 
 
 class QiniuUtil(object):
