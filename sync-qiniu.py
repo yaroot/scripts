@@ -8,14 +8,18 @@ import requests as _requests
 import hmac
 from hashlib import sha1
 from base64 import urlsafe_b64encode
-import logging
+import logging as _logger_factory
 from path import Path
 from urllib.parse import urlparse, urlencode
 import os
 from datetime import datetime, timedelta
 import json
 
-logging.getLogger().setLevel(logging.DEBUG)
+_logger_factory.basicConfig(
+    level=_logger_factory.DEBUG,
+    format='%(levelname)-5s %(asctime)s %(name)s %(message)s'
+)
+logger = _logger_factory.getLogger(__name__)
 
 # global pool
 requests = _requests.session()
@@ -28,6 +32,14 @@ class Qiniu(object):
 
     def __init__(self, authkey):
         self.authkey = authkey
+
+    def generate_upload_token(self, bucket, target_path):
+        put_policy = {
+            'scope': '{}:{}'.format(bucket, target_path),
+            'deadline': int((datetime.now() + timedelta(days=1)).timestamp()),
+        }
+        upload_token = self.authkey.sign_upload_policy(json.dumps(put_policy))
+        return upload_token
 
     def post(self, host, api_path, queries=None):
         if queries is None:
@@ -66,12 +78,14 @@ class Qiniu(object):
         return items
 
     def upload(self, local_path, bucket, target_path):
-        logging.info('uploading <{}> to <{}:{}>'.format(local_path, bucket, target_path))
-        put_policy = {
-            'scope': '{}:{}'.format(bucket, target_path),
-            'deadline': int((datetime.now() + timedelta(days=1)).timestamp()),
-        }
-        upload_token = self.authkey.sign_upload_policy(json.dumps(put_policy))
+        if Path(local_path).size > QiniuUtil.BLOCK_SIZE:
+            self.upload_multiblock(local_path, bucket, target_path)
+        else:
+            self.upload_singleshot(local_path, bucket, target_path)
+
+    def upload_singleshot(self, local_path, bucket, target_path):
+        logger.info('uploading <{}> to <{}:{}>'.format(local_path, bucket, target_path))
+        upload_token = self.generate_upload_token(bucket, target_path)
         with open(local_path, 'rb') as f:
             r = requests.post('https://{}/'.format(self.UP_HOST), files={
                 'key': ('', target_path),
@@ -80,11 +94,57 @@ class Qiniu(object):
             })
         assert_response(r)
 
+    def upload_multiblock(self, local_path, bucket, target_path):
+        logger.info('uploading multiblock <{}> to <{}:{}>'.format(local_path, bucket, target_path))
+        file_size = Path(local_path).size
+        upload_token = self.generate_upload_token(bucket, target_path)
+        with open(local_path, 'rb') as f:
+            ctxes = [
+                retry(max_retry=3, func=lambda:self.upload_block(blk, upload_token))
+                for blk in QiniuUtil.iter_file(f)]
+        return self.upload_mkfile(file_size, ctxes, upload_token, bucket, target_path)
+
+    # mkblk response
+    # {
+    #     "ctx":          "<Ctx           string>",
+    #     "checksum":     "<Checksum      string>",
+    #     "crc32":         <Crc32         int64>,
+    #     "offset":        <Offset        int64>,
+    #     "host":         "<UpHost        string>"
+    # }
+    def upload_block(self, blk, upload_token):
+        blk_size = len(blk)
+        logger.info('uploading block, size {}'.format(blk_size))
+        r = requests.post(
+            'https://{}/mkblk/{}'.format(self.UP_HOST, blk_size),
+            data=blk,
+            headers={
+                'Content-Type': 'application/octet-stream',
+                'Authorization': 'UpToken {}'.format(upload_token)
+            }
+        )
+        assert_response(r)
+        return r.json()['ctx']
+
+    def upload_mkfile(self, file_size, ctxes, upload_token, bucket, target_path):
+        logger.info('finishing multi block upload, creating file from {}'.format(','.join(ctxes)))
+        encoded_scope = urlsafe_b64encode(target_path.encode('utf-8')).decode('utf-8')
+        r = requests.post(
+            'https://{}/mkfile/{}/key/{}'.format(self.UP_HOST, file_size, encoded_scope),
+            data=','.join(ctxes).encode('utf-8'),
+            headers={
+                'Content-Type': 'text/plain',
+                'Authorization': 'UpToken {}'.format(upload_token)
+            }
+        )
+        assert_response(r)
+        pass
+
     def download(self, bucket, target_path, local_path):
         pass
 
     def delete(self, bucket, target_path):
-        logging.info('delete <{}:{}>'.format(bucket, target_path))
+        logger.info('delete <{}:{}>'.format(bucket, target_path))
         entry_uri = urlsafe_b64encode('{}:{}'.format(bucket, target_path).encode('utf-8')).decode('utf-8')
         r = self.post(self.RS_HOST, '/delete/{}'.format(entry_uri))
         assert_response(r)
@@ -124,16 +184,15 @@ def current_auth_key():
         raise RuntimeError("no key/secret exists (use `~/.qiniu` or env variable)")
 
 
-def retry(max_retry=3):
-    def _retry(f, *args, **kwargs):
-        n = max_retry
-        while n > 0:
-            try:
-                return f(*args, **kwargs)
-            except:
-                logging.exception("error executing " + f)
+def retry(func, max_retry=3):
+    n = max_retry
+    while n > 0:
+        try:
+            return func()
+        except:
+            logger.exception("error executing {}".format(func))
             n -= 1
-    return _retry
+    raise RuntimeError('max_retry reached, {} failed'.format(func))
 
 
 def strip_left(orig, target):
@@ -163,17 +222,10 @@ def assert_response(r):
 
 
 class QiniuUtil(object):
-    _HASH_BLOCK_SIZE = 1024 * 1024 * 4
+    BLOCK_SIZE = 1024 * 1024 * 4
 
     @staticmethod
-    def _file_iter(input_stream, size, offset=0):
-        """读取输入流:
-        Args:
-            input_stream: 待读取文件的二进制流
-            size:         二进制流的大小
-        Raises:
-            IOError: 文件流读取失败
-        """
+    def iter_file(input_stream, size=BLOCK_SIZE, offset=0):
         input_stream.seek(offset)
         d = input_stream.read(size)
         while d:
@@ -182,12 +234,6 @@ class QiniuUtil(object):
 
     @staticmethod
     def _sha1(data):
-        """单块计算hash:
-        Args:
-            data: 待计算hash的数据
-        Returns:
-            输入数据计算的hash值
-        """
         h = sha1()
         h.update(data)
         return h.digest()
@@ -201,7 +247,7 @@ class QiniuUtil(object):
         Returns:
             输入流的etag值
         """
-        array = [QiniuUtil._sha1(block) for block in QiniuUtil._file_iter(input_stream, QiniuUtil._HASH_BLOCK_SIZE)]
+        array = [QiniuUtil._sha1(block) for block in QiniuUtil.iter_file(input_stream)]
         if len(array) == 0:
             array = [QiniuUtil._sha1(b'')]
         if len(array) == 1:
@@ -214,15 +260,15 @@ class QiniuUtil(object):
         return urlsafe_b64encode(prefix + data)
 
     @staticmethod
-    def etag(filePath):
+    def etag(file_path):
         """计算文件的etag:
         Args:
-            filePath: 待计算etag的文件路径
+            file_path: 待计算etag的文件路径
         Returns:
             输入文件的etag值
         """
-        logging.info('hashing {}'.format(filePath))
-        with open(filePath, 'rb') as f:
+        logger.info('hashing {}'.format(file_path))
+        with open(file_path, 'rb') as f:
             return QiniuUtil.etag_stream(f).decode('utf-8')
 
 
