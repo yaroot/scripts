@@ -13,9 +13,9 @@ from urllib.parse import urlparse, urlencode
 import os
 from datetime import datetime, timedelta
 import json
-import progressbar
-import requests as _requests
 from time import sleep
+import requests as _requests_factory
+import progressbar
 
 _logger_factory.basicConfig(
     level=_logger_factory.WARN,
@@ -24,7 +24,7 @@ _logger_factory.basicConfig(
 logger = _logger_factory.getLogger(__name__)
 
 # global pool
-requests = _requests.session()
+requests = _requests_factory.session()
 
 
 class Qiniu(object):
