@@ -54,7 +54,7 @@ class Qiniu(object):
         marker = None
         while True:
             r = self.list(bucket, marker=marker, prefix=prefix)
-            assert r.ok, r.text
+            assert_response(r)
             result = r.json()
             if 'items' in result:
                 items.extend(result['items'])
@@ -78,7 +78,7 @@ class Qiniu(object):
                 'token': ('', upload_token),
                 'file': ('', f),
             })
-        assert r.ok, r.text
+        assert_response(r)
 
     def download(self, bucket, target_path, local_path):
         pass
@@ -87,7 +87,7 @@ class Qiniu(object):
         logging.info('delete <{}:{}>'.format(bucket, target_path))
         entry_uri = urlsafe_b64encode('{}:{}'.format(bucket, target_path).encode('utf-8')).decode('utf-8')
         r = self.post(self.RS_HOST, '/delete/{}'.format(entry_uri))
-        assert r.ok, r.text
+        assert_response(r)
 
 
 class AuthKey(object):
@@ -155,6 +155,11 @@ def joinpath(*args):
 
 def info(stuff):
     print(stuff)
+
+
+def assert_response(r):
+    if not r.ok:
+        raise RuntimeError('request failed {} detail: {}'.format(r.status_code, r.text))
 
 
 class QiniuUtil(object):
