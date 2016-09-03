@@ -17,10 +17,6 @@ from time import sleep
 import requests as _requests_factory
 import progressbar
 
-_logger_factory.basicConfig(
-    level=_logger_factory.WARN,
-    format='%(levelname)-5s %(asctime)s %(name)s %(message)s'
-)
 logger = _logger_factory.getLogger(__name__)
 
 # global pool
@@ -486,7 +482,14 @@ def main():
     parser.add_argument('target', type=str, help='same with source, one should be local path, the other should be remote url')
     parser.add_argument('--force', '-f', action='store_true', default=False)
     parser.add_argument('--delete', '-d', action='store_true', default=False)
+    parser.add_argument('--verbose', '-v', action='store_true', default=False)
     args = parser.parse_args()
+
+    _logger_factory.basicConfig(
+        level=args.verbose and _logger_factory.DEBUG or _logger_factory.WARN,
+        format='%(levelname)-5s %(asctime)s %(name)s %(message)s'
+    )
+
     authkey = current_auth_key()
     src = Storage.new(authkey, args.source)
     dst = Storage.new(authkey, args.target)
