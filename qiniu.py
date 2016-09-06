@@ -438,7 +438,7 @@ class SyncUtil(object):
         dstpaths = set(dst.files.keys())
         toupload = srcpaths.difference(dstpaths)
         toremove = dstpaths.difference(srcpaths)
-        tooverride = SyncUtil.check_override(srcpaths.intersection(dstpaths), src, dst)
+        tooverride = SyncUtil.check_override(srcpaths.intersection(dstpaths), src, dst, args.skip_etag)
         SyncUtil.do_upload(args, src, dst, [src.files[x] for x in toupload])
         SyncUtil.do_override(args, src, dst, [src.files[x] for x in tooverride])
         SyncUtil.do_delete(args, src, dst, [dst.files[x] for x in toremove])
@@ -465,9 +465,9 @@ class SyncUtil(object):
                 dst.upload(fo)
 
     @staticmethod
-    def check_override(fileset, src, dst):
+    def check_override(fileset, src, dst, skip_etag):
         def is_same(a, b):
-            return a.size() == b.size() and a.qetag() == b.qetag()
+            return a.size() == b.size() and (skip_etag or a.qetag() == b.qetag())
         return [
             p for p in fileset
             if not is_same(src.files[p], dst.files[p])
@@ -482,6 +482,7 @@ def main():
     parser.add_argument('--force', '-f', action='store_true', default=False)
     parser.add_argument('--delete', '-d', action='store_true', default=False)
     parser.add_argument('--verbose', '-v', action='store_true', default=False)
+    parser.add_argument('--skip-etag', '-s', action='store_true', default=False)
     args = parser.parse_args()
 
     _logger_factory.basicConfig(
