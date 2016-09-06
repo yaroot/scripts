@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# vim: coding=utf-8:
+# coding=utf-8
 
 # http://developer.qiniu.com/article/index.html
 
@@ -82,7 +82,7 @@ class Qiniu(object):
             self.upload_singleshot(local_path, bucket, target_path)
 
     def upload_singleshot(self, local_path, bucket, target_path):
-        logger.info('uploading <{}> to <{}:{}>'.format(local_path, bucket, target_path))
+        logger.debug('uploading <{}> to <{}:{}>'.format(local_path, bucket, target_path))
         upload_token = self.generate_upload_token(bucket, target_path)
         with open(local_path, 'rb') as f:
             r = requests.post('https://{}/'.format(self.UP_HOST), files={
@@ -93,7 +93,7 @@ class Qiniu(object):
         assert_response(r)
 
     def upload_multiblock(self, local_path, bucket, target_path):
-        logger.info('uploading multiblock <{}> to <{}:{}>'.format(local_path, bucket, target_path))
+        logger.debug('uploading multiblock <{}> to <{}:{}>'.format(local_path, bucket, target_path))
         file_size = Path(local_path).size
         upload_token = self.generate_upload_token(bucket, target_path)
         pbar = PBarUtil.new(file_size).start()  # will not be accurate during retries
@@ -114,7 +114,7 @@ class Qiniu(object):
     # }
     def upload_block(self, pbar, blk, upload_token):
         blk_size = len(blk)
-        logger.info('uploading block, size {}'.format(blk_size))
+        logger.debug('uploading block, size {}'.format(blk_size))
 
         def blk_gen():
             chunk_size = 128 * 1024  # 32k
@@ -136,7 +136,7 @@ class Qiniu(object):
         return r.json()['ctx']
 
     def upload_mkfile(self, file_size, ctxes, upload_token, bucket, target_path):
-        logger.info('finishing multi block upload, creating file from {}'.format(','.join(ctxes)))
+        logger.debug('finishing multi block upload, creating file from {}'.format(','.join(ctxes)))
         encoded_scope = urlsafe_b64encode(target_path.encode('utf-8')).decode('utf-8')
         r = requests.post(
             'https://{}/mkfile/{}/key/{}'.format(self.UP_HOST, file_size, encoded_scope),
@@ -153,7 +153,7 @@ class Qiniu(object):
         pass
 
     def delete(self, bucket, target_path):
-        logger.info('delete <{}:{}>'.format(bucket, target_path))
+        logger.debug('delete <{}:{}>'.format(bucket, target_path))
         entry_uri = urlsafe_b64encode('{}:{}'.format(bucket, target_path).encode('utf-8')).decode('utf-8')
         r = self.post(self.RS_HOST, '/delete/{}'.format(entry_uri))
         assert_response(r)
@@ -294,7 +294,7 @@ class QiniuUtil(object):
         Returns:
             输入文件的etag值
         """
-        logger.info('hashing {}'.format(file_path))
+        logger.debug('hashing {}'.format(file_path))
         with open(file_path, 'rb') as f:
             return QiniuUtil.etag_stream(f).decode('utf-8')
 
