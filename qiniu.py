@@ -181,7 +181,7 @@ class AuthKey(object):
 
 
 def current_auth_key():
-    keyfile = Path(os.path.join(os.path.expanduser('~'), '.qiniu'))
+    keyfile = Path(os.path.join(os.path.expanduser('~'), '.qiniu_access'))
     if keyfile.exists():
         with open(keyfile) as f:
             cont = json.loads(f.read())
@@ -189,7 +189,7 @@ def current_auth_key():
     elif 'QINIU_KEY' in os.environ and 'QINIU_SECRET' in os.environ:
         return AuthKey(os.environ['QINIU_KEY'], os.environ['QINIU_SECRET'])
     else:
-        raise RuntimeError("no key/secret exists (use `~/.qiniu` or env variable)")
+        raise RuntimeError("no key/secret exists (use `~/.qiniu_access` or env variable)")
 
 
 def retry(func, max_retry=3):
