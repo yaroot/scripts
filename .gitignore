@@ -2,3 +2,4 @@
 *.txt
 httpd
 .idea/
+venv/
