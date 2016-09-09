@@ -12,7 +12,8 @@
   <entry>
     <title>{{ text }}</title>
     <link href="https://mobile.twitter.com/{{ #user }}{{ screen_name }}{{ /user }}/status/{{ id_str }}" />
-    <updated>{{ #format_timestamp_millis }}{{ timestamp_ms }}{{ /format_timestamp_millis }}</updated>
+    <updated>{{ timestamp_isoformat }}</updated>
+    <!--<updated>{{! #format_timestamp_ms }}{{ timestamp_ms }}{{! /format_timestamp_ms }}</updated>-->
     <id>{{ id_str }}</id>
     <content type="html">{{ text }}</content>
   </entry>

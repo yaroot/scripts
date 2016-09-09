@@ -32,19 +32,24 @@ def format_timestamp_seconds(i):
     return datetime.utcfromtimestamp(int(i)).isoformat() + 'Z'
 
 
+def reformat_timestamp(tweet):
+    copy = dict(tweet)
+    copy['timestamp_isoformat'] = format_timestamp_millis(tweet['timestamp_ms'])
+    return copy
+
+
 def render_feed(tweets):
     last_update = format_timestamp_seconds(time.time())
     if len(tweets) > 0:
         last_update = format_timestamp_millis(tweets[-1]['timestamp_ms'])
     data = {
-        'format_timestamp_ms': lambda text, render: format_timestamp_millis(render(text)),
         'LAST_UPDATE': last_update,
         'FEED_TITLE': config.FEED_TITLE,
         'FEED_LINK_SELF': config.FEED_LINK_SELF,
         'FEED_LINK': config.FEED_LINK,
         'FEED_ID': config.FEED_ID,
         'FEED_AUTHOR': config.FEED_AUTHOR,
-        'TWEETS': tweets,
+        'TWEETS': map(reformat_timestamp, tweets),
     }
     return pystache.render(FEED_TEMPLATE, data)
 
