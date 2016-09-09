@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>{{ FEED_TITLE }}</title>
+  <link href="{{ FEED_LINK_SELF }}" ref="self" />
+  <link href="{{ FEED_LINK }}" />
+  <updated>{{ LAST_UPDATE }}</updated>
+  <id>{{ FEED_ID }}/</id>
+  <author>
+    <name>{{ FEED_AUTHOR }}</name>
+  </author>
+  {{ #TWEETS }}
+  <entry>
+    <title>{{ text }}</title>
+    <link href="https://mobile.twitter.com/{{ #user }}{{ screen_name }}{{ /user }}/status/{{ id_str }}" />
+    <updated>{{ #format_timestamp_millis }}{{ timestamp_ms }}{{ /format_timestamp_millis }}</updated>
+    <id>{{ id_str }}</id>
+    <content type="html">{{ text }}</content>
+  </entry>
+  {{ /TWEETS }}
+</feed>
+
