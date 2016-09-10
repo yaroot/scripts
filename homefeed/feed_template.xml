@@ -15,7 +15,17 @@
     <updated>{{ timestamp_isoformat }}</updated>
     <!--<updated>{{! #format_timestamp_ms }}{{ timestamp_ms }}{{! /format_timestamp_ms }}</updated>-->
     <id>{{ id_str }}</id>
-    <content type="html">{{ text }}</content>
+    <content type="html">
+      <![CDATA[
+      {{ #extended_entities }}
+        {{ #media }}
+          <a href="{{ display_url }}" rel="nofollow">
+            <img src="{{ media_url_https }}" alt="{{ display_url }}"></img>
+          </a>
+        {{ /media }}
+      {{ /extended_entities }}
+      ]]>
+    </content>
   </entry>
   {{ /TWEETS }}
 </feed>
