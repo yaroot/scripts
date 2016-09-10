@@ -91,7 +91,7 @@ def write_local_cache(tweets):
 
 
 def produce_feed(tweets):
-    to_render = keep_fitness([t for t in tweets if 'text' in t], FEED_SIZE)
+    to_render = list(reversed(keep_fitness([t for t in tweets if 'text' in t], FEED_SIZE)))
     if to_render:
         rendered = render_feed(to_render)
         atomic_write(FEED_FILENAME, rendered.encode('utf-8'))
