@@ -19,7 +19,7 @@
       {{ #extended_entities }}
         {{ #media }}
           <a href="{{ display_url }}" rel="nofollow">
-            <img src="{{ media_url_https }}" alt="{{ display_url }}"></img>
+            <img src="{{ media_url_https }}" alt="{{ display_url }}">
           </a>
         {{ /media }}
       {{ /extended_entities }}
