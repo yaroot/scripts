@@ -10,7 +10,7 @@
   </author>
   {{ #TWEETS }}
   <entry>
-    <title><![CDATA[{{ #user }}{{ name }} @{{ screen_name }}{{ /user }}: {{ text }}]]></title>
+    <title><![CDATA[{{ #user }}@{{ screen_name }} {{ name }}{{ /user }}: {{ text }}]]></title>
     <link href="https://mobile.twitter.com/{{ #user }}{{ screen_name }}{{ /user }}/status/{{ id_str }}" />
     <updated>{{ timestamp_isoformat }}</updated>
     <id>urn:tweet:{{ id_str }}</id>
