@@ -4,7 +4,7 @@
   <link href="{{ FEED_LINK_SELF }}" rel="self" />
   <link href="{{ FEED_LINK }}" />
   <updated>{{ LAST_UPDATE }}</updated>
-  <id>urn:fake:{{ FEED_ID }}</id>
+  <id>urn:feed:{{ FEED_ID }}</id>
   <author>
     <name>{{ FEED_AUTHOR }}</name>
   </author>
