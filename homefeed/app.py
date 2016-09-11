@@ -38,6 +38,7 @@ def reformat_timestamp(tweet):
     return copy
 
 
+# TODO make this function return generator
 def render_feed(tweets):
     last_update = format_timestamp_seconds(time.time())
     if len(tweets) > 0:
