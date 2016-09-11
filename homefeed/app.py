@@ -75,7 +75,11 @@ def keep_fitness(lst, max_size):
 def atomic_write(path, content):
     tmp = '{}.tmp'.format(path)
     with open(tmp, 'w') as f:
-        f.write(content)
+        if type(content) in (unicode, str):
+            f.write(content)
+        else:
+            for chunk in content:
+                f.write(chunk)
     os.rename(tmp, path)
 
 
@@ -90,8 +94,8 @@ def read_local_cache():
 
 
 def write_local_cache(tweets):
-    serialized = [json.dumps(tweet) for tweet in tweets]
-    atomic_write(CACHE_FILENAME, '\n'.join(serialized))
+    serialized = [json.dumps(tweet) + '\n' for tweet in tweets]
+    atomic_write(CACHE_FILENAME, serialized)
 
 
 def produce_feed(tweets):
