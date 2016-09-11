@@ -57,6 +57,10 @@ def render_feed(tweets):
 def trywith(f):
     try:
         f()
+    except MemoryError:
+        logger.exception('memory error, exiting')
+        import sys
+        sys.exit(-1)
     except Exception:
         logger.exception('exception occurred')
 
@@ -115,10 +119,7 @@ def main():
 
     import time
     while True:
-        try:
-            main_loop(cached_tweets, twitter)
-        except Exception:
-            logger.exception('main loop error')
+        trywith(lambda: main_loop(cached_tweets, twitter))
         time.sleep(1)
 
 
