@@ -149,7 +149,6 @@ def main_loop(tweets, twitter):
 
 
 def main():
-    cached_tweets = read_local_cache()
     twitter = TwitterAPI(
         config.CONSUMER_KEY,
         config.CONSUMER_SECRET,
@@ -158,7 +157,7 @@ def main():
 
     import time
     while True:
-        trywith(lambda: main_loop(cached_tweets, twitter))
+        trywith(lambda: main_loop(read_local_cache(), twitter))
         time.sleep(1)
 
 
