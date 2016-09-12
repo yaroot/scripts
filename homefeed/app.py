@@ -5,7 +5,6 @@ from __future__ import unicode_literals, division
 import json
 import os
 from datetime import datetime
-import time
 from TwitterAPI import TwitterAPI
 import pystache
 import config
@@ -21,7 +20,43 @@ CACHE_SIZE = 1000 * 100
 FEED_SIZE = 1000 * 10
 CACHE_FILENAME = 'data/feed_cache.json'
 FEED_FILENAME = 'data/feed.xml'
-FEED_TEMPLATE = open('feed_template.xml', 'r').read()
+
+TEMPLATE_HEAD = """
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>{{ FEED_TITLE }}</title>
+  <link href="{{ FEED_LINK_SELF }}" rel="self" />
+  <link href="{{ FEED_LINK }}" />
+  <updated>{{ LAST_UPDATE }}</updated>
+  <id>urn:feed:{{ FEED_ID }}</id>
+  <author>
+    <name>{{ FEED_AUTHOR }}</name>
+  </author>
+"""
+
+TEMPLATE_BODY = """
+  <entry>
+    <title><![CDATA[{{ #user }}@{{ screen_name }} {{ name }}{{ /user }}: {{ text }}]]></title>
+    <link href="https://mobile.twitter.com/{{ #user }}{{ screen_name }}{{ /user }}/status/{{ id_str }}" />
+    <updated>{{ timestamp_isoformat }}</updated>
+    <id>urn:tweet:{{ id_str }}</id>
+    <content type="html">
+      <![CDATA[
+      {{ #extended_entities }}
+        {{ #media }}
+          <a href="{{ display_url }}" rel="nofollow">
+            <img src="{{ media_url_https }}" alt="{{ display_url }}">
+          </a>
+        {{ /media }}
+      {{ /extended_entities }}
+      ]]>
+    </content>
+  </entry>
+"""
+
+TEMPLATE_CLOSING = """
+</feed>
+"""
 
 
 def format_timestamp_millis(i):
@@ -38,21 +73,20 @@ def reformat_timestamp(tweet):
     return copy
 
 
-# TODO make this function return generator
 def render_feed(tweets):
-    last_update = format_timestamp_seconds(time.time())
-    if len(tweets) > 0:
-        last_update = format_timestamp_millis(tweets[-1]['timestamp_ms'])
-    data = {
-        'LAST_UPDATE': last_update,
+    assert len(tweets) > 0
+    header_data = {
+        'LAST_UPDATE': format_timestamp_millis(tweets[-1]['timestamp_ms']),
         'FEED_TITLE': config.FEED_TITLE,
         'FEED_LINK_SELF': config.FEED_LINK_SELF,
         'FEED_LINK': config.FEED_LINK,
         'FEED_ID': config.FEED_ID,
         'FEED_AUTHOR': config.FEED_AUTHOR,
-        'TWEETS': map(reformat_timestamp, tweets),
     }
-    return pystache.render(FEED_TEMPLATE, data)
+    yield pystache.render(TEMPLATE_HEAD, header_data)
+    for t in reversed(tweets):
+        yield pystache.render(TEMPLATE_BODY, reformat_timestamp(t))
+    yield TEMPLATE_CLOSING
 
 
 def trywith(f):
@@ -100,10 +134,10 @@ def write_local_cache(tweets):
 
 
 def produce_feed(tweets):
-    to_render = list(reversed(keep_fitness([t for t in tweets if 'text' in t], FEED_SIZE)))
+    to_render = keep_fitness([t for t in tweets if 'text' in t], FEED_SIZE)
     if to_render:
-        rendered = render_feed(to_render)
-        atomic_write(FEED_FILENAME, rendered.encode('utf-8'))
+        rendered = (chunk.encode('utf-8') for chunk in render_feed(to_render))
+        atomic_write(FEED_FILENAME, rendered)
 
 
 def main_loop(tweets, twitter):
