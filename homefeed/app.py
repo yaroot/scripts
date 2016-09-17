@@ -16,8 +16,8 @@ _logger_factory.basicConfig(
 
 logger = _logger_factory.getLogger(__name__)
 
-CACHE_SIZE = 1000 * 5
-FEED_SIZE = 1000 * 5
+CACHE_SIZE = 1000 * 3
+FEED_SIZE = 1000 * 3
 CACHE_FILENAME = 'data/feed_cache.json'
 FEED_FILENAME = 'data/feed.xml'
 
