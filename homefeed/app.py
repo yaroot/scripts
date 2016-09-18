@@ -157,7 +157,8 @@ def main():
 
     import time
     while True:
-        trywith(lambda: main_loop(read_local_cache(), twitter))
+        # deal with unhandled interruption outside
+        main_loop(read_local_cache(), twitter)
         time.sleep(1)
 
 
