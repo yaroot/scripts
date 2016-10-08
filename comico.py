@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# save comics from comico jp/tw/cn site for offline viewing (on
+# airplanes maybe)
 
 from urllib.parse import urlparse, parse_qs
 from os import mkdir
