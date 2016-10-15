@@ -12,6 +12,8 @@ if [ -n "$2" ]; then
     problematic_package="$2"
 fi
 
+# echo [[:upper:]]*
+# echo [a-z]*
 for d in *; do
     if [ "$skipping" = true ]; then
         if [ "$until" != "$d" ]; then
