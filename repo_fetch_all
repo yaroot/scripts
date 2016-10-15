@@ -30,6 +30,7 @@ for d in *; do
         rt=1
         echo ">>> $d"
         if [ -d ".git" ]; then
+            sleep 1s
             git fetch --prune --all
             rt="$?"
             # if [ -n "`cat .git/config | grep '\[svn\-remote'`" ]; then
