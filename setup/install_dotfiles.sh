@@ -42,12 +42,6 @@ _install "yaroot/dotfiles" "$HOME/.dotfiles"
 _install "yaroot/scripts" "$HOME/.bin"
 _install "yaroot/vimrc" "$HOME/.vim"
 
-# _install yaroot/spiped-PKGBUILD $HOME/repos/spiped-PKGBUILD
-# _install yaroot/tabbed-PKGBUILD $HOME/repos/tabbed-PKGBUILD
-# _install yaroot/shadowsocks-go-PKGBUILD $HOME/repos/shadowsocks-go-PKGBUILD
-# _install yaroot/network.sh $HOME/repos/network.sh
-_install yaroot/emacsd "$HOME/.emacs.d.yaroot"
-
 if [ -f '/etc/os-release' ]; then
   source '/etc/os-release'
   if [ "$NAME" = 'Arch Linux' ]; then
