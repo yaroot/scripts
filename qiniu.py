@@ -8,7 +8,7 @@ import hmac
 from hashlib import sha1
 from base64 import urlsafe_b64encode
 import logging as _logger_factory
-from path import Path
+from pathlib import Path
 from urllib.parse import urlparse, urlencode
 import os
 from datetime import datetime, timedelta
@@ -76,7 +76,7 @@ class Qiniu(object):
         return items
 
     def upload(self, local_path, bucket, target_path):
-        if Path(local_path).size > QiniuUtil.BLOCK_SIZE:
+        if file_size(local_path) > QiniuUtil.BLOCK_SIZE:
             self.upload_multiblock(local_path, bucket, target_path)
         else:
             self.upload_singleshot(local_path, bucket, target_path)
@@ -94,9 +94,9 @@ class Qiniu(object):
 
     def upload_multiblock(self, local_path, bucket, target_path):
         logger.debug('uploading multiblock <{}> to <{}:{}>'.format(local_path, bucket, target_path))
-        file_size = Path(local_path).size
+        total_size = file_size(local_path)
         upload_token = self.generate_upload_token(bucket, target_path)
-        pbar = PBarUtil.new(file_size).start()  # will not be accurate during retries
+        pbar = PBarUtil.new(total_size).start()  # will not be accurate during retries
         with open(local_path, 'rb') as f:
             ctxes = [
                 retry(max_retry=3, func=lambda: self.upload_block(pbar, blk, upload_token))
@@ -183,7 +183,7 @@ class AuthKey(object):
 def current_auth_key():
     keyfile = Path(os.path.join(os.path.expanduser('~'), '.qiniu_access'))
     if keyfile.exists():
-        with open(keyfile) as f:
+        with keyfile.open() as f:
             cont = json.loads(f.read())
             return AuthKey(cont['key'], cont['secret'])
     elif 'QINIU_KEY' in os.environ and 'QINIU_SECRET' in os.environ:
@@ -228,6 +228,10 @@ def info(stuff):
 def assert_response(r):
     if not r.ok:
         raise RuntimeError('request failed {} detail: {}'.format(r.status_code, r.text))
+
+
+def file_size(path):
+    return Path(path).stat().st_size
 
 
 class PBarUtil(object):
@@ -333,7 +337,7 @@ class LocalStorage(Storage):
     def scan(self):
         p = Path(self.basepath)
         assert p.exists()
-        if p.isdir():
+        if p.is_dir():
             return list(self.walk_dir(str(p)))
         else:
             raise RuntimeError("path is not a directory: {}".format(self.basepath))
@@ -395,7 +399,7 @@ class LocalObject(FileObject):
         return self.relpath
 
     def size(self):
-        return Path(self.fullpath()).size
+        return file_size(self.fullpath())
 
     def qetag(self):
         return QiniuUtil.etag(self.fullpath())
