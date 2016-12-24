@@ -102,7 +102,7 @@ class Qiniu(object):
                 retry(max_retry=3, func=lambda: self.upload_block(pbar, blk, upload_token))
                 for blk in QiniuUtil.iter_file(f)]
         pbar.finish()
-        return retry(max_retry=3, func=lambda: self.upload_mkfile(file_size, ctxes, upload_token, bucket, target_path))
+        return retry(max_retry=3, func=lambda: self.upload_mkfile(total_size, ctxes, upload_token, bucket, target_path))
 
     # mkblk response
     # {
