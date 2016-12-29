@@ -9,8 +9,8 @@ def camalize(name):
 
 def derive(name, what):
     n = camalize(name)
-    return 'implicit val %s%s: %s[%s] = derive%s[%s]' % (
-        n, what, what, name, what, name
+    return 'implicit val %s%s: %s[%s] = derive%s' % (
+        n, what, what, name, what
     )
 
 def main():
