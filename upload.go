@@ -61,6 +61,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	http.HandleFunc("/", uploadHandler)
 	err := http.ListenAndServe(":5005", nil)
+	log.Println("Listening on :5005")
 	if err != nil {
 		panic(err)
 	}
