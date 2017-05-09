@@ -50,10 +50,14 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	content := `<form enctype="multipart/form-data" method="post" action="/">
-<input type="file" name="files" multiple />
-<input type="submit" value="upload"/>
-</form>`
+	content := `
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<form enctype="multipart/form-data" method="post" action="/">
+	<input type="file" name="files" multiple />
+	<input type="submit" value="upload"/>
+</form>
+`
 
 	write(w, content)
 }
