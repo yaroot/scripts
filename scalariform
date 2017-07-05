@@ -1,8 +1,0 @@
-#!/bin/sh
-
-sf_jar="$HOME/.local/bin/_scalariform.jar"
-
-test -f $sf_jar || echo "** download https://github.com/daniel-trinh/scalariform/releases to $sf_jar"
-test -f $sf_jar || exit 1
- 
-java -jar $sf_jar $@
