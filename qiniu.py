@@ -120,7 +120,7 @@ class Qiniu(object):
             chunk_size = 128 * 1024  # 32k
             chunks = (blk[i:i+chunk_size] for i in range(0, blk_size, chunk_size))
             for chunk in chunks:
-                pbar.update(min(pbar.currval + len(chunk), pbar.maxval))
+                pbar.update(min(pbar.value + len(chunk), pbar.max_value))
                 yield chunk
 
         r = requests.post(
@@ -238,8 +238,9 @@ class PBarUtil(object):
     @staticmethod
     def new(maxval):
         pbar = progressbar.ProgressBar(
-            maxval=maxval,
-            term_width=80,
+            max_value=maxval,
+            min_value=0,
+            # term_width=80,
             poll=0.1,
             left_justify=False,
             widgets=[
