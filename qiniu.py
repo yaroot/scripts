@@ -3,7 +3,6 @@
 
 # http://developer.qiniu.com/article/index.html
 
-from __future__ import unicode_literals, division
 import hmac
 from hashlib import sha1
 from base64 import urlsafe_b64encode
