@@ -478,6 +478,7 @@ class SyncUtil(object):
             if not is_same(src.files[p], dst.files[p])
         ]
 
+
 @click.group()
 @click.option('--verbose', '-v', is_flag=True)
 def cli_entry(verbose):
