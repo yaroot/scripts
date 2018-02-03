@@ -15,6 +15,7 @@ import json
 from time import sleep
 import requests as _requests_factory
 import progressbar
+import click
 
 logger = _logger_factory.getLogger(__name__)
 
@@ -434,7 +435,7 @@ class QiniuObject(FileObject):
 
 class SyncUtil(object):
     @staticmethod
-    def sync(args, src, dst):
+    def sync(src, dst, force=False, delete=False, skip_etag=False):
         assert type(src) in (QiniuStorage, LocalStorage)\
                and type(dst) in (QiniuStorage, LocalStorage)\
                and type(dst) != type(src)
@@ -442,30 +443,30 @@ class SyncUtil(object):
         dstpaths = set(dst.files.keys())
         toupload = srcpaths.difference(dstpaths)
         toremove = dstpaths.difference(srcpaths)
-        tooverride = SyncUtil.check_override(srcpaths.intersection(dstpaths), src, dst, args.skip_etag)
-        SyncUtil.do_upload(args, src, dst, [src.files[x] for x in toupload])
-        SyncUtil.do_override(args, src, dst, [src.files[x] for x in tooverride])
-        SyncUtil.do_delete(args, src, dst, [dst.files[x] for x in toremove])
+        tooverride = SyncUtil.check_override(srcpaths.intersection(dstpaths), src, dst, skip_etag)
+        SyncUtil.do_upload(force, src, dst, [src.files[x] for x in toupload])
+        SyncUtil.do_override(force and delete, src, dst, [src.files[x] for x in tooverride])
+        SyncUtil.do_delete(force and delete, src, dst, [dst.files[x] for x in toremove])
 
     @staticmethod
-    def do_delete(args, src, dst, todelete):
+    def do_delete(delete, src, dst, todelete):
         for fo in todelete:
             info('delete <{}>'.format(fo.path()))
-            if args.force and args.delete:
+            if delete:
                 dst.delete(fo)
 
     @staticmethod
-    def do_upload(args, src, dst, toupload):
+    def do_upload(force, src, dst, toupload):
         for fo in toupload:
             info('upload <{}>'.format(fo.path()))
-            if args.force:
+            if force:
                 dst.upload(fo)
 
     @staticmethod
-    def do_override(args, src, dst, tooverride):
+    def do_override(override, src, dst, tooverride):
         for fo in tooverride:
             info('override <{}>'.format(fo.path()))
-            if args.force and args.delete:
+            if override:
                 dst.upload(fo)
 
     @staticmethod
@@ -477,28 +478,56 @@ class SyncUtil(object):
             if not is_same(src.files[p], dst.files[p])
         ]
 
-
-def main():
-    import argparse
-    parser = argparse.ArgumentParser(description='sync qiniu')
-    parser.add_argument('source', type=str, help='local path or `<bucket>/optional/path`')
-    parser.add_argument('target', type=str, help='same with source, one should be local path, the other should be remote url')
-    parser.add_argument('--force', '-f', action='store_true', default=False)
-    parser.add_argument('--delete', '-d', action='store_true', default=False)
-    parser.add_argument('--verbose', '-v', action='store_true', default=False)
-    parser.add_argument('--skip-etag', '-s', action='store_true', default=False)
-    args = parser.parse_args()
-
+@click.group()
+@click.option('--verbose', '-v', is_flag=True)
+def cli_entry(verbose):
     _logger_factory.basicConfig(
-        level=args.verbose and _logger_factory.DEBUG or _logger_factory.WARN,
+        level=verbose and _logger_factory.DEBUG or _logger_factory.WARN,
         format='%(levelname)-5s %(asctime)s %(name)s %(message)s'
     )
+    pass
 
+
+@cli_entry.command("sync")
+@cli_entry.argument("source", type=click.STRING)
+@cli_entry.argument("target", type=click.STRING)
+@cli_entry.option('--force', '-f', is_flag=True)
+@cli_entry.option('--delete', '-d', is_flag=True)
+@cli_entry.option('--skip-etag', '-s', is_flag=True)
+def command_sync(source, target, force, delete, skip_etag):
     authkey = current_auth_key()
-    src = Storage.new(authkey, args.source)
-    dst = Storage.new(authkey, args.target)
-    SyncUtil.sync(args, src, dst)
+    src = Storage.new(authkey, source)
+    dst = Storage.new(authkey, target)
+    SyncUtil.sync(src, dst, force=force, delete=delete, skip_etag=skip_etag)
+
+
+@cli_entry.command("delete")
+def command_delete():
+    pass
+
+
+@cli_entry.command("archive")
+def command_archive():
+    pass
+
+
+# def main():
+#     import argparse
+#     parser = argparse.ArgumentParser(description='sync qiniu')
+#     parser.add_argument('source', type=str, help='local path or `<bucket>/optional/path`')
+#     parser.add_argument('target', type=str, help=
+# 'same with source, one should be local path, the other should be remote url')
+#     parser.add_argument('--force', '-f', action='store_true', default=False)
+#     parser.add_argument('--delete', '-d', action='store_true', default=False)
+#     parser.add_argument('--verbose', '-v', action='store_true', default=False)
+#     parser.add_argument('--skip-etag', '-s', action='store_true', default=False)
+#     args = parser.parse_args()
+#
+#     authkey = current_auth_key()
+#     src = Storage.new(authkey, args.source)
+#     dst = Storage.new(authkey, args.target)
+#     SyncUtil.sync(args, src, dst)
 
 
 if __name__ == '__main__':
-    main()
+    cli_entry()
