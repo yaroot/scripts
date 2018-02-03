@@ -490,11 +490,11 @@ def cli_entry(verbose):
 
 
 @cli_entry.command("sync")
-@cli_entry.argument("source", type=click.STRING)
-@cli_entry.argument("target", type=click.STRING)
-@cli_entry.option('--force', '-f', is_flag=True)
-@cli_entry.option('--delete', '-d', is_flag=True)
-@cli_entry.option('--skip-etag', '-s', is_flag=True)
+@click.argument("source", type=click.STRING)
+@click.argument("target", type=click.STRING)
+@click.option('--force', '-f', is_flag=True)
+@click.option('--delete', '-d', is_flag=True)
+@click.option('--skip-etag', '-s', is_flag=True)
 def command_sync(source, target, force, delete, skip_etag):
     authkey = current_auth_key()
     src = Storage.new(authkey, source)
