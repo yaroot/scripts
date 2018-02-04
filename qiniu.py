@@ -573,8 +573,6 @@ def command_archive(target, force):
     dst = Storage.new(authkey, target)
     ArchiveUtil.batch_archive(force, dst)
 
-    pass
-
 
 if __name__ == '__main__':
     cli_entry()
