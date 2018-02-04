@@ -567,7 +567,7 @@ def command_delete(target, force):
 
 @cli_entry.command("archive")
 @click.argument("target", type=click.STRING)
-@click.option('--force', '-f', is_flat=True)
+@click.option('--force', '-f', is_flag=True)
 def command_archive(target, force):
     authkey = current_auth_key()
     dst = Storage.new(authkey, target)
