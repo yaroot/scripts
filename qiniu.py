@@ -152,10 +152,20 @@ class Qiniu(object):
     def download(self, bucket, target_path, local_path):
         pass
 
+    # entry -> '<bucket>:<key>'
+    def encode_entry(self, entry):
+        return urlsafe_b64encode(entry.encode('utf-8')).decode('utf-8')
+
     def delete(self, bucket, target_path):
         logger.debug('delete <{}:{}>'.format(bucket, target_path))
-        entry_uri = urlsafe_b64encode('{}:{}'.format(bucket, target_path).encode('utf-8')).decode('utf-8')
+        entry_uri = self.encode_entry('{}:{}'.format(bucket, target_path))
         r = self.post(self.RS_HOST, '/delete/{}'.format(entry_uri))
+        assert_response(r)
+
+    def archive(self, bucket, target_path, set_archive=True):
+        logger.debug('archive <{}:{}>'.format(bucket, target_path))
+        entry_uri = self.encode_entry('{}:{}'.format(bucket, target_path))
+        r = self.post(self.RS_HOST, '/chstatus/{}/status/{}'.format(entry_uri, set_archive and 1 or 0))
         assert_response(r)
 
 
@@ -425,12 +435,11 @@ class QiniuObject(FileObject):
     }
     """
     def __init__(self, props, basepath):
-        print(props)
         self.key = props['key']
         self.hash = props['hash']
         self.fsize = props['fsize']
         self.putTime = props['putTime']
-        self.type = props['type']
+        self.storage_type = props['type']
         self.rel_path = strip_left(self.key, basepath)
 
     def path(self):
@@ -443,7 +452,7 @@ class QiniuObject(FileObject):
         return self.hash
 
     def is_archive(self):
-        return self.type == 1
+        return self.storage_type == 1
 
     def support_archive(self):
         return True
@@ -495,6 +504,35 @@ class SyncUtil(object):
         ]
 
 
+class DeleteUtil(object):
+    @staticmethod
+    def batch_delete(force, dst):
+        assert type(dst) == QiniuStorage
+        for fo in dst.fileobjects:
+            info('delete <{}>'.format(fo.path()))
+            if force:
+                dst.qiniu.delete(dst.bucket, fo.key)
+        pass
+
+
+class ArchiveUtil(object):
+    @staticmethod
+    def batch_archive(force, dst):
+        assert type(dst) == QiniuStorage
+        for fo in dst.fileobjects:
+            if not fo.is_archive() and fo.support_archive():
+                info('archive <{}>'.format(fo.path()))
+                if force:
+                    dst.qiniu.archive(dst.bucket, fo.key)
+        pass
+
+    @staticmethod
+    def batch_unarchive(force, dst):
+        assert type(dst) == QiniuStorage
+        info('TODO')
+
+
+# TODO: pass authkey as context
 @click.group()
 @click.option('--verbose', '-v', is_flag=True)
 def cli_entry(verbose):
@@ -519,32 +557,25 @@ def command_sync(source, target, force, delete, skip_etag):
 
 
 @cli_entry.command("delete")
-def command_delete():
-    pass
+@click.argument("target", type=click.STRING)
+@click.option('--force', '-f', is_flag=True)
+def command_delete(target, force):
+    authkey = current_auth_key()
+    dst = Storage.new(authkey, target)
+    DeleteUtil.batch_delete(force, dst)
 
 
 @cli_entry.command("archive")
-def command_archive():
+@click.argument("target", type=click.STRING)
+@click.option('--force', '-f', is_flat=True)
+def command_archive(target, force):
+    authkey = current_auth_key()
+    dst = Storage.new(authkey, target)
+    ArchiveUtil.batch_archive(force, dst)
+
     pass
-
-
-# def main():
-#     import argparse
-#     parser = argparse.ArgumentParser(description='sync qiniu')
-#     parser.add_argument('source', type=str, help='local path or `<bucket>/optional/path`')
-#     parser.add_argument('target', type=str, help=
-# 'same with source, one should be local path, the other should be remote url')
-#     parser.add_argument('--force', '-f', action='store_true', default=False)
-#     parser.add_argument('--delete', '-d', action='store_true', default=False)
-#     parser.add_argument('--verbose', '-v', action='store_true', default=False)
-#     parser.add_argument('--skip-etag', '-s', action='store_true', default=False)
-#     args = parser.parse_args()
-#
-#     authkey = current_auth_key()
-#     src = Storage.new(authkey, args.source)
-#     dst = Storage.new(authkey, args.target)
-#     SyncUtil.sync(args, src, dst)
 
 
 if __name__ == '__main__':
     cli_entry()
+
