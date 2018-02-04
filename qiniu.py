@@ -387,6 +387,12 @@ class FileObject(object):
     def qetag(self):
         pass
 
+    def is_archive(self):
+        return False
+
+    def support_archive(self):
+        return False
+
 
 class LocalObject(FileObject):
     def __init__(self, path, basepath):
@@ -409,18 +415,22 @@ class LocalObject(FileObject):
 class QiniuObject(FileObject):
     """
     {
-      "key": "duplicity-full.20160817T150035Z.vol4.difftar.gpg",
-      "hash": "lpNs_-6JIpe9qjdWA9L7Qc8r3pOK",
-      "fsize": 209764896,
-      "mimeType": "application/pgp-encrypted",
-      "putTime": 14714478455502964
+       "key" : "tsu-repos/duplicity-new-signatures.20171227T071233Z.to.20180203T144703Z.sigtar.gpg",
+       "hash" : "lhxosg25TPvGfiRP4oseqj2Ht5Gz",
+       "status" : 0,
+       "mimeType" : "application/octet-stream",
+       "type" : 0,
+       "putTime" : 15176766658333667,
+       "fsize" : 168485346
     }
     """
     def __init__(self, props, basepath):
+        print(props)
         self.key = props['key']
         self.hash = props['hash']
         self.fsize = props['fsize']
         self.putTime = props['putTime']
+        self.type = props['type']
         self.rel_path = strip_left(self.key, basepath)
 
     def path(self):
@@ -431,6 +441,12 @@ class QiniuObject(FileObject):
 
     def qetag(self):
         return self.hash
+
+    def is_archive(self):
+        return self.type == 1
+
+    def support_archive(self):
+        return True
 
 
 class SyncUtil(object):
