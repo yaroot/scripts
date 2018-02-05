@@ -165,10 +165,8 @@ class Qiniu(object):
     def archive(self, bucket, target_path, set_archive=True):
         logger.debug('archive <{}:{}>'.format(bucket, target_path))
         entry_uri = self.encode_entry('{}:{}'.format(bucket, target_path))
-        status = 1
-        if set_archive: status = 0
-        r = self.post(self.RS_HOST, '/chstatus/{}/status/{}'.format(entry_uri, status))
-        # assert_response(r)
+        r = self.post(self.RS_HOST, '/chtype/{}/type/{}'.format(entry_uri, set_archive and 1 or 0))
+        assert_response(r)
 
 
 class AuthKey(object):
