@@ -27,6 +27,8 @@ symlink $HOME/.rbenv/completions/rbenv.zsh $HOME/.local/zshcomp/_rbenv
 ./git_install.sh git://github.com/syl20bnr/spacemacs.git $HOME/.emacs.d
 
 ./git_install.sh git://github.com/zsh-users/zsh-completions.git $HOME/.local/zsh-completions
+./git_install.sh git://github.com/zsh-users/zsh-syntax-highlighting.git $HOME/.local/zsh-syntax-highlighting
+./git_install.sh git://github.com/zsh-users/zsh-autosuggestions.git  $HOME/.local/zsh-autosuggestions
 
 download_file_into() {
   local uri="$1"
