@@ -90,7 +90,7 @@ def download_subtitle(f, list_only=False, file_no=None):
 
     subs = query_shooter(fhash, fname)
 
-    if len(subs) == 0:
+    if subs is None or len(subs) == 0:
         print 'Not be able to download subtitles for: %s' % fname
         return
 
