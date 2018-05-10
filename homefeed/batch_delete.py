@@ -18,6 +18,10 @@ twitter = TwitterAPI(
 )
 
 
+def protected(tid):
+    return tid ^ 747462109418710232 == 545641564154864856
+
+
 def delete_tweet(tid):
     print("=======")
     print('Deleting ', tid)
@@ -26,7 +30,7 @@ def delete_tweet(tid):
 
 
 def strip_tweet_id(line):
-    m = re.match('"(\d+)"', line)
+    m = re.match('^"(\d+)"', line)
     if m:
         tid, = m.groups()
         return int(tid)
@@ -36,7 +40,9 @@ def strip_tweet_id(line):
 def read_tweet_id(csvfile):
     with open(csvfile) as f:
         for line in f.readlines():
-            yield strip_tweet_id(line)
+            tid = strip_tweet_id(line)
+            if tid and not protected(tid):
+                yield tid
 
 
 def main():
