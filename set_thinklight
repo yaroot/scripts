@@ -1,0 +1,15 @@
+#!/bin/bash
+
+pct=$1
+
+test "x$pct" = "x" && echo "Usage: set_thinklight <percentage> (10~100%)" && exit -1
+test $pct -gt 100  && echo "Error: percentage must be less than 100" && exit -1
+test $pct -lt 10   && echo "Error: percentage must be greater than 10" && exit -1 
+
+maxbright="`cat /sys/class/backlight/intel_backlight/max_brightness`"
+pctbright=`echo "$maxbright/100" | bc -l`
+
+bright_x=`echo "$pct*$pctbright/1" | bc`
+
+echo $bright_x > /sys/class/backlight/intel_backlight/brightness
+

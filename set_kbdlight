@@ -1,0 +1,10 @@
+#!/bin/bash
+
+x=$1
+
+if [ $x -gt 2 -o $x -lt 0 ]; then
+  echo 'Usage: set_kbd_light 1/2/0'
+  exit -1
+fi
+
+echo $x > /sys/class/leds/tpacpi::kbd_backlight/brightness
