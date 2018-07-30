@@ -3,4 +3,5 @@
 httpd
 .idea/
 venv/
+.venv/
 /upload
