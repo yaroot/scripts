@@ -51,9 +51,9 @@ main()
   for host in "$@"; do
     # echo "[$SSH_CMD $host]"
     tmux split-window -t $TMUXWINDOW
+    tmux select-layout -t $TMUXWINDOW even-vertical > /dev/null
     local TMUXPANE=`tmux list-panes -t $TMUXWINDOW | awk -F: 'END { print $1 }'`
     tmux send-key -t "${TMUXWINDOW}.${TMUXPANE}" "$SSH_CMD $host" Enter
-    tmux select-layout -t $TMUXWINDOW even-vertical > /dev/null
   done
 
   # kill the first pane
