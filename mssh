@@ -50,8 +50,10 @@ main()
   # split window and `ssh` to `host`
   for host in "$@"; do
     # echo "[$SSH_CMD $host]"
-    tmux split-window -t $TMUXWINDOW
+    tmux split-window -v -t $TMUXWINDOW
+    sleep 0.1s
     tmux select-layout -t $TMUXWINDOW even-vertical > /dev/null
+    sleep 0.1s
     local TMUXPANE=`tmux list-panes -t $TMUXWINDOW | awk -F: 'END { print $1 }'`
     tmux send-key -t "${TMUXWINDOW}.${TMUXPANE}" "$SSH_CMD $host" Enter
   done
