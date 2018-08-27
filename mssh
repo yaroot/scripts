@@ -50,18 +50,21 @@ main()
   # split window and `ssh` to `host`
   for host in "$@"; do
     # echo "[$SSH_CMD $host]"
-    tmux split-window -v -t $TMUXWINDOW
-    sleep 0.1s
+    tmux split-window -v -t $TMUXWINDOW "exec $SSH_CMD $host"
     tmux select-layout -t $TMUXWINDOW even-vertical > /dev/null
-    sleep 0.1s
-    local TMUXPANE=`tmux list-panes -t $TMUXWINDOW | awk -F: 'END { print $1 }'`
-    tmux send-key -t "${TMUXWINDOW}.${TMUXPANE}" "$SSH_CMD $host" Enter
+    # tmux send-key -t 
+    #sleep 0.3s
+    # local TMUXPANE=`tmux list-panes -t $TMUXWINDOW | awk -F: 'END { print $1 }'`
+    # tmux send-key -t "${TMUXWINDOW}.${TMUXPANE}" "$SSH_CMD $host" Enter
+    #sleep 0.3s
   done
+  tmux select-layout -t $TMUXWINDOW even-vertical > /dev/null
 
   # kill the first pane
   tmux kill-pane -t "${TMUXWINDOW}.0"
   tmux set-window-option -t $TMUXWINDOW synchronize-panes on > /dev/null
-  sleep 1s && tmux select-layout -t $TMUXWINDOW even-vertical > /dev/null
+  tmux select-layout -t $TMUXWINDOW even-vertical > /dev/null
+  tmux select-layout -t $TMUXWINDOW even-vertical > /dev/null
 }
 
 main $@
