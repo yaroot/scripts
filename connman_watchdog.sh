@@ -9,6 +9,7 @@ test_link() {
 }
 
 reconnect() {
+    echo 'Reconnecting to' $SERVICE
     connmanctl disable wifi && sleep 5s && \
     connmanctl enable wifi && sleep 5s && \
     connmanctl connect $SERVICE
