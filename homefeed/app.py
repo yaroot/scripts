@@ -198,6 +198,10 @@ def timestamp_from_id(id: int):
 def get_zulu_time(t):
     ts = timestamp_from_id(t['id'])
     dt = datetime.utcfromtimestamp(ts)
+    return format_time(dt)
+
+
+def format_time(dt):
     return dt.isoformat() + 'Z'
 
 
@@ -217,6 +221,7 @@ def generate_timeline(tweets):
             'title': '{} (@{}): {}'.format(t['user']['name'], t['user']['screen_name'], t['text']),
             'url': 'https://mobile.twitter.com/{}/status/{}'.format(t['user']['screen_name'], t['id']),
             'date_published': get_zulu_time(t),
+            'date_modified': format_time(datetime.utcnow()),
             'content_html': get_image_content_html(t)
         }
         for t in tweets
