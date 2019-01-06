@@ -221,7 +221,7 @@ def generate_timeline(tweets):
             'title': '{} (@{}): {}'.format(t['user']['name'], t['user']['screen_name'], t['text']),
             'url': 'https://mobile.twitter.com/{}/status/{}'.format(t['user']['screen_name'], t['id']),
             'date_published': get_zulu_time(t),
-            'date_modified': format_time(datetime.utcnow()),
+            # 'date_modified': format_time(datetime.utcnow()),
             'content_html': get_image_content_html(t)
         }
         for t in tweets
