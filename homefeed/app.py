@@ -2,15 +2,15 @@
 
 from __future__ import unicode_literals, division
 
+import time
 import json
 import os
 from datetime import datetime
 from TwitterAPI import TwitterAPI
-import pystache
 import config
 import logging as _logger_factory
 _logger_factory.basicConfig(
-    level=_logger_factory.DEBUG,
+    level=_logger_factory.INFO,
     format='%(levelname)-5s %(asctime)s %(name)s %(message)s'
 )
 
@@ -181,81 +181,88 @@ FEED_FILENAME = 'data/feed.json'
   "lang": "zh"
 }
 """
-def format_timestamp_millis(i):
-    return format_timestamp_seconds(int(i) / 1000)
 
 
-def format_timestamp_seconds(i):
-    return datetime.utcfromtimestamp(int(i)).isoformat() + 'Z'
+# twitter snowflake:
+# 41 bits of timestamp in millis
+# 10 bits of machine id
+# 12 bits of sequence id
+def timestamp_from_id(id: int):
+    MASK = 9223372036850581504
+    EPOCH = 1288834974657
+    return (((id & MASK) >> 22) + EPOCH)/1000
 
 
-def reformat_timestamp(tweet):
-    copy = dict(tweet)
-    copy['timestamp_isoformat'] = format_timestamp_millis(tweet['timestamp_ms'])
-    return copy
+def get_zulu_time(t):
+    ts = timestamp_from_id(t['id'])
+    dt = datetime.utcfromtimestamp(ts)
+    return dt.isoformat() + 'Z'
 
 
-def render_feed(tweets):
-    assert len(tweets) > 0
-    header_data = {
-        'LAST_UPDATE': format_timestamp_millis(tweets[-1]['timestamp_ms']),
-        'FEED_TITLE': config.FEED_TITLE,
-        'FEED_LINK_SELF': config.FEED_LINK_SELF,
-        'FEED_LINK': config.FEED_LINK,
-        'FEED_ID': config.FEED_ID,
-        'FEED_AUTHOR': config.FEED_AUTHOR,
-    }
-    yield pystache.render(TEMPLATE_HEAD, header_data)
-    for t in reversed(tweets):
-        yield pystache.render(TEMPLATE_BODY, reformat_timestamp(t))
-    yield TEMPLATE_CLOSING
+def get_image(t):
+    media = t.get('extended_entities', {}).get('media', [])
+    if media:
+        return media[0]['media_url_https']
+    pass
 
 
-def trywith(f):
-    try:
-        f()
-    except MemoryError:
-        logger.exception('memory error, exiting')
-        import sys
-        sys.exit(-1)
-    except Exception:
-        logger.exception('exception occurred')
+def generate_timeline(tweets):
+    return [
+        {
+            'id': 'urn:tweet:{}'.format(t['id']),
+            'title': '{} (@{}): {}'.format(t['user']['name'], t['user']['screen_name'], t['text']),
+            'url': 'https://mobile.twitter.com/{}/status/{}'.format(t['user']['screen_name'], t['id']),
+            'date_published': get_zulu_time(t),
+            'image': get_image(t)
+        }
+        for t in tweets
+    ]
 
 
-def keep_fitness(lst, max_size):
-    if len(lst) > max_size:
-        return lst[len(lst) - max_size:]
-    else:
-        return lst
-
-
-def atomic_write(path, content):
+def atomic_write_json(path, data):
     tmp = '{}.tmp'.format(path)
     with open(tmp, 'w') as f:
-        f.write(content)
+        json.dump(data, f, ensure_ascii=True, indent=2)
     os.rename(tmp, path)
 
 
 def write_cache(tweets):
-    atomic_write(CACHE_FILENAME, json.dumps(tweets))
+    atomic_write_json(CACHE_FILENAME, tweets)
 
 
 def write_feed(tweets):
-    pass
+    data = {
+        'version': 'https://jsonfeed.org/version/1',
+        'title': 'Yaroot\'s home timeline',
+        'home_page_url': 'https://twitter.com/',
+        'items': generate_timeline(tweets)
+    }
+    atomic_write_json(FEED_FILENAME, data)
 
 
 def fetch_tweets0(twitter: TwitterAPI, since_id=None):
-    pass
-
-
-def fetch_tweets(twitter: TwitterAPI, since_id=None):
     params = {
         'count': 200,
         'since_id': since_id
     }
     r = twitter.request('statuses/home_timeline', params)
-    import ipdb; ipdb.set_trace()
-    pass
+    tweets = r.json()
+    new_since_id = None
+    if tweets:
+        new_since_id = tweets[0]['id']
+    return tweets, new_since_id
+
+
+def fetch_tweets(twitter: TwitterAPI, since_id=None):
+    tweets = []
+    while True:
+        tweets0, new_id = fetch_tweets0(twitter, since_id)
+        tweets = tweets0 + tweets
+        logger.info('fetched {} new tweets, new_id={}, old_id={}'.format(len(tweets0), since_id, new_id))
+        if not new_id:
+            return tweets
+        since_id = new_id
+        time.sleep(1)
 
 
 def load_old_tweets():
@@ -274,10 +281,14 @@ def main():
         config.ACCESS_TOKEN_SECRET)
 
     old_tweets = load_old_tweets()
-    new_tweets = fetch_tweets(twitter)
-    # merge tweets
-    # write feed
-    # write cache
+    logger.info('loaded {} old tweets'.format(len(old_tweets)))
+    since_id = old_tweets[0]['id'] if old_tweets else None
+    new_tweets = fetch_tweets(twitter, since_id)
+    logger.info('loaded {} new tweets'.format(len(new_tweets)))
+
+    all_tweets = new_tweets + old_tweets
+    write_cache(all_tweets)
+    write_feed(all_tweets[:TIMELINE_SIZE])
 
 
 if __name__ == '__main__':
