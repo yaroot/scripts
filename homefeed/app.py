@@ -203,12 +203,11 @@ def get_zulu_time(t):
 
 def get_image_content_html(t):
     media = t.get('extended_entities', {}).get('media', [])
-    if media:
-        return '\n<br>\n'.join([
-            '''<a href="{link}" rel="nofollow"><img src="{src}"></a>'''.format(
-                link=img['url'], src=img['media_url_https'])
-            for img in media
-        ])
+    return '\n<br>\n'.join([
+        '''<a href="{link}" rel="nofollow"><img src="{src}"></a>'''.format(
+            link=img['url'], src=img['media_url_https'])
+        for img in media
+    ])
 
 
 def generate_timeline(tweets):
