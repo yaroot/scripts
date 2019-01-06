@@ -287,8 +287,9 @@ def main():
     logger.info('loaded {} new tweets'.format(len(new_tweets)))
 
     all_tweets = new_tweets + old_tweets
-    write_cache(all_tweets)
-    write_feed(all_tweets[:TIMELINE_SIZE])
+    write_cache(all_tweets[:TIMELINE_SIZE])
+    write_feed(all_tweets)
+    logger.info('written {} items'.format(len(all_tweets)))
 
 
 if __name__ == '__main__':
