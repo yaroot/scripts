@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from __future__ import unicode_literals, division, print_function
 
 import sys
 import os
@@ -26,7 +25,7 @@ def delete_tweet(tid):
     print("=======")
     print('Deleting ', tid)
     r = twitter.request('statuses/destroy/:%d' % tid)
-    print(r.status_code, r.get_rest_quota())
+    print(r.status_code, r.get_quota())
 
 
 def strip_tweet_id(line):
