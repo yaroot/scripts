@@ -17,6 +17,8 @@ _logger_factory.basicConfig(
 logger = _logger_factory.getLogger(__name__)
 
 TIMELINE_SIZE = 1000 * 3
+FETCH_COUNT = 200
+
 CACHE_FILENAME = 'data/feed_cache.json'
 FEED_FILENAME = 'data/feed.json'
 
@@ -242,7 +244,7 @@ def write_feed(tweets):
 
 def fetch_tweets0(twitter: TwitterAPI, since_id=None):
     params = {
-        'count': 200,
+        'count': FETCH_COUNT,
         'since_id': since_id
     }
     r = twitter.request('statuses/home_timeline', params)
@@ -259,7 +261,7 @@ def fetch_tweets(twitter: TwitterAPI, since_id=None):
         tweets0, new_id = fetch_tweets0(twitter, since_id)
         tweets = tweets0 + tweets
         logger.info('fetched {} new tweets, new_id={}, old_id={}'.format(len(tweets0), since_id, new_id))
-        if not new_id:
+        if len(tweets) < FETCH_COUNT/2 or not new_id:
             return tweets
         since_id = new_id
         time.sleep(1)
