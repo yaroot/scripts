@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-from __future__ import unicode_literals, division
-
 import sys
 import time
 import json
@@ -203,19 +201,14 @@ def get_zulu_time(t):
     return dt.isoformat() + 'Z'
 
 
-def get_image(t):
+def get_image_content_html(t):
     media = t.get('extended_entities', {}).get('media', [])
     if media:
-        return media[0]['media_url_https']
-    pass
-
-
-def get_image_content_html(t):
-    img = get_image(t)
-    if img:
-        return ''
-    else:
-        return ''
+        return '\n<br>\n'.join([
+            '''<a href="{link}" rel="nofollow"><img src="{src}"></a>'''.format(
+                link=img['url'], src=img['media_url_https'])
+            for img in media
+        ])
 
 
 def generate_timeline(tweets):
