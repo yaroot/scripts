@@ -210,6 +210,14 @@ def get_image(t):
     pass
 
 
+def get_image_content_html(t):
+    img = get_image(t)
+    if img:
+        return ''
+    else:
+        return ''
+
+
 def generate_timeline(tweets):
     return [
         {
@@ -217,7 +225,7 @@ def generate_timeline(tweets):
             'title': '{} (@{}): {}'.format(t['user']['name'], t['user']['screen_name'], t['text']),
             'url': 'https://mobile.twitter.com/{}/status/{}'.format(t['user']['screen_name'], t['id']),
             'date_published': get_zulu_time(t),
-            'image': get_image(t)
+            'content_html': get_image_content_html(t)
         }
         for t in tweets
     ]
@@ -237,7 +245,7 @@ def write_cache(tweets):
 def write_feed(tweets):
     data = {
         'version': 'https://jsonfeed.org/version/1',
-        'title': 'Yaroot\'s home timeline',
+        'title': config.FEED_TITLE,
         'home_page_url': 'https://twitter.com/',
         'items': generate_timeline(tweets)
     }
