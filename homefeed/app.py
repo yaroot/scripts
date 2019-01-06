@@ -16,49 +16,171 @@ _logger_factory.basicConfig(
 
 logger = _logger_factory.getLogger(__name__)
 
-CACHE_SIZE = 1000 * 3
-FEED_SIZE = 1000 * 3
+TIMELINE_SIZE = 1000 * 3
 CACHE_FILENAME = 'data/feed_cache.json'
-FEED_FILENAME = 'data/feed.xml'
+FEED_FILENAME = 'data/feed.json'
 
-TEMPLATE_HEAD = """
-<?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
-  <title>{{ FEED_TITLE }}</title>
-  <link href="{{ FEED_LINK_SELF }}" rel="self" />
-  <link href="{{ FEED_LINK }}" />
-  <updated>{{ LAST_UPDATE }}</updated>
-  <id>urn:feed:{{ FEED_ID }}</id>
-  <author>
-    <name>{{ FEED_AUTHOR }}</name>
-  </author>
+
+# tweet example
 """
-
-TEMPLATE_BODY = """
-  <entry>
-    <title><![CDATA[{{ #user }}@{{ screen_name }} {{ name }}{{ /user }}: {{ text }}]]></title>
-    <link href="https://mobile.twitter.com/{{ #user }}{{ screen_name }}{{ /user }}/status/{{ id_str }}" />
-    <updated>{{ timestamp_isoformat }}</updated>
-    <id>urn:tweet:{{ id_str }}</id>
-    <content type="html">
-      <![CDATA[
-      {{ #extended_entities }}
-        {{ #media }}
-          <a href="{{ display_url }}" rel="nofollow">
-            <img src="{{ media_url_https }}" alt="{{ display_url }}">
-          </a>
-        {{ /media }}
-      {{ /extended_entities }}
-      ]]>
-    </content>
-  </entry>
+{
+  "created_at": "Sun Jan 06 10:01:53 +0000 2019",
+  "id": 1081853350054785000,
+  "id_str": "1081853350054785025",
+  "text": "说好的\"Full Support for Windows Server 2019\"呢？ https://t.co/MUIUtevvLF",
+  "truncated": false,
+  "entities": {
+    "hashtags": [],
+    "symbols": [],
+    "user_mentions": [],
+    "urls": [],
+    "media": [
+      {
+        "id": 1081853239153197000,
+        "id_str": "1081853239153197056",
+        "indices": [
+          44,
+          67
+        ],
+        "media_url": "http://pbs.twimg.com/media/DwODygLVAAAvlcB.jpg",
+        "media_url_https": "https://pbs.twimg.com/media/DwODygLVAAAvlcB.jpg",
+        "url": "https://t.co/MUIUtevvLF",
+        "display_url": "pic.twitter.com/MUIUtevvLF",
+        "expanded_url": "https://twitter.com/nekomplex/status/1081853350054785025/photo/1",
+        "type": "photo",
+        "sizes": {
+          "large": {
+            "w": 1425,
+            "h": 834,
+            "resize": "fit"
+          },
+          "thumb": {
+            "w": 150,
+            "h": 150,
+            "resize": "crop"
+          },
+          "small": {
+            "w": 680,
+            "h": 398,
+            "resize": "fit"
+          },
+          "medium": {
+            "w": 1200,
+            "h": 702,
+            "resize": "fit"
+          }
+        }
+      }
+    ]
+  },
+  "extended_entities": {
+    "media": [
+      {
+        "id": 1081853239153197000,
+        "id_str": "1081853239153197056",
+        "indices": [
+          44,
+          67
+        ],
+        "media_url": "http://pbs.twimg.com/media/DwODygLVAAAvlcB.jpg",
+        "media_url_https": "https://pbs.twimg.com/media/DwODygLVAAAvlcB.jpg",
+        "url": "https://t.co/MUIUtevvLF",
+        "display_url": "pic.twitter.com/MUIUtevvLF",
+        "expanded_url": "https://twitter.com/nekomplex/status/1081853350054785025/photo/1",
+        "type": "photo",
+        "sizes": {
+          "large": {
+            "w": 1425,
+            "h": 834,
+            "resize": "fit"
+          },
+          "thumb": {
+            "w": 150,
+            "h": 150,
+            "resize": "crop"
+          },
+          "small": {
+            "w": 680,
+            "h": 398,
+            "resize": "fit"
+          },
+          "medium": {
+            "w": 1200,
+            "h": 702,
+            "resize": "fit"
+          }
+        }
+      }
+    ]
+  },
+  "source": "<a href=\"http://twitter.com\" rel=\"nofollow\">Twitter Web Client</a>",
+  "in_reply_to_status_id": null,
+  "in_reply_to_status_id_str": null,
+  "in_reply_to_user_id": null,
+  "in_reply_to_user_id_str": null,
+  "in_reply_to_screen_name": null,
+  "user": {
+    "id": 78234516,
+    "id_str": "78234516",
+    "name": "猫爺划水中",
+    "screen_name": "nekomplex",
+    "location": "Nagoya, Japan",
+    "description": "博土临时工／无薪程序员／桥洞投资家／岛国吃瓜党／资深魔法师／微笑真任饭／",
+    "url": null,
+    "entities": {
+      "description": {
+        "urls": []
+      }
+    },
+    "protected": false,
+    "followers_count": 477,
+    "friends_count": 635,
+    "listed_count": 10,
+    "created_at": "Tue Sep 29 06:20:54 +0000 2009",
+    "favourites_count": 559,
+    "utc_offset": null,
+    "time_zone": null,
+    "geo_enabled": true,
+    "verified": false,
+    "statuses_count": 7362,
+    "lang": "en",
+    "contributors_enabled": false,
+    "is_translator": false,
+    "is_translation_enabled": false,
+    "profile_background_color": "C0DEED",
+    "profile_background_image_url": "http://abs.twimg.com/images/themes/theme1/bg.png",
+    "profile_background_image_url_https": "https://abs.twimg.com/images/themes/theme1/bg.png",
+    "profile_background_tile": false,
+    "profile_image_url": "http://pbs.twimg.com/profile_images/606390618428837888/X4-SDIX4_normal.jpg",
+    "profile_image_url_https": "https://pbs.twimg.com/profile_images/606390618428837888/X4-SDIX4_normal.jpg",
+    "profile_banner_url": "https://pbs.twimg.com/profile_banners/78234516/1434628625",
+    "profile_link_color": "1DA1F2",
+    "profile_sidebar_border_color": "C0DEED",
+    "profile_sidebar_fill_color": "DDEEF6",
+    "profile_text_color": "333333",
+    "profile_use_background_image": true,
+    "has_extended_profile": false,
+    "default_profile": true,
+    "default_profile_image": false,
+    "following": true,
+    "follow_request_sent": false,
+    "notifications": false,
+    "translator_type": "none"
+  },
+  "geo": null,
+  "coordinates": null,
+  "place": null,
+  "contributors": null,
+  "is_quote_status": false,
+  "retweet_count": 0,
+  "favorite_count": 0,
+  "favorited": false,
+  "retweeted": false,
+  "possibly_sensitive": false,
+  "possibly_sensitive_appealable": false,
+  "lang": "zh"
+}
 """
-
-TEMPLATE_CLOSING = """
-</feed>
-"""
-
-
 def format_timestamp_millis(i):
     return format_timestamp_seconds(int(i) / 1000)
 
@@ -110,42 +232,38 @@ def keep_fitness(lst, max_size):
 def atomic_write(path, content):
     tmp = '{}.tmp'.format(path)
     with open(tmp, 'w') as f:
-        if type(content) in (unicode, str):
-            f.write(content)
-        else:
-            for chunk in content:
-                f.write(chunk)
+        f.write(content)
     os.rename(tmp, path)
 
 
-def read_local_cache():
-    if not os.path.exists(CACHE_FILENAME):
+def write_cache(tweets):
+    atomic_write(CACHE_FILENAME, json.dumps(tweets))
+
+
+def write_feed(tweets):
+    pass
+
+
+def fetch_tweets0(twitter: TwitterAPI, since_id=None):
+    pass
+
+
+def fetch_tweets(twitter: TwitterAPI, since_id=None):
+    params = {
+        'count': 200,
+        'since_id': since_id
+    }
+    r = twitter.request('statuses/home_timeline', params)
+    import ipdb; ipdb.set_trace()
+    pass
+
+
+def load_old_tweets():
+    if os.path.exists(CACHE_FILENAME):
+        with open(CACHE_FILENAME) as f:
+            return json.loads(f.read())
+    else:
         return []
-    with open(CACHE_FILENAME, 'r') as f:
-        return [
-            json.loads(line)
-            for line in f.readlines()
-        ]
-
-
-def write_local_cache(tweets):
-    serialized = [json.dumps(tweet) + '\n' for tweet in tweets]
-    atomic_write(CACHE_FILENAME, serialized)
-
-
-def produce_feed(tweets):
-    to_render = keep_fitness([t for t in tweets if 'text' in t], FEED_SIZE)
-    if to_render:
-        rendered = (chunk.encode('utf-8') for chunk in render_feed(to_render))
-        atomic_write(FEED_FILENAME, rendered)
-
-
-def main_loop(tweets, twitter):
-    for item in twitter.request('user'):
-        tweets.append(item)
-        tweets = keep_fitness(tweets, CACHE_SIZE)
-        trywith(lambda: write_local_cache(tweets))
-        trywith(lambda: produce_feed(tweets))
 
 
 def main():
@@ -155,11 +273,11 @@ def main():
         config.ACCESS_TOKEN_KEY,
         config.ACCESS_TOKEN_SECRET)
 
-    import time
-    while True:
-        # deal with unhandled interruption outside
-        main_loop(read_local_cache(), twitter)
-        time.sleep(1)
+    old_tweets = load_old_tweets()
+    new_tweets = fetch_tweets(twitter)
+    # merge tweets
+    # write feed
+    # write cache
 
 
 if __name__ == '__main__':
