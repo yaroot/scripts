@@ -16,7 +16,7 @@ _logger_factory.basicConfig(
     stream=sys.stdout
 )
 
-logger = _logger_factory.getLogger(__name__)
+logger = _logger_factory.getLogger('homefeed')
 
 TIMELINE_SIZE = 1000 * 3
 FETCH_COUNT = 200
