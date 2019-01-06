@@ -2,6 +2,7 @@
 
 from __future__ import unicode_literals, division
 
+import sys
 import time
 import json
 import os
@@ -11,7 +12,8 @@ import config
 import logging as _logger_factory
 _logger_factory.basicConfig(
     level=_logger_factory.INFO,
-    format='%(levelname)-5s %(asctime)s %(name)s %(message)s'
+    format='%(levelname)-5s %(asctime)s %(name)s %(message)s',
+    stream=sys.stdout
 )
 
 logger = _logger_factory.getLogger(__name__)
