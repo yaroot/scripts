@@ -1,12 +1,9 @@
 import sys
 import time
 import json
-import os
-from datetime import datetime
 from TwitterAPI import TwitterAPI
-import config
 import sqlite3
-from .util import timestamp_from_id, load_api
+from util import timestamp_from_id, load_api
 
 import logging as _logger_factory
 _logger_factory.basicConfig(
@@ -28,27 +25,41 @@ CREATE TABLE IF NOT EXISTS "fav_tweets" (
 """
 
 
-def load_history(twitter: TwitterAPI, db: sqlite3.Connection):
+def request_fav(twitter: TwitterAPI, max_id=None):
+    r = twitter.request('favorites/list', params={
+        'count': 200,
+        'max_id': max_id,
+        'include_entities': 'true',
+    })
+    return r.json()
+
+
+def savage_latest(twitter: TwitterAPI, db: sqlite3.Connection):
+    tweets = request_fav(twitter)
+    if tweets:
+        for t in tweets:
+            insert(db, t)
+        print('saved %s tweets' % len(tweets))
+    pass
+
+
+def savage_history(twitter: TwitterAPI, db: sqlite3.Connection):
+    max_id = None
     while True:
-        max_id = load_max_id(db)
         print('max_id=%s' % max_id)
-        r = twitter.request('favorites/list', params={
-            'count': 200,
-            'max_id': max_id,
-            'include_entities': 'true',
-        })
-        tweets = r.json()
+        tweets = request_fav(twitter, max_id)
         print('fetched %s tweets' % len(tweets))
-        if not r:
+        if not tweets:
             return
         for t in tweets:
             insert(db, t)
         print('saved %s tweets' % len(tweets))
-        time.sleep(30)
+        max_id = int(tweets[-1]['id_str'])
+        time.sleep(3)
 
 
 def dump_db(db: sqlite3.Connection):
-    with open(DB_EXPORT) as f:
+    with open(DB_EXPORT, 'w') as f:
         for l in db.iterdump():
             f.write(l)
             f.write('\n')
@@ -91,9 +102,10 @@ def load_max_id(db: sqlite3.Connection):
 def main():
     twitter = load_api()
     db = open_db()
-    load_history(twitter, db)
+    # savage_history(twitter, db)
+    savage_latest(twitter, db)
 
-    # dump_db(db)
+    dump_db(db)
     db.close()
 
 
