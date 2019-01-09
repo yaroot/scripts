@@ -6,6 +6,7 @@ from datetime import datetime
 from TwitterAPI import TwitterAPI
 import config
 import sqlite3
+from .util import timestamp_from_id, load_api
 
 import logging as _logger_factory
 _logger_factory.basicConfig(
@@ -25,13 +26,6 @@ CREATE TABLE IF NOT EXISTS "fav_tweets" (
  `created_at` UNSIGNED INTEGER NOT NULL
 );
 """
-
-
-# snowflake
-def timestamp_from_id(id: int):
-    MASK = 9223372036850581504
-    EPOCH = 1288834974657
-    return (((id & MASK) >> 22) + EPOCH)/1000
 
 
 def load_history(twitter: TwitterAPI, db: sqlite3.Connection):
@@ -95,11 +89,7 @@ def load_max_id(db: sqlite3.Connection):
 
 
 def main():
-    twitter = TwitterAPI(
-        config.CONSUMER_KEY,
-        config.CONSUMER_SECRET,
-        config.ACCESS_TOKEN_KEY,
-        config.ACCESS_TOKEN_SECRET)
+    twitter = load_api()
     db = open_db()
     load_history(twitter, db)
 

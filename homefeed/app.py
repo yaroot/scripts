@@ -8,6 +8,9 @@ from datetime import datetime
 from TwitterAPI import TwitterAPI
 import config
 import logging as _logger_factory
+from .util import timestamp_from_id, load_api
+
+
 _logger_factory.basicConfig(
     level=_logger_factory.INFO,
     format='%(levelname)-5s %(asctime)s %(name)s %(message)s',
@@ -185,16 +188,6 @@ FEED_FILENAME = 'data/feed.json'
 """
 
 
-# twitter snowflake:
-# 41 bits of timestamp in millis
-# 10 bits of machine id
-# 12 bits of sequence id
-def timestamp_from_id(id: int):
-    MASK = 9223372036850581504
-    EPOCH = 1288834974657
-    return (((id & MASK) >> 22) + EPOCH)/1000
-
-
 def get_zulu_time(t):
     ts = timestamp_from_id(t['id'])
     dt = datetime.utcfromtimestamp(ts)
@@ -283,11 +276,7 @@ def load_old_tweets():
 
 
 def main():
-    twitter = TwitterAPI(
-        config.CONSUMER_KEY,
-        config.CONSUMER_SECRET,
-        config.ACCESS_TOKEN_KEY,
-        config.ACCESS_TOKEN_SECRET)
+    twitter = load_api()
 
     old_tweets = load_old_tweets()
     logger.info('loaded {} old tweets'.format(len(old_tweets)))
