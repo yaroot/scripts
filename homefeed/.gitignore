@@ -2,3 +2,6 @@ config.py
 !requirements.txt
 data
 *.csv
+*.sqlite3
+*.sqlite
+*.sql
