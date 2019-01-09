@@ -18,15 +18,39 @@ logger = _logger_factory.getLogger('fav')
 DB_FILE = 'fav.sqlite'
 DB_EXPORT = 'fav.sql'
 
+SCHEMA = """
+CREATE TABLE IF NOT EXISTS "fav_tweets" (
+ `id` UNSIGNED INTEGER NOT NULL PRIMARY KEY,
+ `tweet` TEXT NOT NULL,
+ `created_at` UNSIGNED INTEGER NOT NULL
+);
+"""
+
+
+# snowflake
+def timestamp_from_id(id: int):
+    MASK = 9223372036850581504
+    EPOCH = 1288834974657
+    return (((id & MASK) >> 22) + EPOCH)/1000
+
 
 def load_history(twitter: TwitterAPI, db: sqlite3.Connection):
-    r = twitter.request('favorites/list', params={
-        'count': 20,
-        'max_id': None,
-        'include_entities': 'true',
-    })
-    import ipdb; ipdb.set_trace()
-    pass
+    while True:
+        max_id = load_max_id(db)
+        print('max_id=%s' % max_id)
+        r = twitter.request('favorites/list', params={
+            'count': 200,
+            'max_id': max_id,
+            'include_entities': 'true',
+        })
+        tweets = r.json()
+        print('fetched %s tweets' % len(tweets))
+        if not r:
+            return
+        for t in tweets:
+            insert(db, t)
+        print('saved %s tweets' % len(tweets))
+        time.sleep(30)
 
 
 def dump_db(db: sqlite3.Connection):
@@ -37,16 +61,51 @@ def dump_db(db: sqlite3.Connection):
     pass
 
 
+def open_db():
+    db = sqlite3.connect(DB_FILE)
+    db.cursor().execute(SCHEMA).close()
+    return db
+
+
+def insert(db: sqlite3.Connection, t):
+    id = int(t['id_str'])
+    created_at = int(timestamp_from_id(id))
+    cur = db.cursor()
+    cur.execute(
+        """
+        INSERT INTO fav_tweets (`id`, `tweet`, `created_at`)
+        VALUES (?, ?, ?)
+        ON CONFLICT (`id`) DO NOTHING
+        """,
+        (id, json.dumps(t), created_at)
+    )
+    db.commit()
+    cur.close()
+
+
+def load_max_id(db: sqlite3.Connection):
+    cur = db.cursor()
+    cur.execute('select min(id) from fav_tweets')
+    r = cur.fetchone()
+    db.rollback()
+    cur.close()
+    if r:
+        return r[0]
+    pass
+
+
 def main():
     twitter = TwitterAPI(
         config.CONSUMER_KEY,
         config.CONSUMER_SECRET,
         config.ACCESS_TOKEN_KEY,
         config.ACCESS_TOKEN_SECRET)
-    db = sqlite3.connect(DB_FILE)
+    db = open_db()
     load_history(twitter, db)
 
     # dump_db(db)
+    db.close()
+
 
 if __name__ == '__main__':
     main()
