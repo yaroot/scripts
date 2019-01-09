@@ -1,20 +1,15 @@
 #!/usr/bin/env python
 
-
 import sys
 import os
 import re
 import time
 from TwitterAPI import TwitterAPI
-import config
+from . import config
+from .util import load_api
 
 
-twitter = TwitterAPI(
-    config.CONSUMER_KEY,
-    config.CONSUMER_SECRET,
-    config.ACCESS_TOKEN_KEY,
-    config.ACCESS_TOKEN_SECRET
-)
+twitter = load_api()
 
 
 def protected(tid):

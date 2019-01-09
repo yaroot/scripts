@@ -6,9 +6,9 @@ import json
 import os
 from datetime import datetime
 from TwitterAPI import TwitterAPI
-import config
+from . import config
 import logging as _logger_factory
-from util import timestamp_from_id, load_api
+from .util import timestamp_from_id, load_api
 
 
 _logger_factory.basicConfig(

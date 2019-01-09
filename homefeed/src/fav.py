@@ -3,7 +3,7 @@ import time
 import json
 from TwitterAPI import TwitterAPI
 import sqlite3
-from util import timestamp_from_id, load_api
+from .util import timestamp_from_id, load_api
 
 import logging as _logger_factory
 _logger_factory.basicConfig(

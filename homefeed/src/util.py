@@ -1,5 +1,5 @@
 from TwitterAPI import TwitterAPI
-import config
+from . import config
 
 
 def load_api():
