@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 def camalize(name):
     if len(name) > 1:
@@ -16,8 +16,8 @@ def derive(name, what):
 def main():
     import sys
     for name in sys.argv[1:]:
-        print derive(name, 'Encoder')
-        print derive(name, 'Decoder')
+        print(derive(name, 'Encoder'))
+        print(derive(name, 'Decoder'))
 
 if __name__ == '__main__':
     main()
