@@ -54,7 +54,10 @@ def savage_history(twitter: TwitterAPI, db: sqlite3.Connection):
         for t in tweets:
             insert(db, t)
         print('saved %s tweets' % len(tweets))
-        max_id = int(tweets[-1]['id_str'])
+        new_max_id = int(tweets[-1]['id_str'])
+        if max_id == new_max_id:
+            return
+        max_id = new_max_id
         time.sleep(3)
 
 
