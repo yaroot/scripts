@@ -102,7 +102,8 @@ def load_max_id(db: sqlite3.Connection):
 def main():
     twitter = load_api()
     db = open_db()
-    # savage_history(twitter, db)
+    if '-h' in sys.argv:
+        savage_history(twitter, db)
     savage_latest(twitter, db)
 
     dump_db(db)

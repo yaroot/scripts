@@ -4,3 +4,4 @@ config.py
 *.sqlite3
 *.sqlite
 *.sql
+*.sqlite-journal
