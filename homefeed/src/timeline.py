@@ -19,7 +19,7 @@ _logger_factory.basicConfig(
 
 logger = _logger_factory.getLogger('homefeed')
 
-TIMELINE_SIZE = 1000 * 3
+TIMELINE_SIZE = 500
 FETCH_COUNT = 200
 
 CACHE_FILENAME = 'data/feed_cache.json'
