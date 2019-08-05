@@ -58,7 +58,7 @@ def savage_history(twitter: TwitterAPI, db: sqlite3.Connection):
         if max_id == new_max_id:
             return
         max_id = new_max_id
-        time.sleep(3)
+        time.sleep(15)
 
 
 def dump_db(db: sqlite3.Connection):
