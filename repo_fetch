@@ -1,0 +1,8 @@
+#!/bin/sh
+
+echo "-> $1"
+cd $1
+
+
+test -d .git && git fetch --all --prune && rm -f .git/objects/pack/tmp_pack_*
+test -d .hg  && hg pull
