@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# parallel -j 10 repo_fetch
+
 echo "-> $1"
 cd $1
 
