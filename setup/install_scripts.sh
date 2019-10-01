@@ -11,13 +11,17 @@ symlink() {
   ln -sv "$src" "$tar"
 }
 
+
+./git_install.sh https://github.com/asdf-vm/asdf.git $HOME/.asdf
+
+
 # ./git_install.sh git://github.com/visionmedia/n.git $HOME/.local/n
 # ./git_install.sh git://github.com/ekalinin/nodeenv.git $HOME/repos/nodeenv
 
-./git_install.sh git://github.com/sstephenson/rbenv.git $HOME/.rbenv
-./git_install.sh git://github.com/sstephenson/ruby-build.git $HOME/.rbenv/plugins/ruby-build
+#./git_install.sh git://github.com/sstephenson/rbenv.git $HOME/.rbenv
+#./git_install.sh git://github.com/sstephenson/ruby-build.git $HOME/.rbenv/plugins/ruby-build
 # ./git_install.sh git://github.com/jamis/rbenv-gemset.git $HOME/.rbenv/plugins/rbenv-gemset
-symlink $HOME/.rbenv/completions/rbenv.zsh $HOME/.local/zshcomp/_rbenv
+#symlink $HOME/.rbenv/completions/rbenv.zsh $HOME/.local/zshcomp/_rbenv
 
 # ./git_install.sh git://github.com/technomancy/leiningen.git $HOME/repos/leiningen
 # symlink $HOME/repos/leiningen/zsh_completion.zsh $HOME/.local/zshcomp/_lein
