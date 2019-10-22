@@ -1,0 +1,13 @@
+#!/bin/sh
+
+cd $1
+
+test -d .git || exit 0
+n=`find .git/objects -type f | grep -v 'pack$' | grep -v 'idx$' | wc -l`
+# # test $n -gt 0 && echo "[$d] found $n"
+test $n -gt 20 || continue
+
+echo "[GC] $1 $n"
+git gc
+# git gc --auto --prune=now
+# git gc --auto
