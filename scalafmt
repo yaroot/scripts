@@ -1,5 +1,0 @@
-#!/bin/sh
-
-jar="$HOME/.local/opt/scalafmt.jar"
-
-java -jar $jar $@

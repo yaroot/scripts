@@ -52,4 +52,4 @@ if [ -f '/etc/os-release' ]; then
   fi
 fi
 
-
+# https://git.grml.org/f/grml-etc-core/etc/zsh/zshrc
