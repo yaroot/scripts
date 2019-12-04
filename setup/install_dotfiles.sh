@@ -45,9 +45,9 @@ _install "yaroot/vimrc" "$HOME/.vim"
 if [ -f '/etc/os-release' ]; then
   source '/etc/os-release'
   if [ "$NAME" = 'Arch Linux' ]; then
-    if [ -z `which cower` ]; then
+    if [ -z `which auracle` ]; then
       # http://github.com/falconindy/cower
-      wget https://aur.archlinux.org/cgit/aur.git/snapshot/cower.tar.gz
+      wget https://aur.archlinux.org/cgit/aur.git/snapshot/auracle-git.tar.gz
     fi
   fi
 fi
