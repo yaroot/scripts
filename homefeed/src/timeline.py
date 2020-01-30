@@ -4,12 +4,12 @@ import sys
 import time
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from TwitterAPI import TwitterAPI
 from . import config
 import logging as _logger_factory
 from .util import timestamp_from_id, load_api
-
+import pystache
 
 _logger_factory.basicConfig(
     level=_logger_factory.INFO,
@@ -23,8 +23,17 @@ TIMELINE_SIZE = 500
 FETCH_COUNT = 200
 
 CACHE_FILENAME = 'data/feed_cache.json'
-FEED_FILENAME = 'data/feed.json'
+FEED_FILENAME = 'data/feed.xml'
 
+
+def read_template():
+    base = os.path.dirname(__file__)
+    tp = os.path.join(base, 'feed_template.xml')
+    with open(tp) as f:
+        return f.read()
+
+
+FEED_TEMPLATE = read_template()
 
 # tweet example
 """
@@ -215,31 +224,54 @@ def generate_timeline(tweets):
             'url': 'https://mobile.twitter.com/{}/status/{}'.format(t['user']['screen_name'], t['id']),
             'date_published': get_zulu_time(t),
             # 'date_modified': format_time(datetime.utcnow()),
-            'content_html': get_image_content_html(t)
+            'content_html': html if html else None
         }
         for t in tweets
+        for html in [get_image_content_html(t)]
     ]
 
 
-def atomic_write_json(path, data):
+def pretty_json(xs):
+    return json.dumps(xs, ensure_ascii=True, indent=2)
+
+
+def atomic_write(path, data: str):
     tmp = '{}.tmp'.format(path)
     with open(tmp, 'w') as f:
-        json.dump(data, f, ensure_ascii=True, indent=2)
+        f.write(data)
     os.rename(tmp, path)
 
 
 def write_cache(tweets):
-    atomic_write_json(CACHE_FILENAME, tweets)
+    atomic_write(CACHE_FILENAME, pretty_json(tweets))
 
 
 def write_feed(tweets):
     data = {
         'version': 'https://jsonfeed.org/version/1',
+        'feed_id': config.FEED_ID,
+        'feed_url': config.FEED_URL,
         'title': config.FEED_TITLE,
+        'last_updated': datetime.utcnow().replace(tzinfo=timezone.utc).isoformat(),
         'home_page_url': 'https://twitter.com/',
-        'items': generate_timeline(tweets)
+        'items': generate_timeline(tweets),
     }
-    atomic_write_json(FEED_FILENAME, data)
+
+    rendered = pystache.render(
+        pystache.parse(FEED_TEMPLATE),
+        context=data
+    )
+    atomic_write(FEED_FILENAME, rendered)
+
+
+# def write_feed(tweets):
+    # data = {
+    #     'version': 'https://jsonfeed.org/version/1',
+    #     'title': config.FEED_TITLE,
+    #     'home_page_url': 'https://twitter.com/',
+    #     'items': generate_timeline(tweets)
+    # }
+    # atomic_write_json(FEED_FILENAME, data)
 
 
 def fetch_tweets0(twitter: TwitterAPI, since_id=None):
@@ -280,11 +312,12 @@ def main():
 
     old_tweets = load_old_tweets()
     logger.info('loaded {} old tweets'.format(len(old_tweets)))
-    since_id = old_tweets[0]['id'] if old_tweets else None
-    new_tweets = fetch_tweets(twitter, since_id)
-    logger.info('loaded {} new tweets'.format(len(new_tweets)))
+    # since_id = old_tweets[0]['id'] if old_tweets else None
+    # new_tweets = fetch_tweets(twitter, since_id)
+    # logger.info('loaded {} new tweets'.format(len(new_tweets)))
 
-    all_tweets = new_tweets + old_tweets
+    # all_tweets = new_tweets + old_tweets
+    all_tweets = old_tweets
     write_cache(all_tweets[:TIMELINE_SIZE])
     write_feed(all_tweets)
     logger.info('written {} items'.format(len(all_tweets)))
