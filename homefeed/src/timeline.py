@@ -312,12 +312,12 @@ def main():
 
     old_tweets = load_old_tweets()
     logger.info('loaded {} old tweets'.format(len(old_tweets)))
-    # since_id = old_tweets[0]['id'] if old_tweets else None
-    # new_tweets = fetch_tweets(twitter, since_id)
-    # logger.info('loaded {} new tweets'.format(len(new_tweets)))
+    since_id = old_tweets[0]['id'] if old_tweets else None
+    new_tweets = fetch_tweets(twitter, since_id)
+    logger.info('loaded {} new tweets'.format(len(new_tweets)))
 
-    # all_tweets = new_tweets + old_tweets
-    all_tweets = old_tweets
+    all_tweets = new_tweets + old_tweets
+    # all_tweets = old_tweets
     write_cache(all_tweets[:TIMELINE_SIZE])
     write_feed(all_tweets)
     logger.info('written {} items'.format(len(all_tweets)))
