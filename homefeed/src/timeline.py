@@ -252,7 +252,7 @@ def write_feed(tweets):
         'feed_id': config.FEED_ID,
         'feed_url': config.FEED_URL,
         'title': config.FEED_TITLE,
-        'last_updated': datetime.utcnow().replace(tzinfo=timezone.utc).isoformat(),
+        'last_updated': format_time(datetime.utcnow()),
         'home_page_url': 'https://twitter.com/',
         'items': generate_timeline(tweets),
     }
