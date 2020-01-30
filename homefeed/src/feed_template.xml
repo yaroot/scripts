@@ -14,7 +14,7 @@
         <id>{{ id }}</id>
         <content type="html">
             {{ #content_html }}
-            <![CDATA[{{ content_html }}]]>
+            <![CDATA[{{& content_html }}]]>
             {{ /content_html }}
         </content>
     </entry>
