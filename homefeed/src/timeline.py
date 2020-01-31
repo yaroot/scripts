@@ -10,6 +10,16 @@ from . import config
 import logging as _logger_factory
 from .util import timestamp_from_id, load_api
 import pystache
+import records
+
+SCHEMA = '''
+CREATE TABLE IF NOT EXISTS "timeline" (
+ `id` INTEGER PRIMARY KEY AUTOINCREMENT,
+ `tweet_id` UNSIGNED INTEGER NOT NULL UNIQUE,
+ `tweet` TEXT NOT NULL,
+ `created_at` UNSIGNED INTEGER NOT NULL
+);
+'''
 
 _logger_factory.basicConfig(
     level=_logger_factory.INFO,
@@ -24,7 +34,9 @@ FETCH_COUNT = 200
 
 CACHE_FILENAME = 'data/feed_cache.json'
 FEED_FILENAME = 'data/feed.xml'
-
+#DB_PATH = os.path.join(os.path.abspath('.'), 'timeline.sqlite')
+DB_PATH = '/./timeline.sqlite'
+db = records.Database(f'sqlite://{DB_PATH}')
 
 def read_template():
     base = os.path.dirname(__file__)
@@ -242,8 +254,18 @@ def atomic_write(path, data: str):
     os.rename(tmp, path)
 
 
-def write_cache(tweets):
-    atomic_write(CACHE_FILENAME, pretty_json(tweets))
+def save_new_tweets(tweets):
+    for t in tweets:
+        tid = t['id']
+        db.query(
+            ''' insert into timeline (tweet_id, tweet, created_at)
+                values (:tweet_id, :tweet, :created_at)
+                on conflict (tweet_id) do nothing
+            ''',
+            tweet_id=tid,
+            tweet=json.dumps(t),
+            created_at=timestamp_from_id(tid),
+        )
 
 
 def write_feed(tweets):
@@ -299,27 +321,29 @@ def fetch_tweets(twitter: TwitterAPI, since_id=None):
         time.sleep(1)
 
 
-def load_old_tweets():
-    if os.path.exists(CACHE_FILENAME):
-        with open(CACHE_FILENAME) as f:
-            return json.loads(f.read())
-    else:
-        return []
+def load_last_tweets(n: int):
+    xs = [
+        json.loads(r.tweet)
+        for r in db.query('select * from timeline order by id desc limit :tlsize', tlsize=n, fetchall=True).all()
+    ]
+    return list(reversed(xs))
 
 
 def main():
     twitter = load_api()
 
-    old_tweets = load_old_tweets()
-    logger.info('loaded {} old tweets'.format(len(old_tweets)))
-    since_id = old_tweets[0]['id'] if old_tweets else None
-    new_tweets = fetch_tweets(twitter, since_id)
-    logger.info('loaded {} new tweets'.format(len(new_tweets)))
+    old_tweets = load_last_tweets(1)
 
-    all_tweets = new_tweets + old_tweets
-    # all_tweets = old_tweets
-    write_cache(all_tweets[:TIMELINE_SIZE])
-    write_feed(all_tweets)
+    since_id = old_tweets[-1]['id'] if old_tweets else None
+    logger.info('loaded since_id=%s', since_id)
+
+    new_tweets = fetch_tweets(twitter, since_id)
+    logger.info('loaded %s new tweets', len(new_tweets))
+
+    save_new_tweets(list(reversed(new_tweets)))
+
+    all_tweets = load_last_tweets(TIMELINE_SIZE)
+    write_feed(list(reversed(all_tweets)))
     logger.info('written {} items'.format(len(all_tweets)))
 
 
