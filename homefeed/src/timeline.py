@@ -34,9 +34,9 @@ FETCH_COUNT = 200
 
 CACHE_FILENAME = 'data/feed_cache.json'
 FEED_FILENAME = 'data/feed.xml'
-#DB_PATH = os.path.join(os.path.abspath('.'), 'timeline.sqlite')
 DB_PATH = '/./timeline.sqlite'
 db = records.Database(f'sqlite://{DB_PATH}')
+
 
 def read_template():
     base = os.path.dirname(__file__)
@@ -243,10 +243,6 @@ def generate_timeline(tweets):
     ]
 
 
-def pretty_json(xs):
-    return json.dumps(xs, ensure_ascii=True, indent=2)
-
-
 def atomic_write(path, data: str):
     tmp = '{}.tmp'.format(path)
     with open(tmp, 'w') as f:
@@ -284,16 +280,6 @@ def write_feed(tweets):
         context=data
     )
     atomic_write(FEED_FILENAME, rendered)
-
-
-# def write_feed(tweets):
-    # data = {
-    #     'version': 'https://jsonfeed.org/version/1',
-    #     'title': config.FEED_TITLE,
-    #     'home_page_url': 'https://twitter.com/',
-    #     'items': generate_timeline(tweets)
-    # }
-    # atomic_write_json(FEED_FILENAME, data)
 
 
 def fetch_tweets0(twitter: TwitterAPI, since_id=None):
