@@ -2,7 +2,7 @@ import sys
 import time
 import json
 from TwitterAPI import TwitterAPI
-import sqlite3
+import records
 from .util import timestamp_from_id, load_api
 
 import logging as _logger_factory
@@ -15,6 +15,7 @@ _logger_factory.basicConfig(
 logger = _logger_factory.getLogger('fav')
 DB_FILE = 'fav.sqlite'
 DB_EXPORT = 'fav.sql'
+db = records.Database(f'sqlite:///./{DB_FILE}')
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS "fav_tweets" (
@@ -34,16 +35,16 @@ def request_fav(twitter: TwitterAPI, max_id=None):
     return r.json()
 
 
-def savage_latest(twitter: TwitterAPI, db: sqlite3.Connection):
+def savage_latest(twitter: TwitterAPI):
     tweets = request_fav(twitter)
     if tweets:
         for t in tweets:
-            insert(db, t)
+            insert(t)
         print('saved %s tweets' % len(tweets))
     pass
 
 
-def savage_history(twitter: TwitterAPI, db: sqlite3.Connection):
+def savage_history(twitter: TwitterAPI):
     max_id = None
     while True:
         print('max_id=%s' % max_id)
@@ -52,7 +53,7 @@ def savage_history(twitter: TwitterAPI, db: sqlite3.Connection):
         if not tweets:
             return
         for t in tweets:
-            insert(db, t)
+            insert(t)
         print('saved %s tweets' % len(tweets))
         new_max_id = int(tweets[-1]['id_str'])
         if max_id == new_max_id:
@@ -61,56 +62,26 @@ def savage_history(twitter: TwitterAPI, db: sqlite3.Connection):
         time.sleep(15)
 
 
-def dump_db(db: sqlite3.Connection):
-    with open(DB_EXPORT, 'w') as f:
-        for l in db.iterdump():
-            f.write(l)
-            f.write('\n')
-    pass
-
-
-def open_db():
-    db = sqlite3.connect(DB_FILE)
-    db.cursor().execute(SCHEMA).close()
-    return db
-
-
-def insert(db: sqlite3.Connection, t):
+def insert(t):
     id = int(t['id_str'])
     created_at = int(timestamp_from_id(id))
-    cur = db.cursor()
-    cur.execute(
-        """
+    db.query(
+        '''
         INSERT INTO fav_tweets (`id`, `tweet`, `created_at`)
-        VALUES (?, ?, ?)
+        VALUES (:id, :tweet, :created_at)
         ON CONFLICT (`id`) DO NOTHING
-        """,
-        (id, json.dumps(t), created_at)
+        ''',
+        id=id,
+        tweet=json.dumps(t),
+        created_at=created_at
     )
-    db.commit()
-    cur.close()
-
-
-def load_max_id(db: sqlite3.Connection):
-    cur = db.cursor()
-    cur.execute('select min(id) from fav_tweets')
-    r = cur.fetchone()
-    db.rollback()
-    cur.close()
-    if r:
-        return r[0]
-    pass
 
 
 def main():
     twitter = load_api()
-    db = open_db()
     if '-h' in sys.argv:
-        savage_history(twitter, db)
-    savage_latest(twitter, db)
-
-    dump_db(db)
-    db.close()
+        savage_history(twitter)
+    savage_latest(twitter)
 
 
 if __name__ == '__main__':
