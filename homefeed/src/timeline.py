@@ -32,20 +32,35 @@ logger = _logger_factory.getLogger('homefeed')
 TIMELINE_SIZE = 500
 FETCH_COUNT = 200
 
-CACHE_FILENAME = 'data/feed_cache.json'
 FEED_FILENAME = 'data/feed.xml'
 DB_PATH = '/./timeline.sqlite'
 db = records.Database(f'sqlite://{DB_PATH}')
 
 
-def read_template():
-    base = os.path.dirname(__file__)
-    tp = os.path.join(base, 'feed_template.xml')
-    with open(tp) as f:
-        return f.read()
+FEED_TEMPLATE = """
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>{{ title }}</title>
+    <link href="{{ feed_url }}/feed.json" rel="self" />
+    <link href="{{ feed_url }}" />
+    <updated>{{ last_updated }}</updated>
+    <id>urn:feed:{{ feed_id }}</id>
 
-
-FEED_TEMPLATE = read_template()
+    {{ #items }}
+    <entry>
+        <title><![CDATA[{{ title }}]]></title>
+        <link href="{{ url }}" />
+        <updated>{{ date_published }}</updated>
+        <id>{{ id }}</id>
+        <content type="html">
+            {{ #content_html }}
+            <![CDATA[{{& content_html }}]]>
+            {{ /content_html }}
+        </content>
+    </entry>
+    {{ /items }}
+</feed>
+"""
 
 # tweet example
 """
