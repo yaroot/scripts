@@ -2,3 +2,5 @@ ipdb
 TwitterAPI
 pystache
 records
+lxml
+httpx
