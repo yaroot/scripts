@@ -20,12 +20,12 @@ create table if not exists "articles" (
 CREATE INDEX articles_created_at_idx ON articles (created_at);
 '''
 
-FEED_FILE = "data/sankei.json"
+FEED_FILE = "data/sankei.xml"
 TEMPLATE = """
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>産経新聞</title>
-    <link href="{{ feed_url }}/sankei.json" rel="self" />
+    <link href="{{ feed_url }}/sankei.xml" rel="self" />
     <link href="{{ feed_url }}" />
     <updated>{{ last_updated }}</updated>
     <id>urn:feed:{{ feed_id }}</id>
