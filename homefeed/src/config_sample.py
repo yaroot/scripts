@@ -11,3 +11,4 @@ FEED_ID = ''
 FEED_URL = ''
 
 SANKEI_ID = ''
+YOMIURI_ID = ''

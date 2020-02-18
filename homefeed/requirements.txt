@@ -1,5 +1,7 @@
-ipdb
 TwitterAPI
+cssselect
+httpx
+ipdb
+lxml
 pystache
 records
-httpx
