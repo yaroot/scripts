@@ -1,11 +1,10 @@
 #!/bin/sh
 
-if [ -d $x/.git ]; then
-  echo ">>>>>> GC [$x]"
-  eval "pushd '$x' > /dev/null"
-  # git prune
-  git gc --auto --prune=now
-  rm -rf .git/objects/pack/tmp_pack_*
-  # git clean -xdf
-  popd > /dev/null
-fi
+test -d $1/.git || exit 0
+
+echo ">>>>>> GC [$1]"
+cd $1
+# git prune
+git gc --auto --prune=now
+rm -rf .git/objects/pack/tmp_pack_*
+# git clean -xdf
