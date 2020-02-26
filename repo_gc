@@ -1,13 +1,11 @@
 #!/bin/sh
 
-cd $1
-
-test -d .git || exit 0
-n=`find .git/objects -type f | grep -v 'pack$' | grep -v 'idx$' | wc -l`
-# # test $n -gt 0 && echo "[$d] found $n"
-test $n -gt 20 || continue
-
-echo "[GC] $1 $n"
-git gc
-# git gc --auto --prune=now
-# git gc --auto
+if [ -d $x/.git ]; then
+  echo ">>>>>> GC [$x]"
+  eval "pushd '$x' > /dev/null"
+  # git prune
+  git gc --auto --prune=now
+  rm -rf .git/objects/pack/tmp_pack_*
+  # git clean -xdf
+  popd > /dev/null
+fi
