@@ -29,7 +29,7 @@ _logger_factory.basicConfig(
 
 logger = _logger_factory.getLogger('homefeed')
 
-TIMELINE_SIZE = 500
+TIMELINE_SIZE = 100
 FETCH_COUNT = 200
 
 FEED_FILENAME = 'data/feed.xml'
