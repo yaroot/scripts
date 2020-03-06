@@ -96,6 +96,19 @@ func main() {
 	}
 	ci.AddCommand(ciDownloadArt)
 
+	ciKeep := &cobra.Command{
+		Use:  "keep <user/repo> <Job ID>",
+		Args: cobra.ExactArgs(2),
+		Run: func(_ *cobra.Command, args []string) {
+			repo := args[0]
+			jobId, err := strconv.ParseInt(args[1], 10, 32)
+			lerror(err)
+			_, _, err = git.Jobs.KeepArtifacts(repo, int(jobId))
+			lerror(err)
+		},
+	}
+	ci.AddCommand(ciKeep)
+
 	err := cmd.Execute()
 	lerror(err)
 }
