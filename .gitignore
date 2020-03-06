@@ -5,3 +5,4 @@ httpd
 venv/
 .venv/
 /upload
+/gitlab
