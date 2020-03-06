@@ -32,7 +32,10 @@ func fmtTime(t *time.Time) string {
 func main() {
 	privateToken := readToken()
 	git := gitlab.NewClient(nil, privateToken)
-	cmd := &cobra.Command{Use: "gl"}
+	cmd := &cobra.Command{
+		Use:  "gl",
+		Long: "\n Access token: use `GITLAB_TOKEN` or $HOME/.gitlab_token",
+	}
 
 	ci := &cobra.Command{Use: "ci"}
 	cmd.AddCommand(ci)
@@ -97,6 +100,10 @@ func main() {
 }
 
 func readToken() string {
+	token := os.Getenv("GITLAB_TOKEN")
+	if len(token) > 0 {
+		return token
+	}
 	u, err := user.Current()
 	lerror(err)
 	content, err := ioutil.ReadFile(path.Join(u.HomeDir, ".gitlab_token"))
