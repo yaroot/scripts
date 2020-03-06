@@ -91,6 +91,7 @@ func main() {
 			barReader := bar.NewProxyReader(resp.Body)
 			_, err = io.Copy(localFile, barReader)
 			lerror(err)
+			bar.Finish()
 		},
 	}
 	ci.AddCommand(ciDownloadArt)
