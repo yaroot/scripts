@@ -60,7 +60,7 @@ FEED_TEMPLATE = """
     </entry>
     {{ /items }}
 </feed>
-"""
+""".strip()
 
 # tweet example
 """
