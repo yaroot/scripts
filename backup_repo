@@ -26,7 +26,7 @@ for dir in *; do
     done
   fi
 
-  cmd="rsync -rltv -z --delete --progress $RSYNC_ARGS ./$dir $BACKUP_TARGET_BASE/."
+  cmd="rsync -rltv --delete --progress $RSYNC_ARGS ./$dir $BACKUP_TARGET_BASE/."
   echo '>>>>>' $cmd
   eval $cmd
 
