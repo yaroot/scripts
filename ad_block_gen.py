@@ -173,9 +173,10 @@ def write_block_file(domains: List[str]):
 
 def print_help():
     print(
-        'run `unbound-checkconf /etc/unbound/unbound.conf` to verify config\n'
-        'run `unbound-control reload` to reload config'
-        'run `unbound-control stats | grep total.num` to check stats'
+        '\nUseful commands'
+        '\n  `unbound-checkconf /etc/unbound/unbound.conf`'
+        '\n  `unbound-control reload`'
+        '\n  `unbound-control stats | grep total.num`'
     )
 
 
