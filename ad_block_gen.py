@@ -162,22 +162,15 @@ def download_parse_list(url: str, startfrom: Optional[str] = None):
 
 
 def write_block_file(domains: List[str]):
-    with open('block.conf', 'w') as f:
-        f.write('\n')
+    with open('block.list', 'w') as f:
         for x in domains:
-            f.write('local-zone: "%s" redirect\n' % x)
-            f.write('local-data: "%s 10 IN A 0.0.0.0"\n' % x)
+            f.write(x)
             f.write('\n')
+        # for x in domains:
+        #     f.write('local-zone: "%s" redirect\n' % x)
+        #     f.write('local-data: "%s 10 IN A 0.0.0.0"\n' % x)
+        #     f.write('\n')
     pass
-
-
-def print_help():
-    print(
-        '\nUseful commands'
-        '\n  `unbound-checkconf /etc/unbound/unbound.conf`'
-        '\n  `unbound-control reload`'
-        '\n  `unbound-control stats | grep total.num`'
-    )
 
 
 def main():
@@ -193,7 +186,6 @@ def main():
     ]
     print('Blocking %d domains total' % len(domains))
     write_block_file(domains)
-    print_help()
 
 
 if __name__ == '__main__':
