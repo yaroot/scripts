@@ -35,6 +35,7 @@ func (d *DNSHandler) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 		m.MsgHdr.RecursionDesired = true
 		m.Compress = r.Compress
 		m.Question = forward
+		m.Id = r.Id
 
 		//log.Println("query")
 		//log.Printf("%+v\n", m)
@@ -53,9 +54,10 @@ func (d *DNSHandler) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 		}
 	}
 
+	r.MsgHdr.Response = true
+	r.MsgHdr.RecursionAvailable = true
+
 	for _, b := range blocked {
-		r.MsgHdr.Response = true
-		r.MsgHdr.RecursionAvailable = true
 		rr, err := dns.NewRR(fmt.Sprintf("%s 10 IN A 0.0.0.0", b.Name))
 		if err != nil {
 			log.Println(err.Error())

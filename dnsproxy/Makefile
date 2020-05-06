@@ -4,9 +4,13 @@ all: clean build
 clean:
 	rm -f dnsproxy
 
-build:
+fmt:
+	go fmt
+
+build: fmt
 	go build -o dnsproxy main.go
+	strip dnsproxy
 
 
-.PHONY: all clean build
+.PHONY: all clean fmt build
 
