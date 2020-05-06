@@ -4,9 +4,8 @@ lists source:
     https://firebog.net/
     https://github.com/StevenBlack/hosts
 
-
-
 """
+
 from typing import Optional, List
 
 import time
@@ -162,8 +161,9 @@ def download_parse_list(url: str, startfrom: Optional[str] = None):
 
 
 def write_block_file(domains: List[str]):
-    with open('block.list', 'w') as f:
+    with open('block.hosts', 'w') as f:
         for x in domains:
+            f.write('0.0.0.0 ')
             f.write(x)
             f.write('\n')
         # for x in domains:
