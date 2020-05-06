@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"crypto/tls"
 	"flag"
 	"fmt"
 	"github.com/miekg/dns"
@@ -32,15 +33,15 @@ func (d *DNSHandler) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 
 	if len(forward) > 0 {
 		m := new(dns.Msg)
-		m.MsgHdr.RecursionDesired = true
+		m.MsgHdr = r.MsgHdr
 		m.Compress = r.Compress
 		m.Question = forward
-		m.Id = r.Id
 
 		//log.Println("query")
 		//log.Printf("%+v\n", m)
 
 		mr, _, err := d.client.Exchange(m, d.upstream)
+
 		if err != nil {
 			log.Println(err.Error())
 		}
@@ -89,7 +90,10 @@ func readBlockList(path string, bl map[string]byte) error {
 func main() {
 	bind := flag.String("bind", "127.0.0.1:1052", "binding address")
 	upstream := flag.String("upstream", "127.0.0.1:1053", "upstream dns")
-	blockListFile := flag.String("block_file", "block.list", "path to block file")
+	blockListFile := flag.String("block-file", "block.list", "path to block file")
+	dot := flag.Bool("dot", false, "dns-over-tls")
+	tlsAuthName := flag.String("tls-auth-name", "", "tls auth name (for DoT)")
+
 	flag.Parse()
 
 	blocklist := make(map[string]byte)
@@ -103,6 +107,16 @@ func main() {
 
 	client := new(dns.Client)
 	client.Net = "tcp"
+	if *dot {
+		if *tlsAuthName == "" {
+			log.Panicln("tls-auth-name should not be empty")
+		}
+		client.Net = "tcp-tls"
+		client.TLSConfig = &tls.Config{
+			MinVersion: tls.VersionTLS12,
+			ServerName: *tlsAuthName,
+		}
+	}
 
 	dnshandler := &DNSHandler{
 		blocklist: blocklist,
