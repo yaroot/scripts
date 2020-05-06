@@ -27,6 +27,9 @@ source_lists = [
     ('https://sites.google.com/site/hosts2ch/ja',),
     ('https://logroid.github.io/adaway-hosts/hosts_no_white.txt',),
     ('https://280blocker.net/files/280blocker_domain.txt',),
+
+    # china
+    ('https://raw.githubusercontent.com/privacy-protection-tools/anti-AD/master/anti-ad-domains.txt',),
 ]
 
 whitelist_domains = (
