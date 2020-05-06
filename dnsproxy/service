@@ -1,0 +1,15 @@
+[Unit]
+Description=dnsproxy
+After=network.target
+
+[Service]
+WorkingDirectory=/etc/unbound
+ExecStart=/usr/local/bin/dnsproxy
+User=nobody
+Group=nobody
+Restart=always
+RestartSec=2s
+
+[Install]
+WantedBy=multi-user.target
+
