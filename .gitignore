@@ -7,3 +7,4 @@ venv/
 /upload
 /gitlab
 /postlisk
+/tls-cert-check
