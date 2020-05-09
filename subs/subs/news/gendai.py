@@ -99,7 +99,7 @@ def write_rss():
     ]
     data = {
         'feed_url': config.FEED_URL,
-        'feed_id': config.SANKEI_ID,
+        'feed_id': config.GENDAI_ID,
         'last_updated': services.format_ts(int(time.time())),
         'items': items,
     }
