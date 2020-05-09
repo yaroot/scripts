@@ -1,7 +1,7 @@
 import click
 import subs.migrate
 from subs.news import sankei, yomiuri, gendai
-from twr import fav, timeline
+from subs.twr import fav, timeline
 
 @click.group()
 def cli(): pass
