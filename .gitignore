@@ -1,5 +1,4 @@
 *.pyc
-*.txt
 httpd
 .idea/
 venv/
