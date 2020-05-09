@@ -1,9 +1,0 @@
-TwitterAPI
-cssselect
-httpx
-ipdb
-lxml
-pystache
-python-dateutil
-pytz
-records

@@ -1,7 +1,0 @@
-config.py
-!requirements.txt
-*.csv
-*.sqlite3
-*.sqlite
-*.sql
-*.sqlite-journal
