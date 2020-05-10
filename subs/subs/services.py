@@ -70,8 +70,10 @@ def format_ts(x):
     if type(x) in (int, float):
         x = datetime.utcfromtimestamp(x).replace(tzinfo=timezone.utc)
     assert type(x) == datetime
-    assert x.tzinfo is not None
-    return x.isoformat() + 'Z'
+    if x.tzinfo is None:
+        return x.isoformat() + 'Z'
+    else:
+        return x.isoformat()
 
 
 def render_pystache_to(template, context, filename):
