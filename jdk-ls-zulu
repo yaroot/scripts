@@ -1,0 +1,24 @@
+#!/bin/sh
+
+# https://zulu.org/api/#query-parameters
+
+arch=x86
+hwbit=64
+os=linux
+jdk_version=0
+feature=fx,headfull
+bundle_type=jdk
+ext=tar.gz
+
+test 'Darwin' = "`uname -s`" && os=macos
+
+
+ls_remote() {
+    url="https://api.zulu.org/zulu/download/community/v1.0/bundles/latest/?jdk_version=${jdk_version}&ext=${ext}&os=${os}&arch=${arch}&hw_bitness=${hwbit}&features=${features}&bundle_type=${bundle_type}"
+    curl -s "$url" | jq -r '.url'
+}
+
+
+jdk_version=8   ls_remote
+jdk_version=11  ls_remote
+jdk_version=''  ls_remote
