@@ -38,6 +38,7 @@ whitelist_domains = (
     'lh3.googleusercontent.com',
     'yt3.ggpht.com',
     'lh3.ggpht.com',
+    's.gravatar.com',
 
     's3.amazonaws.com',
     'clients2.google.com',
@@ -163,7 +164,10 @@ def download_parse_list(url: str, startfrom: Optional[str] = None):
 def write_block_file(domains: List[str]):
     with open('block.hosts', 'w') as f:
         for x in domains:
-            f.write('0.0.0.0 ')
+            f.write('0.0.0.0    ')
+            f.write(x)
+            f.write('\n')
+            f.write('::/0       ')
             f.write(x)
             f.write('\n')
         # for x in domains:
@@ -184,6 +188,7 @@ def main():
         for x in domains
         if x not in whitelist_domains
     ]
+    domains = sorted(domains)
     print('Blocking %d domains total' % len(domains))
     write_block_file(domains)
 
