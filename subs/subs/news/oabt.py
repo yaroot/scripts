@@ -18,7 +18,7 @@ TEMPLATE = """
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>oabt</title>
-    <link href="{{ feed_url }}/obat.xml" rel="self" />
+    <link href="{{ feed_url }}/oabt.xml" rel="self" />
     <link href="{{ feed_url }}" />
     <updated>{{ last_updated }}</updated>
     <id>urn:feed:{{ feed_id }}</id>
