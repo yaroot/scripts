@@ -14,3 +14,5 @@ FEED_URL = ''
 SANKEI_ID = ''
 YOMIURI_ID = ''
 GENDAI_ID = ''
+OABT_ID = ''
+

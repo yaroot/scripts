@@ -1,6 +1,6 @@
 import click
 import subs.migrate
-from subs.news import sankei, yomiuri, gendai
+from subs.news import sankei, yomiuri, gendai, oabt
 from subs.twr import fav, timeline
 
 @click.group()
@@ -18,6 +18,8 @@ def run_yomiuri(): yomiuri.main()
 @cli.command()
 def run_gendai(): gendai.main()
 
+@cli.command()
+def run_oabt(): oabt.main()
 
 @cli.command()
 @click.pass_context
