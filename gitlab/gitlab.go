@@ -31,7 +31,10 @@ func fmtTime(t *time.Time) string {
 
 func main() {
 	privateToken := readToken()
-	git := gitlab.NewClient(nil, privateToken)
+	git, err := gitlab.NewClient(privateToken)
+	if err != nil {
+		lerror(err)
+	}
 	cmd := &cobra.Command{
 		Use:  "gl",
 		Long: "\n Access token: use `GITLAB_TOKEN` or $HOME/.gitlab_token",
@@ -71,7 +74,7 @@ func main() {
 			jobId, err := strconv.ParseInt(args[1], 10, 32)
 			lerror(err)
 
-			localFileName := fmt.Sprintf("artifacts-%d.zip", jobId)
+			localFileName := fmt.Sprintf("artifacts-%s-%d.zip", strings.ReplaceAll(repo, "/", "-"), jobId)
 			downloadUrl := fmt.Sprintf("https://gitlab.com/api/v4/projects/%s/jobs/%d/artifacts", url.PathEscape(repo), jobId)
 			req, err := http.NewRequest("GET", downloadUrl, nil)
 			lerror(err)
@@ -109,7 +112,7 @@ func main() {
 	}
 	ci.AddCommand(ciKeep)
 
-	err := cmd.Execute()
+	err = cmd.Execute()
 	lerror(err)
 }
 
