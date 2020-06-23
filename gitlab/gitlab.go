@@ -54,13 +54,14 @@ func main() {
 			for _, job := range jobs {
 
 				fmt.Printf(
-					"%8s   Job-ID: %d   Job-Name: %18s   Pipeline: %d %8s  %s\n",
+					"%8s   Job-ID: %d   Job-Name: %-18s   Pipeline: %d %8s  %s %s\n",
 					strings.ToUpper(job.Status),
 					job.ID,
 					job.Name,
 					job.Pipeline.ID,
 					strings.ToUpper(job.Pipeline.Status),
 					fmtTime(job.CreatedAt),
+					job.Ref,
 				)
 			}
 		},
