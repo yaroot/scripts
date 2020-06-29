@@ -1,5 +1,41 @@
 #!/usr/bin/env python3
 
+'''
+https://gist.github.com/jbeda/5c79d2b1434f0018d693
+http://nixos.org/~eelco/pubs/phd-thesis.pdf
+
+serialise(fso) = str("nix-archive-1") + serialise1(fso)
+
+serialise1(fso) = str("(") + seralise2(fso) + str(")")
+
+serialise2(type=Regular, exec, contents) =
+  str("type") + str("regular")
+  + (
+    str("executable") + str(""), if exec = Executable
+    "", if exec = NonExecutable
+  ) + str("contents") + str(contents)
+
+serialise2(type=SymLink, target) =
+  str("type") + str("symlink")
+  + str("target") + str(target)
+
+serialise2(type=Directory, entries) =
+  str("type") + str("directory")
+  + concatMap(serialiseEntry, sortEntries(entries))
+
+serialiseEntry((name, fso)) =
+  str("entry") + str("(")
+  + str("name") + str(name)
+  + str("node") + serialise1(fso)
+  + str(")")
+
+str(s) = int(|s|) + pad(s)
+
+int(n) = the 64-bit little endian representation of the number n
+
+pad(s) = the byte sequence s, padded with 0s to a multiple of 8 bytes
+'''
+
 import sys
 from pathlib import Path
 import struct
