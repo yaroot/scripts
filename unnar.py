@@ -54,7 +54,7 @@ def read_bytes() -> bytes:
     try:
         return _read(n)
     finally:
-        if n%8 != 0:
+        if n % 8 != 0:
             _read(8 - n % 8)
         pass
 
