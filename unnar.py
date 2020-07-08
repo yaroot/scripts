@@ -64,7 +64,8 @@ def read_ascii():
 
 
 def read_ascii_const(value: str):
-    assert read_bytes().decode('ascii') == value
+    a = read_ascii()
+    assert a == value, f'Value Error: {a} != {value}'
 
 
 def read_attr(name: str):
@@ -76,8 +77,21 @@ def read_directory():
     read_ascii_const('entry')
     read_ascii_const('(')
     name = read_attr('name')
-    print(name)
+    print('entry', name)
+    read_ascii_const('node')
+    read_next()
     read_ascii_const(')')
+    pass
+
+
+def read_regular():
+    _type = read_ascii()
+    if _type == 'executable':
+        print('executable')
+        _type = read_ascii()
+    if _type == 'contents':
+        content = read_bytes()
+        print('content length=', len(content))
     pass
 
 
@@ -86,6 +100,8 @@ def read_next():
     _ftype = read_attr('type')
     if _ftype == 'directory':
         read_directory()
+    elif _ftype == 'regular':
+        read_regular()
     else:
         assert False, f'Unknown `{_ftype}`'
     read_ascii_const(')')   # close
