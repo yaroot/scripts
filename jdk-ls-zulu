@@ -14,7 +14,7 @@ test 'Darwin' = "`uname -s`" && os=macos
 
 
 ls_remote() {
-    url="https://api.zulu.org/zulu/download/community/v1.0/bundles/latest/?jdk_version=${jdk_version}&ext=${ext}&os=${os}&arch=${arch}&hw_bitness=${hwbit}&features=${features}&bundle_type=${bundle_type}"
+    url="https://api.zulu.org/zulu/download/v1.0/bundles/latest/?jdk_version=${jdk_version}&ext=${ext}&os=${os}&arch=${arch}&hw_bitness=${hwbit}&features=${features}&bundle_type=${bundle_type}"
     curl -s "$url" | jq -r '.url'
 }
 
