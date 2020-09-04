@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sort"
 	"strconv"
 )
 
@@ -26,8 +27,14 @@ type handler struct {
 
 func (h handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	log.Printf("=> %s %s", request.Method, request.URL)
-	for key, vals := range request.Header {
-		for _, val := range vals {
+	keys := make([]string, 0, len(request.Header))
+	for k := range request.Header {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	for _, key := range keys {
+		for _, val := range request.Header.Values(key) {
 			log.Printf("->   %s: %s\n", key, val)
 		}
 	}
