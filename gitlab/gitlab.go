@@ -44,8 +44,9 @@ func main() {
 	cmd.AddCommand(ci)
 
 	ciLs := &cobra.Command{
-		Use:  "ls <user/repo>",
-		Args: cobra.ExactArgs(1),
+		Use:     "ls <user/repo>",
+		Aliases: []string{"list"},
+		Args:    cobra.ExactArgs(1),
 		Run: func(_ *cobra.Command, args []string) {
 			repo := args[0]
 			jobs, response, err := git.Jobs.ListProjectJobs(repo, nil)
@@ -69,8 +70,9 @@ func main() {
 	ci.AddCommand(ciLs)
 
 	ciDownloadArt := &cobra.Command{
-		Use:  "download <user/repo> <Job ID>",
-		Args: cobra.ExactArgs(2),
+		Use:     "download <user/repo> <Job ID>",
+		Aliases: []string{"d", "dl"},
+		Args:    cobra.ExactArgs(2),
 		Run: func(_ *cobra.Command, args []string) {
 			repo := args[0]
 			jobId, err := strconv.ParseInt(args[1], 10, 32)
