@@ -1,0 +1,22 @@
+name: Build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+      - run: go version
+      - run: |
+        mkdir out
+        go build ./goecho.go -o out/goecho
+        go build ./tls-cert-check.go out/tls-cert-check
+        pushd gitlab-cli && go build && mv gitlab ../out && popd
+        pushd cfupdate && go build && mv cfupdate ../out && popd
+      - uses: actions/upload-artifact@v1
+        with:
+          name: binaries
+          path: out
+
