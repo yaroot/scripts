@@ -25,20 +25,21 @@ func main() {
 type handler struct {
 }
 
-func (h handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
-	log.Printf("=> %s %s", request.Method, request.URL)
-	keys := make([]string, 0, len(request.Header))
-	for k := range request.Header {
+func (h handler) ServeHTTP(rep http.ResponseWriter, req *http.Request) {
+	log.Printf("=> %s %s%s", req.Method, req.Host, req.URL)
+
+	keys := make([]string, 0, len(req.Header))
+	for k := range req.Header {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
 
 	for _, key := range keys {
-		for _, val := range request.Header.Values(key) {
+		for _, val := range req.Header.Values(key) {
 			log.Printf("->   %s: %s\n", key, val)
 		}
 	}
-	_, err := io.Copy(writer, request.Body)
+	_, err := io.Copy(rep, req.Body)
 	if err != nil {
 		log.Println(err)
 	}
