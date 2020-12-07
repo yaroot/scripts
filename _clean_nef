@@ -1,0 +1,18 @@
+#!/bin/bash
+
+main() {
+    confirm="$1"
+    for x in *.NEF; do
+        local jpeg_file=${x/.NEF/.JPG}
+        if [ ! -f "$jpeg_file" ]; then
+            if [ "$confirm" = "-f" ]; then
+                echo "Removing $x"
+                rm $x
+            else
+                echo "Not removing $x"
+            fi
+        fi
+    done
+}
+
+main $@
