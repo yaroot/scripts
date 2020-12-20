@@ -28,11 +28,12 @@ symlink() {
 
 # ./git_install.sh git://github.com/pypa/virtualenv.git $HOME/repos/virtualenv
 
-./git_install.sh git://github.com/syl20bnr/spacemacs.git $HOME/.emacs.d
+./git_install.sh https://github.com/syl20bnr/spacemacs.git $HOME/.emacs.d
 
-./git_install.sh git://github.com/zsh-users/zsh-completions.git $HOME/.local/zsh-completions
-./git_install.sh git://github.com/zsh-users/zsh-syntax-highlighting.git $HOME/.local/zsh-syntax-highlighting
-./git_install.sh git://github.com/zsh-users/zsh-autosuggestions.git  $HOME/.local/zsh-autosuggestions
+./git_install.sh https://github.com/zsh-users/zsh-completions.git           $HOME/.local/zsh-completions
+./git_install.sh https://github.com/zsh-users/zsh-syntax-highlighting.git   $HOME/.local/zsh-syntax-highlighting
+./git_install.sh https://github.com/zsh-users/zsh-autosuggestions.git       $HOME/.local/zsh-autosuggestions
+./git_install.sh https://github.com/spwhitt/nix-zsh-completions             $HOME/.local/zsh-nix-completions
 
 download_file_into() {
   local uri="$1"
@@ -52,5 +53,5 @@ download_file_into() {
 # chmod +x $HOME/.local/bin/hub
 
 
-./git_install.sh git://github.com/icy/pacapt.git "$HOME/repos/pacapt"
+./git_install.sh https://github.com/icy/pacapt.git "$HOME/repos/pacapt"
 
