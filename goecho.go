@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -26,6 +26,7 @@ type handler struct {
 }
 
 func (h handler) ServeHTTP(rep http.ResponseWriter, req *http.Request) {
+	defer req.Body.Close()
 	log.Printf("=> %s %s%s", req.Method, req.Host, req.URL)
 
 	keys := make([]string, 0, len(req.Header))
@@ -39,8 +40,13 @@ func (h handler) ServeHTTP(rep http.ResponseWriter, req *http.Request) {
 			log.Printf("->   %s: %s\n", key, val)
 		}
 	}
-	_, err := io.Copy(rep, req.Body)
+
+	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		log.Println(err)
+		log.Println(err.Error())
+		return
 	}
+	bs := string(body)
+	log.Printf("-> START BODY\n---\n%s\n---\n", bs)
+	log.Printf("-> END BODY")
 }
