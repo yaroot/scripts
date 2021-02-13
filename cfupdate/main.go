@@ -1,19 +1,29 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"flag"
 	"fmt"
 	"github.com/cloudflare/cloudflare-go"
 	"io/ioutil"
+	"net"
+	"net/http"
 	"os"
 	"strings"
-
-	"net/http"
 )
 
 func get_ip() (string, error) {
-	r, err := http.DefaultClient.Get("http://checkip.dns.he.net")
+	cli := &http.Client{
+		Transport: &http.Transport{
+			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+				var d net.Dialer
+				return d.DialContext(ctx, "tcp4", addr)
+			},
+		},
+	}
+
+	r, err := cli.Get("http://checkip.dns.he.net")
 	if err != nil {
 		return "", err
 	}
