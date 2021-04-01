@@ -142,6 +142,9 @@ def main():
     elif action == 'relocate-shards':
         relocate_shards(*args0)
     else:
+        # TODO
+        #   https://www.elastic.co/guide/en/elasticsearch/reference/current/add-elasticsearch-nodes.html
+        #   POST /_cluster/voting_config_exclusions?node_names=node_name
         usage()
     pass
 
