@@ -13,7 +13,7 @@ sync-pip: pip
 .PHONY: sync-pip
 
 pip: venv
-	${VBIN}/pip install -U pip pip-tools
+	${VBIN}/pip install -U pip pip-tools wheel
 
 .PHONY: pip
 
