@@ -18,8 +18,8 @@ def run_yomiuri(): yomiuri.main()
 @cli.command()
 def run_gendai(): gendai.main()
 
-@cli.command()
-def run_oabt(): oabt.main()
+# @cli.command()
+# def run_oabt(): oabt.main()
 
 @cli.command()
 @click.pass_context
