@@ -2,6 +2,8 @@
 
 # https://zulu.org/api/#query-parameters
 
+# set -ex
+
 arch=x86
 hwbit=64
 os=linux
@@ -14,7 +16,7 @@ test 'Darwin' = "`uname -s`" && os=macos
 
 
 ls_remote() {
-    url="https://api.zulu.org/zulu/download/v1.0/bundles/latest/?jdk_version=${jdk_version}&ext=${ext}&os=${os}&arch=${arch}&hw_bitness=${hwbit}&features=${features}&bundle_type=${bundle_type}"
+    url="https://api.azul.com/zulu/download/community/v1.0/bundles/latest/?jdk_version=${jdk_version}&os=${os}&arch=${arch}&hw_bitness=${hwbit}&ext=${ext}&bundle_type=${bundle_type}&javafx=true&release_status=ga"
     curl -s "$url" | jq -r '.url'
 }
 
