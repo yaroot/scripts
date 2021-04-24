@@ -21,6 +21,5 @@ ls_remote() {
 }
 
 
-jdk_version=8   ls_remote
 jdk_version=11  ls_remote
 jdk_version=''  ls_remote
