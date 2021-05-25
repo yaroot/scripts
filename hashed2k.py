@@ -35,7 +35,7 @@ def hash_file(file_path):
 
 def gen_ed2k_url(filename):
     _hash = hash_file(filename)
-    link = 'ed2k://|file|%s|%d|%s|/\n' % (
+    link = 'ed2k://|file|%s|%d|%s|/' % (
         basename(filename),
         getsize(filename),
         _hash
