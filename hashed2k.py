@@ -1,7 +1,8 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # encoding=utf-8
 
-from __future__ import unicode_literals
+import sys
+from os.path import basename, getsize
 import hashlib
 
 # https://www.radicand.org/edonkey2000-hash-in-python/
@@ -13,7 +14,7 @@ def hash_file(file_path):
 
     md4 = hashlib.new('md4').copy
 
-    def gen(f):
+    def iter(f):
         while True:
             x = f.read(9728000)
             if x: yield x
@@ -25,27 +26,24 @@ def hash_file(file_path):
         return m
 
     with open(file_path, 'rb') as f:
-        a = gen(f)
-        hashes = [md4_hash(data).digest() for data in a]
+        hashes = [md4_hash(data).digest() for data in iter(f)]
         if len(hashes) == 1:
-            return hashes[0].encode("hex")
+            return hashes[0].hex()
         else:
             return md4_hash(reduce(lambda a,d: a + d, hashes)).hexdigest()
 
-def gen_ed2k_url(filename):
-    _hash = hash_file(filename).decode('utf-8')
 
+def gen_ed2k_url(filename):
+    _hash = hash_file(filename)
     link = 'ed2k://|file|%s|%d|%s|/\n' % (
-        basename(filename).decode('utf-8'),
+        basename(filename),
         getsize(filename),
         _hash
     )
     return link
 
-if __name__ == '__main__':
-    import sys
-    from os.path import basename, getsize
 
+if __name__ == '__main__':
     for f in sys.argv[1:]:
-        print gen_ed2k_url(f).encode('utf-8')
+        print(gen_ed2k_url(f))
 
