@@ -5,6 +5,7 @@ test -d $1/.git || exit 0
 echo ">>>>>> GC [$1]"
 cd $1
 # git prune
-git gc --auto --prune=now
+git gc --prune=now
+#git gc --auto --prune=now
 rm -rf .git/objects/pack/tmp_pack_*
 # git clean -xdf
