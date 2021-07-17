@@ -1,7 +1,5 @@
 #!/usr/bin/env sh
 
 
-OUTPUT=$1
-
-dd if=/dev/urandom of=${OUTPUT} count=1 bs=32
+dd if=/dev/urandom count=1 bs=32 | base64
 
