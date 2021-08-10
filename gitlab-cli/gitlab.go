@@ -15,6 +15,7 @@ import (
 	"path"
 	"strconv"
 	"strings"
+	"text/tabwriter"
 	"time"
 )
 
@@ -52,19 +53,28 @@ func main() {
 			jobs, response, err := git.Jobs.ListProjectJobs(repo, nil)
 			lerror(err)
 			log.Printf("%+v\n", response)
-			for _, job := range jobs {
 
-				fmt.Printf(
-					"%8s   Job-ID: %d   Job-Name: %-18s   Pipeline: %d %8s  %s %6s %s\n",
+			w := new(tabwriter.Writer)
+			w.Init(os.Stdout, 8, 8, 0, '\t', 0)
+			defer w.Flush()
+
+			fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t%s\t\n", "status", "job-id", "name", "pipeline", "created-at", "dura", "ref")
+
+			for _, job := range jobs {
+				_, err = fmt.Fprintf(
+					w,
+					"%s\t%d\t%s\t%d\t%s\t%s\t%s\t\n",
 					strings.ToUpper(job.Status),
 					job.ID,
 					job.Name,
 					job.Pipeline.ID,
-					strings.ToUpper(job.Pipeline.Status),
 					fmtTime(job.CreatedAt),
 					time.Duration(job.Duration)*time.Second,
 					job.Ref,
 				)
+				if err != nil {
+					panic(err)
+				}
 			}
 		},
 	}
