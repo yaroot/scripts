@@ -50,9 +50,9 @@ def render(abis, out):
     pass
 
 
-def main():
-    _in = sys.stdin.read()
-    _in = json.loads(_in)
+def main(path):
+    with open(path, 'r') as f:
+        _in = json.load(f)
     if 'abi' in _in:
         _abi = _in['abi']
     elif type(_in) == list:
@@ -63,4 +63,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1])
