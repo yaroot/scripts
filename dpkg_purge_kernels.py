@@ -67,7 +67,7 @@ def main():
     ])
     highest = highest[:5]
     print('current:', running_ver)
-    print('highest:', '%d.%d.%d-%d.%d' % highest, '(%s)' % str(highest))
+    print('highest:', '%d.%d.%d-%d.%d' % highest)
     to_be_removed = [
         (name, ver_txt, ver)
         for name, ver_txt, ver in installed
