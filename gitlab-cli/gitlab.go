@@ -112,31 +112,6 @@ func main() {
 		Args:    cobra.ExactArgs(2),
 		Run: func(_ *cobra.Command, args []string) {
 			download(client, privateToken, args[0], args[1], "artifacts-%s-%d.zip", "artifacts")
-			//repo := args[0]
-			//jobId, err := strconv.ParseInt(args[1], 10, 32)
-			//lerror(err)
-			//
-			//localFileName := fmt.Sprintf("artifacts-%s-%d.zip", strings.ReplaceAll(repo, "/", "-"), jobId)
-			//downloadUrl := fmt.Sprintf("https://gitlab.com/api/v4/projects/%s/jobs/%d/artifacts", url.PathEscape(repo), jobId)
-			//req, err := http.NewRequest("GET", downloadUrl, nil)
-			//lerror(err)
-			//req.Header.Add("PRIVATE-TOKEN", privateToken)
-			//resp, err := http.DefaultClient.Do(req)
-			//lerror(err)
-			//if resp.StatusCode != 200 {
-			//	fmt.Printf("Download error %s: %d\n", downloadUrl, resp.StatusCode)
-			//	return
-			//}
-			//
-			//fmt.Printf("Saving artifacts to %s\n", localFileName)
-			//localFile, err := os.Create(localFileName)
-			//lerror(err)
-			//defer localFile.Close()
-			//bar := pb.Full.Start64(resp.ContentLength)
-			//barReader := bar.NewProxyReader(resp.Body)
-			//_, err = io.Copy(localFile, barReader)
-			//lerror(err)
-			//bar.Finish()
 		},
 	})
 
