@@ -32,7 +32,7 @@ func fmtTime(t *time.Time) string {
 
 func main() {
 	privateToken := readToken()
-	git, err := gitlab.NewClient(privateToken)
+	client, err := gitlab.NewClient(privateToken)
 	if err != nil {
 		lerror(err)
 	}
@@ -50,7 +50,7 @@ func main() {
 		Args:    cobra.ExactArgs(1),
 		Run: func(_ *cobra.Command, args []string) {
 			repo := args[0]
-			jobs, response, err := git.Jobs.ListProjectJobs(repo, nil)
+			jobs, response, err := client.Jobs.ListProjectJobs(repo, nil)
 			lerror(err)
 			log.Printf("%+v\n", response)
 
@@ -119,7 +119,7 @@ func main() {
 			repo := args[0]
 			jobId, err := strconv.ParseInt(args[1], 10, 32)
 			lerror(err)
-			_, _, err = git.Jobs.KeepArtifacts(repo, int(jobId))
+			_, _, err = client.Jobs.KeepArtifacts(repo, int(jobId))
 			lerror(err)
 		},
 	})
