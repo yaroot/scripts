@@ -30,6 +30,33 @@ func fmtTime(t *time.Time) string {
 	return t.Format(time.RFC3339)
 }
 
+func download(client *gitlab.Client, privateToken, repo, jobIdStr, localNameTemplate, ftype string) {
+	jobId, err := strconv.ParseInt(jobIdStr, 10, 32)
+	lerror(err)
+
+	localFileName := fmt.Sprintf(localNameTemplate, strings.ReplaceAll(repo, "/", "-"), jobId)
+	downloadUrl := fmt.Sprintf("https://gitlab.com/api/v4/projects/%s/jobs/%d/%s", url.PathEscape(repo), jobId, ftype)
+	req, err := http.NewRequest("GET", downloadUrl, nil)
+	lerror(err)
+	req.Header.Add("PRIVATE-TOKEN", privateToken)
+	resp, err := http.DefaultClient.Do(req)
+	lerror(err)
+	if resp.StatusCode != 200 {
+		fmt.Printf("Download error %s: %d\n", downloadUrl, resp.StatusCode)
+		return
+	}
+
+	fmt.Printf("Saving %s to %s\n", ftype, localFileName)
+	localFile, err := os.Create(localFileName)
+	lerror(err)
+	defer localFile.Close()
+	bar := pb.Full.Start64(resp.ContentLength)
+	barReader := bar.NewProxyReader(resp.Body)
+	_, err = io.Copy(localFile, barReader)
+	lerror(err)
+	bar.Finish()
+}
+
 func main() {
 	privateToken := readToken()
 	client, err := gitlab.NewClient(privateToken)
@@ -84,31 +111,32 @@ func main() {
 		Aliases: []string{"d", "dl"},
 		Args:    cobra.ExactArgs(2),
 		Run: func(_ *cobra.Command, args []string) {
-			repo := args[0]
-			jobId, err := strconv.ParseInt(args[1], 10, 32)
-			lerror(err)
-
-			localFileName := fmt.Sprintf("artifacts-%s-%d.zip", strings.ReplaceAll(repo, "/", "-"), jobId)
-			downloadUrl := fmt.Sprintf("https://gitlab.com/api/v4/projects/%s/jobs/%d/artifacts", url.PathEscape(repo), jobId)
-			req, err := http.NewRequest("GET", downloadUrl, nil)
-			lerror(err)
-			req.Header.Add("PRIVATE-TOKEN", privateToken)
-			resp, err := http.DefaultClient.Do(req)
-			lerror(err)
-			if resp.StatusCode != 200 {
-				fmt.Printf("Download error %s: %d\n", downloadUrl, resp.StatusCode)
-				return
-			}
-
-			fmt.Printf("Saving artifacts to %s\n", localFileName)
-			localFile, err := os.Create(localFileName)
-			lerror(err)
-			defer localFile.Close()
-			bar := pb.Full.Start64(resp.ContentLength)
-			barReader := bar.NewProxyReader(resp.Body)
-			_, err = io.Copy(localFile, barReader)
-			lerror(err)
-			bar.Finish()
+			download(client, privateToken, args[0], args[1], "artifacts-%s-%d.zip", "artifacts")
+			//repo := args[0]
+			//jobId, err := strconv.ParseInt(args[1], 10, 32)
+			//lerror(err)
+			//
+			//localFileName := fmt.Sprintf("artifacts-%s-%d.zip", strings.ReplaceAll(repo, "/", "-"), jobId)
+			//downloadUrl := fmt.Sprintf("https://gitlab.com/api/v4/projects/%s/jobs/%d/artifacts", url.PathEscape(repo), jobId)
+			//req, err := http.NewRequest("GET", downloadUrl, nil)
+			//lerror(err)
+			//req.Header.Add("PRIVATE-TOKEN", privateToken)
+			//resp, err := http.DefaultClient.Do(req)
+			//lerror(err)
+			//if resp.StatusCode != 200 {
+			//	fmt.Printf("Download error %s: %d\n", downloadUrl, resp.StatusCode)
+			//	return
+			//}
+			//
+			//fmt.Printf("Saving artifacts to %s\n", localFileName)
+			//localFile, err := os.Create(localFileName)
+			//lerror(err)
+			//defer localFile.Close()
+			//bar := pb.Full.Start64(resp.ContentLength)
+			//barReader := bar.NewProxyReader(resp.Body)
+			//_, err = io.Copy(localFile, barReader)
+			//lerror(err)
+			//bar.Finish()
 		},
 	})
 
@@ -124,37 +152,14 @@ func main() {
 		},
 	})
 
-	//ci.AddCommand(&cobra.Command{
-	//	Use:  "cat <user/repo> <Job ID>",
-	//	Args: cobra.ExactArgs(2),
-	//	Run: func(_ *cobra.Command, args []string) {
-	//		repo := args[0]
-	//		jobId, err := strconv.ParseInt(args[1], 10, 32)
-	//		lerror(err)
-	//		//https://gitlab.com/pasotan/jisaku/-/jobs/1574016564/raw
-	//		logUrl := fmt.Sprintf("https://gitlab.com/%s/-/jobs/%d/raw", repo, jobId)
-	//		println(logUrl)
-	//		req, err := http.NewRequest("GET", logUrl, nil)
-	//		lerror(err)
-	//		req.Header.Add("PRIVATE-TOKEN", privateToken)
-	//		resp, err := http.DefaultClient.Do(req)
-	//		lerror(err)
-	//		if resp.StatusCode != 200 {
-	//			fmt.Printf("Download error %s: %d\n", logUrl, resp.StatusCode)
-	//			return
-	//		}
-	//		localFileName := fmt.Sprintf("job-%s-%d.log", strings.ReplaceAll(repo, "/", "-"), jobId)
-	//		fmt.Printf("Saving artifacts to %s\n", localFileName)
-	//		localFile, err := os.Create(localFileName)
-	//		lerror(err)
-	//		defer localFile.Close()
-	//		bar := pb.Full.Start64(resp.ContentLength)
-	//		barReader := bar.NewProxyReader(resp.Body)
-	//		_, err = io.Copy(localFile, barReader)
-	//		lerror(err)
-	//		bar.Finish()
-	//	},
-	//})
+	ci.AddCommand(&cobra.Command{
+		Use:     "log <user/repo> <Job ID>",
+		Aliases: []string{"d", "dl"},
+		Args:    cobra.ExactArgs(2),
+		Run: func(_ *cobra.Command, args []string) {
+			download(client, privateToken, args[0], args[1], "job-%s-%d.log", "trace")
+		},
+	})
 
 	err = cmd.Execute()
 	lerror(err)
