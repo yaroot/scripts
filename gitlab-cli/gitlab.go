@@ -44,7 +44,7 @@ func main() {
 	ci := &cobra.Command{Use: "ci"}
 	cmd.AddCommand(ci)
 
-	ciLs := &cobra.Command{
+	ci.AddCommand(&cobra.Command{
 		Use:     "ls <user/repo>",
 		Aliases: []string{"list"},
 		Args:    cobra.ExactArgs(1),
@@ -77,10 +77,9 @@ func main() {
 				}
 			}
 		},
-	}
-	ci.AddCommand(ciLs)
+	})
 
-	ciDownloadArt := &cobra.Command{
+	ci.AddCommand(&cobra.Command{
 		Use:     "download <user/repo> <Job ID>",
 		Aliases: []string{"d", "dl"},
 		Args:    cobra.ExactArgs(2),
@@ -111,10 +110,9 @@ func main() {
 			lerror(err)
 			bar.Finish()
 		},
-	}
-	ci.AddCommand(ciDownloadArt)
+	})
 
-	ciKeep := &cobra.Command{
+	ci.AddCommand(&cobra.Command{
 		Use:  "keep <user/repo> <Job ID>",
 		Args: cobra.ExactArgs(2),
 		Run: func(_ *cobra.Command, args []string) {
@@ -124,8 +122,39 @@ func main() {
 			_, _, err = git.Jobs.KeepArtifacts(repo, int(jobId))
 			lerror(err)
 		},
-	}
-	ci.AddCommand(ciKeep)
+	})
+
+	//ci.AddCommand(&cobra.Command{
+	//	Use:  "cat <user/repo> <Job ID>",
+	//	Args: cobra.ExactArgs(2),
+	//	Run: func(_ *cobra.Command, args []string) {
+	//		repo := args[0]
+	//		jobId, err := strconv.ParseInt(args[1], 10, 32)
+	//		lerror(err)
+	//		//https://gitlab.com/pasotan/jisaku/-/jobs/1574016564/raw
+	//		logUrl := fmt.Sprintf("https://gitlab.com/%s/-/jobs/%d/raw", repo, jobId)
+	//		println(logUrl)
+	//		req, err := http.NewRequest("GET", logUrl, nil)
+	//		lerror(err)
+	//		req.Header.Add("PRIVATE-TOKEN", privateToken)
+	//		resp, err := http.DefaultClient.Do(req)
+	//		lerror(err)
+	//		if resp.StatusCode != 200 {
+	//			fmt.Printf("Download error %s: %d\n", logUrl, resp.StatusCode)
+	//			return
+	//		}
+	//		localFileName := fmt.Sprintf("job-%s-%d.log", strings.ReplaceAll(repo, "/", "-"), jobId)
+	//		fmt.Printf("Saving artifacts to %s\n", localFileName)
+	//		localFile, err := os.Create(localFileName)
+	//		lerror(err)
+	//		defer localFile.Close()
+	//		bar := pb.Full.Start64(resp.ContentLength)
+	//		barReader := bar.NewProxyReader(resp.Body)
+	//		_, err = io.Copy(localFile, barReader)
+	//		lerror(err)
+	//		bar.Finish()
+	//	},
+	//})
 
 	err = cmd.Execute()
 	lerror(err)
