@@ -11,10 +11,9 @@ def main():
     session.auth = api.auth
     print(session.auth)
     for line in sys.stdin.readlines():
-        twt = json.loads(line)
-        _id = twt[0]
-        print(twt)
+        _id = line.strip()
         int(_id)
+        print(_id)
         r = session.post(f'https://api.twitter.com/1.1/statuses/destroy/{_id}.json')
         print(r)
         if r.status_code not in (200, 404): return
