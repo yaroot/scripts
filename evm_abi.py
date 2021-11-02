@@ -9,6 +9,7 @@ def format_args(args):
         return ''
     vals = []
     for x in args:
+        # internal_type = x['internalType']
         name = x['name']
         typ = x['type']
         vals.append(f'{typ} {name}')
