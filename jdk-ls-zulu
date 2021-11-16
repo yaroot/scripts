@@ -23,4 +23,7 @@ ls_remote() {
 
 jdk_version=11  ls_remote
 jdk_version=17  ls_remote
-jdk_version=''  ls_remote
+# jdk_version=''  ls_remote
+
+jdk_version=11 arch=arm os=macos  ls_remote
+jdk_version=17 arch=arm os=macos  ls_remote
