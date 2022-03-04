@@ -31,7 +31,7 @@ func fmtTime(t *time.Time) string {
 }
 
 func download(client *gitlab.Client, privateToken, repo, jobIdStr, localNameTemplate, ftype string) {
-	jobId, err := strconv.ParseInt(jobIdStr, 10, 32)
+	jobId, err := strconv.ParseInt(jobIdStr, 10, 64)
 	lerror(err)
 
 	localFileName := fmt.Sprintf(localNameTemplate, strings.ReplaceAll(repo, "/", "-"), jobId)
@@ -108,7 +108,7 @@ func main() {
 
 	ci.AddCommand(&cobra.Command{
 		Use:     "download <user/repo> <Job ID>",
-		Aliases: []string{"d", "dl"},
+		Aliases: []string{"d", "dl", "download"},
 		Args:    cobra.ExactArgs(2),
 		Run: func(_ *cobra.Command, args []string) {
 			download(client, privateToken, args[0], args[1], "artifacts-%s-%d.zip", "artifacts")
