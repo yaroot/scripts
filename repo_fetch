@@ -5,6 +5,7 @@
 echo "-> $1"
 cd $1
 
+export GIT_TERMINAL_PROMPT=0
 
 test -d .git && timeout 100s git fetch --all --prune && rm -f .git/objects/pack/tmp_pack_* && git gc --auto
 test -d .hg  && timeout 100s hg pull
