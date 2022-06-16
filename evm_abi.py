@@ -39,8 +39,13 @@ def format(x):
         inputs = x['inputs']
         _ins = format_args(inputs)
         return f'❄ {name}({_ins})'
+    elif _type == 'error':
+        name = x['name']
+        inputs = x['inputs']
+        _ins = format_args(inputs)
+        return f'! {name}({_ins})'
     else:
-        print('>>', _type)
+        print('>>', _type, x)
 
 
 def render(abis, out):
