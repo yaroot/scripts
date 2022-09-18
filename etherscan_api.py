@@ -4,6 +4,11 @@ import os
 import sys
 
 
+'''
+curlie -v https://api.etherscan.io/api module==contract action==getsourcecode address==??? apikey==??? | tee abi.json
+'''
+
+
 def write(path, content):
     path = './contract/' + path.lstrip('/')
     print(f'Writing {path}')
