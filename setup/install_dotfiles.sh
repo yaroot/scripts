@@ -24,7 +24,7 @@ _install() {
   if $use_ssh; then
     repo="git@github.com:${repo}.git"
   else
-    repo="git://github.com/${repo}.git"
+    repo="https://github.com/${repo}.git"
   fi
 
   if $use_ssh; then
