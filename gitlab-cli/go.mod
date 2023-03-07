@@ -13,9 +13,8 @@ require (
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/spf13/cobra v1.2.1
 	github.com/xanzy/go-gitlab v0.50.4
-	golang.org/x/net v0.0.0-20210908191846-a5e095526f91 // indirect
+	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20210819190943-2bc19b11175f // indirect
-	golang.org/x/sys v0.0.0-20210908233432-aa78b53d3365 // indirect
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 )
