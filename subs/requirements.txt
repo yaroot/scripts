@@ -12,7 +12,7 @@ backcall==0.2.0
     # via ipython
 black==22.1.0
     # via ipython
-certifi==2021.10.8
+certifi==2022.12.7
     # via
     #   httpcore
     #   httpx
@@ -127,8 +127,6 @@ traitlets==5.1.1
     #   matplotlib-inline
 twitterapi==2.7.11
     # via -r requirements.in
-typing-extensions==4.0.1
-    # via black
 urllib3==1.26.8
     # via requests
 wcwidth==0.2.5
