@@ -5,15 +5,24 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/cloudflare/cloudflare-go"
-	"io/ioutil"
+	"io"
 	"net"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/cloudflare/cloudflare-go/v5"
+	"github.com/cloudflare/cloudflare-go/v5/dns"
+	"github.com/cloudflare/cloudflare-go/v5/option"
+	"github.com/cloudflare/cloudflare-go/v5/zones"
 )
 
-func get_ip() (string, error) {
+type CfUpdate struct {
+	httpCli  *http.Client
+	cfClient *cloudflare.Client
+}
+
+func newV4Client() *http.Client {
 	cli := &http.Client{
 		Transport: &http.Transport{
 			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
@@ -22,13 +31,17 @@ func get_ip() (string, error) {
 			},
 		},
 	}
+	return cli
+}
 
-	r, err := cli.Get("http://checkip.dns.he.net")
+func (u *CfUpdate) GetIp() (string, error) {
+	r, err := u.httpCli.Get("http://checkip.dns.he.net")
 	if err != nil {
 		return "", err
 	}
+	defer r.Body.Close()
 
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		return "", err
 	}
@@ -41,89 +54,128 @@ func get_ip() (string, error) {
 			return strings.TrimSpace(s), nil
 		}
 	}
-	return "", errors.New("cannot find IP address")
+	return "", errors.New("no ip address found")
 }
 
-func update_ip(zone, record, ip string, force bool) error {
-	token := os.Getenv("CF_API_TOKEN")
-	if token == "" {
-		return errors.New("no token provided (CF_API_TOKEN)")
+func (u *CfUpdate) GetZoneByName(ctx context.Context, zone string) (string, error) {
+	params := zones.ZoneListParams{
+		Name: cloudflare.F(zone),
 	}
-	api, err := cloudflare.NewWithAPIToken(token)
+	page, err := u.cfClient.Zones.List(ctx, params)
 	if err != nil {
-		return err
+		return "", err
 	}
-	zoneID, err := api.ZoneIDByName(zone)
+
+	for page != nil {
+		for _, z := range page.Result {
+			if z.Name == zone {
+				return z.ID, nil
+			}
+		}
+
+		page, err = page.GetNextPage()
+		if err != nil {
+			return "", err
+		}
+	}
+	return "", errors.New("zone not found")
+}
+
+func (u *CfUpdate) GetRecordByName(ctx context.Context, zoneId string, record string) (*dns.RecordResponse, error) {
+	params := dns.RecordListParams{
+		ZoneID: cloudflare.F(zoneId),
+		Name: cloudflare.F(dns.RecordListParamsName{
+			Exact: cloudflare.F(record),
+		}),
+	}
+
+	page, err := u.cfClient.DNS.Records.List(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+
+	for page != nil {
+		for _, r := range page.Result {
+			if r.Name == record {
+				return &r, nil
+			}
+		}
+
+		page, err = page.GetNextPage()
+		if err != nil {
+			return nil, err
+		}
+	}
+	return nil, errors.New("record not found")
+}
+
+func (u *CfUpdate) UpdateIp(ctx context.Context, zone, record, ip string, force bool) error {
+	zoneId, err := u.GetZoneByName(ctx, zone)
 	if err != nil {
 		return err
 	}
 
-	dnsRecord := cloudflare.DNSRecord{Name: record}
-	recs, err := api.DNSRecords(zoneID, dnsRecord)
+	r, err := u.GetRecordByName(ctx, zoneId, record)
 	if err != nil {
 		return err
 	}
 
-	if len(recs) > 1 {
-		return errors.New("More than 1 records, exit")
-	} else if len(recs) == 1 {
-		rr := recs[0]
-		if rr.Type != "A" {
-			return errors.New(fmt.Sprintf("Record type mismatch (%s)", rr.Type))
-		}
-		if rr.Content == ip {
-			fmt.Printf("No need to update, [%s] already points to [%s]\n", rr.Name, rr.Content)
-			return nil
-		}
-		fmt.Printf("Setting [%s] to [%s] (from [%s])\n", rr.Name, ip, rr.Content)
-		if force {
-			rr.Content = ip
-			rr.TTL = 120
-			err = api.UpdateDNSRecord(zoneID, rr.ID, rr)
-			if err != nil {
-				return err
-			}
-		}
-	} else {
-		fmt.Printf("Creating record %s -> %s\n", record, ip)
-		if force {
-			dnsRecord.Type = "A"
-			dnsRecord.Content = ip
-			dnsRecord.TTL = 120
-			_, err = api.CreateDNSRecord(zoneID, dnsRecord)
-			if err != nil {
-				return err
-			}
+	if r.Content == ip {
+		fmt.Printf("Skip updating, %s already sets to [%s]\n", zone, ip)
+		return nil
+	}
+
+	fmt.Printf("Updating %s: from [%s] to [%s]\n", record, r.Content, ip)
+	if force {
+		_, err = u.cfClient.DNS.Records.Edit(ctx, r.ID, dns.RecordEditParams{
+			ZoneID: cloudflare.F(zoneId),
+			Body: dns.ARecordParam{
+				Content: cloudflare.F(ip),
+			},
+		})
+		if err != nil {
+			return err
 		}
 	}
+
 	return nil
 }
 
 func main() {
-	zone := flag.String("zone", "", "zone name")
-	record := flag.String("record", "", "record name")
+	zone := flag.String("zone", "", "zone name (example.com)")
+	record := flag.String("record", "", "record name (server.example.com)")
 	force := flag.Bool("force", false, "dry-run otherwise")
-	ip := flag.String("ip", "", "optional ip address")
+	ip := flag.String("ip", "", "optional ip address (leave empty to auto-detect the address)")
 	flag.Parse()
+	var err error
+
+	cfToken := os.Getenv("CF_API_TOKEN")
+	if cfToken == "" {
+		panic("no token provided (CF_API_TOKEN)")
+	}
 
 	if *zone == "" {
-		println("empty zone name")
-		os.Exit(-1)
+		panic("empty zone name")
 	}
 	if *record == "" {
-		println("empty record name")
-		os.Exit(-1)
+		panic("empty record name")
+	}
+
+	cfupdate := &CfUpdate{
+		httpCli:  newV4Client(),
+		cfClient: cloudflare.NewClient(option.WithAPIToken(cfToken)),
 	}
 
 	ipaddr := *ip
 	if ipaddr == "" {
-		newip, err := get_ip()
+		ipaddr, err = cfupdate.GetIp()
 		if err != nil {
 			panic(err)
 		}
-		ipaddr = newip
 	}
-	err := update_ip(*zone, *record, ipaddr, *force)
+	fmt.Printf("detect ip: %s\n", ipaddr)
+
+	err = cfupdate.UpdateIp(context.Background(), *zone, *record, ipaddr, *force)
 	if err != nil {
 		panic(err)
 	}
